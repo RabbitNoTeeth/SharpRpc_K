@@ -13,7 +13,7 @@ public class RpcRequest implements Serializable{
     /**
      * 请求的接口类型
      */
-    private final Class<?> targetClass;
+    private final String serviceName;
 
     /**
      * 请求的接口方法
@@ -35,15 +35,12 @@ public class RpcRequest implements Serializable{
      */
     private final boolean async;
 
-    public RpcRequest(Class<?> targetClass, String methodName, boolean async) {
-        this.targetClass = targetClass;
+    public RpcRequest(String serviceName, String methodName, boolean async) {
+        this.serviceName = serviceName;
         this.methodName = methodName;
         this.async = async;
     }
 
-    public Class<?> getTargetClass() {
-        return targetClass;
-    }
 
     public String getMethodName() {
         return methodName;
@@ -67,5 +64,9 @@ public class RpcRequest implements Serializable{
 
     public boolean isAsync() {
         return async;
+    }
+
+    public String getServiceName() {
+        return serviceName;
     }
 }

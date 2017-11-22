@@ -19,7 +19,7 @@ public class App {
 
     public static void main( String[] args ) throws InterruptedException {
         new RpcServerBootStrap(9090)
-                .register(TestInterface.class, TestImpl.class)
+                .register("testService", TestImpl.class)
                 .start();
     }
 

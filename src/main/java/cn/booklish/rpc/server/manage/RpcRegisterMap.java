@@ -11,18 +11,18 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class RpcRegisterMap {
 
-    private static final Map<Class<?>,Class<?>> registerMap = new ConcurrentHashMap<>();
+    private static final Map<String,Class<?>> registerMap = new ConcurrentHashMap<>();
 
-    public static void register(Class<?> interface_type,Class<?> impl_type){
-        registerMap.put(interface_type,impl_type);
+    public static void register(String serviceName,Class<?> impl_type){
+        registerMap.put(serviceName,impl_type);
     }
 
-    public static void remove(Class<?> interface_type){
-        registerMap.remove(interface_type);
+    public static void remove(String serviceName){
+        registerMap.remove(serviceName);
     }
 
-    public static Class<?> search(Class<?> interface_type){
-        return registerMap.get(interface_type);
+    public static Class<?> search(String serviceName){
+        return registerMap.get(serviceName);
     }
 
 }

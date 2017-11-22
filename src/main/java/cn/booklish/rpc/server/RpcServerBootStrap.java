@@ -26,8 +26,8 @@ public class RpcServerBootStrap {
     /**
      * 注册Rpc服务
      */
-    public RpcServerBootStrap register(Class<?> interface_type,Class<?> impl_type){
-        RpcRegisterMap.register(interface_type,impl_type);
+    public RpcServerBootStrap register(String serviceName,Class<?> impl_type){
+        RpcRegisterMap.register(serviceName,impl_type);
         return this;
     }
 

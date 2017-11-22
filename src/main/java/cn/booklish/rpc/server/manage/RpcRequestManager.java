@@ -58,7 +58,7 @@ public class RpcRequestManager {
          */
         public Object computeRpcRequest() {
             try{
-                Class<?> serviceClass= RpcRegisterMap.search(rpcRequest.getTargetClass());
+                Class<?> serviceClass= RpcRegisterMap.search(rpcRequest.getServiceName());
                 Method method = serviceClass.getMethod(rpcRequest.getMethodName(), rpcRequest.getParamTypes());
                 return method.invoke(serviceClass.newInstance(), rpcRequest.getParamValues());
             }catch (Exception e){
