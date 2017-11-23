@@ -1,6 +1,5 @@
 package cn.booklish.rpc.client;
 
-import cn.booklish.rpc.server.model.RpcRequest;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
@@ -12,13 +11,14 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.codec.MessageToByteEncoder;
+import net.sf.cglib.proxy.Enhancer;
+import net.sf.cglib.proxy.MethodInterceptor;
+import net.sf.cglib.proxy.MethodProxy;
 import org.apache.commons.codec.binary.Base64;
 import org.objenesis.strategy.StdInstantiatorStrategy;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -30,34 +30,57 @@ import java.util.function.Consumer;
  */
 public class RpcClient {
 
-    private static final Bootstrap b;
-
-    static{
-        b = new Bootstrap();
-        b.channel(NioSocketChannel.class);
-        b.option(ChannelOption.SO_KEEPALIVE, true);
+    /**
+     * 获得service服务代理
+     * @param host
+     * @param port
+     */
+    public static Object getService(String host, int port, String serviceName, Class<?> serviceInterface){
+        Enhancer enhancer = new Enhancer();
+        enhancer.setSuperclass(serviceInterface);
+        // 回调方法
+        enhancer.setCallback(new ServiceProxy(host, port, serviceName));
+        // 创建代理对象
+        return enhancer.create();
     }
 
     /**
-     * 发送Rpc请求
-     * @param host
-     * @param port
-     * @param rpcRequest
-     * @param responseConsumer
+     * Service代理接口实现类
      */
-    public static void sendRpcRequest(String host, int port, RpcRequest rpcRequest, Consumer<Object> responseConsumer){
-        EventLoopGroup workerGroup = new NioEventLoopGroup();
-        try {
-            Bootstrap bootstrap = b.clone();
-            bootstrap.group(workerGroup)
-                    .handler(new RpcClient.RpcPipelineInitializer(responseConsumer));
-            ChannelFuture f = bootstrap.connect(host, port).sync();
-            f.channel().writeAndFlush(rpcRequest);
-            f.channel().closeFuture().sync();
-        } catch (InterruptedException e) {
-            throw new RuntimeException("Rpc远程请求失败",e);
-        } finally {
-            workerGroup.shutdownGracefully();
+    static class ServiceProxy implements MethodInterceptor {
+
+        private final String host;
+
+        private final int port;
+
+        private final String serviceName;
+
+        ServiceProxy(String host, int port, String serviceName) {
+            this.host = host;
+            this.port = port;
+            this.serviceName = serviceName;
+        }
+
+        @Override
+        public Object intercept(Object o, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
+            NioEventLoopGroup group = new NioEventLoopGroup(1);
+            final Object[] result = new Object[1];
+            try{
+                Bootstrap bootstrap = new Bootstrap();
+                bootstrap.group(group)
+                         .channel(NioSocketChannel.class)
+                         .option(ChannelOption.SO_KEEPALIVE, true)
+                         .handler(new RpcPipelineInitializer(response -> result[0] = response));
+                ChannelFuture future = bootstrap.connect(host, port).sync();
+                RpcRequest rpcRequest = new RpcClient.RpcRequest(serviceName,method.getName(),false);
+                rpcRequest.setParamTypes(method.getParameterTypes());
+                rpcRequest.setParamValues(args);
+                future.channel().writeAndFlush(rpcRequest);
+                future.channel().closeFuture().sync();
+                return result[0];
+            }finally {
+                group.shutdownGracefully();
+            }
         }
     }
 
@@ -68,7 +91,7 @@ public class RpcClient {
 
         private final Consumer<Object> consumer;
 
-        public RpcResponseHandler(Consumer<Object> consumer) {
+        RpcResponseHandler(Consumer<Object> consumer) {
             this.consumer = consumer;
         }
 
@@ -96,7 +119,7 @@ public class RpcClient {
 
         private final Consumer<Object> consumer;
 
-        public RpcPipelineInitializer(Consumer<Object> consumer) {
+        RpcPipelineInitializer(Consumer<Object> consumer) {
             this.consumer = consumer;
         }
 
@@ -151,8 +174,75 @@ public class RpcClient {
     }
 
     /**
+     * Rpc请求实体
+     */
+    static class RpcRequest implements Serializable {
+
+        /**
+         * 请求接口的注册名称
+         */
+        private final String serviceName;
+
+        /**
+         * 请求的接口方法
+         */
+        private final String methodName;
+
+        /**
+         * 请求接口方法的参数类型
+         */
+        private Class<?>[] paramTypes;
+
+        /**
+         * 请求接口方法的参数
+         */
+        private Object[] paramValues;
+
+        /**
+         * 是否需要异步处理(对于等待时间长的计算任务推荐使用异步处理)
+         */
+        private final boolean async;
+
+        RpcRequest(String serviceName, String methodName, boolean async) {
+            this.serviceName = serviceName;
+            this.methodName = methodName;
+            this.async = async;
+        }
+
+
+        public String getMethodName() {
+            return methodName;
+        }
+
+        public Class<?>[] getParamTypes() {
+            return paramTypes;
+        }
+
+        public void setParamTypes(Class<?>[] paramTypes) {
+            this.paramTypes = paramTypes;
+        }
+
+        public Object[] getParamValues() {
+            return paramValues;
+        }
+
+        public void setParamValues(Object[] paramValues) {
+            this.paramValues = paramValues;
+        }
+
+        public boolean isAsync() {
+            return async;
+        }
+
+        public String getServiceName() {
+            return serviceName;
+        }
+    }
+
+    /**
      * Kryo序列化工具类
      */
+    @SuppressWarnings("Duplicates")
     static class KryoUtil {
 
         private static final String DEFAULT_ENCODING = "UTF-8";
@@ -162,7 +252,6 @@ public class RpcClient {
             @Override
             protected Kryo initialValue() {
                 Kryo kryo = new Kryo();
-
                 /**
                  * 不要轻易改变这里的配置！更改之后，序列化的格式就会发生变化，
                  * 上线的同时就必须清除 Redis 里的所有缓存，
@@ -207,7 +296,7 @@ public class RpcClient {
         public static <T> byte[] writeToByteArray(T obj) {
             ByteArrayOutputStream byteArrayOutputStream = null;
             Output output = null;
-            try{
+            try {
                 byteArrayOutputStream = new ByteArrayOutputStream();
                 output = new Output(byteArrayOutputStream);
 
@@ -216,15 +305,15 @@ public class RpcClient {
                 output.flush();
 
                 return byteArrayOutputStream.toByteArray();
-            }finally {
-                if(byteArrayOutputStream!=null){
+            } finally {
+                if (byteArrayOutputStream != null) {
                     try {
                         byteArrayOutputStream.close();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
-                if(output!=null){
+                if (output != null) {
                     output.close();
                 }
 
@@ -353,7 +442,4 @@ public class RpcClient {
             }
         }
     }
-
-
-
 }

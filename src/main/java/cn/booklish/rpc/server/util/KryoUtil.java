@@ -9,9 +9,12 @@ import org.objenesis.strategy.StdInstantiatorStrategy;
 import java.io.*;
 
 /**
- * @author Don9
- * @create 2017-11-21-16:31
- **/
+ * @Author: liuxindong
+ * @Description: Kryo序列化工具类
+ * @Create: 2017/11/23 8:21
+ * @Modify:
+ */
+@SuppressWarnings("Duplicates")
 public class KryoUtil {
 
     private static final String DEFAULT_ENCODING = "UTF-8";

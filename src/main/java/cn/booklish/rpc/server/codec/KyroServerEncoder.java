@@ -12,7 +12,7 @@ import io.netty.handler.codec.MessageToByteEncoder;
  * @Create: 2017/11/21 11:16
  * @Modify:
  */
-public class KyroEncoder extends MessageToByteEncoder<Object>{
+public class KyroServerEncoder extends MessageToByteEncoder<Object>{
 
     protected void encode(ChannelHandlerContext channelHandlerContext, Object obj, ByteBuf byteBuf) {
         byte[] bytes = KryoUtil.writeToByteArray(obj);

@@ -15,7 +15,7 @@ import java.util.List;
  * @Create: 2017/11/21 10:53
  * @Modify:
  */
-public class KyroDecoder extends ByteToMessageDecoder{
+public class KyroServerDecoder extends ByteToMessageDecoder{
 
     protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) {
         //获取可读字节数
