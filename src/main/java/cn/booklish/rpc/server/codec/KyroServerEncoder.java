@@ -1,6 +1,7 @@
 package cn.booklish.rpc.server.codec;
 
 
+import cn.booklish.rpc.server.model.RpcResponse;
 import cn.booklish.rpc.server.util.KryoUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -12,11 +13,10 @@ import io.netty.handler.codec.MessageToByteEncoder;
  * @Create: 2017/11/21 11:16
  * @Modify:
  */
-public class KyroServerEncoder extends MessageToByteEncoder<Object>{
+public class KyroServerEncoder extends MessageToByteEncoder<RpcResponse>{
 
-    protected void encode(ChannelHandlerContext channelHandlerContext, Object obj, ByteBuf byteBuf) {
-        byte[] bytes = KryoUtil.writeToByteArray(obj);
-        byteBuf.writeBytes(bytes);
+    protected void encode(ChannelHandlerContext channelHandlerContext, RpcResponse response, ByteBuf byteBuf) {
+        byteBuf.writeBytes(KryoUtil.writeObjectToByteArray(response));
     }
 
     @Override

@@ -2,6 +2,8 @@ package cn.booklish.rpc.server.handler;
 
 import cn.booklish.rpc.server.manage.RpcRequestManager;
 import cn.booklish.rpc.server.model.RpcRequest;
+import cn.booklish.rpc.server.model.RpcResponse;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
@@ -12,6 +14,7 @@ import io.netty.util.ReferenceCountUtil;
  * @Create: 2017/11/21 11:27
  * @Modify:
  */
+@ChannelHandler.Sharable
 public class RpcInboundHandler extends ChannelInboundHandlerAdapter {
 
     private final boolean asyncComputeRpcRequest;
@@ -59,7 +62,7 @@ public class RpcInboundHandler extends ChannelInboundHandlerAdapter {
                     computeResult = RpcRequestManager.submit(rpcRequest);
                 }
             }
-            ctx.write(computeResult);
+            ctx.write(new RpcResponse(rpcRequest.getId(),computeResult));
         }finally {
             ReferenceCountUtil.release(msg);
         }

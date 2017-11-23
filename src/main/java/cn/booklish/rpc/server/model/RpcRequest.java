@@ -11,6 +11,11 @@ import java.io.Serializable;
 public class RpcRequest implements Serializable{
 
     /**
+     * 消息唯一标识id
+     */
+    private final Integer id;
+
+    /**
      * 请求的接口类型
      */
     private final String serviceName;
@@ -35,7 +40,8 @@ public class RpcRequest implements Serializable{
      */
     private final boolean async;
 
-    public RpcRequest(String serviceName, String methodName, boolean async) {
+    public RpcRequest(Integer id, String serviceName, String methodName, boolean async) {
+        this.id = id;
         this.serviceName = serviceName;
         this.methodName = methodName;
         this.async = async;
@@ -68,5 +74,9 @@ public class RpcRequest implements Serializable{
 
     public String getServiceName() {
         return serviceName;
+    }
+
+    public Integer getId() {
+        return id;
     }
 }
