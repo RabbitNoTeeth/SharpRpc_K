@@ -7,7 +7,6 @@
   <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <serviceName>RpcServer</serviceName>
   <url>http://maven.apache.org</url>
 
   <properties>
@@ -71,7 +70,7 @@
         <configuration>
           <source>1.8</source>
           <target>1.8</target>
-          <encoding>${file.encoding}</encoding>
+          <encoding>UTF-8</encoding>
         </configuration>
       </plugin>
     </plugins>
