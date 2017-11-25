@@ -2,6 +2,7 @@ package cn.booklish.rpc.server.manage;
 
 
 import cn.booklish.rpc.server.model.RpcRequest;
+import cn.booklish.rpc.server.model.RpcResponse;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.ExecutorService;
@@ -60,9 +61,10 @@ public class RpcRequestManager {
             try{
                 Class<?> serviceClass= RpcRegisterMap.search(rpcRequest.getServiceName());
                 Method method = serviceClass.getMethod(rpcRequest.getMethodName(), rpcRequest.getParamTypes());
-                return method.invoke(serviceClass.newInstance(), rpcRequest.getParamValues());
+                Object invoke = method.invoke(serviceClass.newInstance(), rpcRequest.getParamValues());
+                return new RpcResponse(rpcRequest.getId(),invoke,true);
             }catch (Exception e){
-                return e.getMessage();
+                return new RpcResponse(rpcRequest.getId(),false,e);
             }
         }
     }

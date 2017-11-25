@@ -1,7 +1,7 @@
 package cn.booklish.rpc.server;
 
 import cn.booklish.rpc.server.manage.RpcRegisterMap;
-import cn.booklish.rpc.server.pipeline.RpcPipelineInitializer;
+import cn.booklish.rpc.server.pipeline.ServerPipelineInitializer;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
@@ -42,7 +42,7 @@ public class RpcServerBootStrap {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)
                     .channel(NioServerSocketChannel.class)
-                    .childHandler(new RpcPipelineInitializer())
+                    .childHandler(new ServerPipelineInitializer())
                     .option(ChannelOption.SO_BACKLOG, 128)
                     .childOption(ChannelOption.SO_KEEPALIVE, true);
 

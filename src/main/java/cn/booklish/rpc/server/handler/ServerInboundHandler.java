@@ -6,6 +6,7 @@ import cn.booklish.rpc.server.model.RpcResponse;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.handler.timeout.ReadTimeoutException;
 import io.netty.util.ReferenceCountUtil;
 
 /**
@@ -15,21 +16,21 @@ import io.netty.util.ReferenceCountUtil;
  * @Modify:
  */
 @ChannelHandler.Sharable
-public class RpcInboundHandler extends ChannelInboundHandlerAdapter {
+public class ServerInboundHandler extends ChannelInboundHandlerAdapter {
 
     private final boolean asyncComputeRpcRequest;
 
     /**
      * 使用默认的Rpc请求消息处理方式:在当前线程中计算请求结果
      */
-    public RpcInboundHandler(){
+    public ServerInboundHandler(){
         asyncComputeRpcRequest = false;
     }
 
     /**
      * 自定义Rpc请求消息的处理方式:是否异步处理
      */
-    public RpcInboundHandler(boolean asyncComputeRpcRequest){
+    public ServerInboundHandler(boolean asyncComputeRpcRequest){
         this.asyncComputeRpcRequest = asyncComputeRpcRequest;
     }
 
@@ -62,7 +63,7 @@ public class RpcInboundHandler extends ChannelInboundHandlerAdapter {
                     computeResult = RpcRequestManager.submit(rpcRequest);
                 }
             }
-            ctx.write(new RpcResponse(rpcRequest.getId(),computeResult));
+            ctx.write(computeResult);
         }finally {
             ReferenceCountUtil.release(msg);
         }
@@ -77,7 +78,13 @@ public class RpcInboundHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        cause.printStackTrace();
-        ctx.close();
+        if(cause instanceof ReadTimeoutException){
+            System.out.println("[Rpc-Server]: 超过指定时间没有接收到来自客户端的信息,关闭该Channel连接");
+        }else{
+            System.out.println("[Rpc-Server]: 服务器入站流发生异常,打印异常信息如下");
+            cause.printStackTrace();
+            ctx.close();
+        }
+
     }
 }

@@ -6,6 +6,6 @@ package cn.booklish.test;
  **/
 public class TestImpl implements TestInterface {
     public String compute(Integer x, Integer y) {
-        return x+"*"+y;
+        return x+"/"+y+" = "+(x/y);
     }
 }
