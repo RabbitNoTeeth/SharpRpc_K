@@ -1,18 +1,29 @@
 package cn.booklish;
 
-import cn.booklish.rpc.server.RpcServerBootStrap;
-import cn.booklish.test.TestImpl;
+import cn.booklish.sharp.client.RpcClient;
+import cn.booklish.test.TestInterface;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * Hello world!
  *
  */
+@Configuration
+@ComponentScan
 public class App {
 
     public static void main( String[] args ) throws InterruptedException {
-        new RpcServerBootStrap(9090)
-                .register("testService", TestImpl.class)
-                .start();
+        ApplicationContext context =
+                new AnnotationConfigApplicationContext(App.class);
+
+        TestInterface service = (TestInterface) RpcClient
+                .getService("/test/TestImpl", TestInterface.class);
+
+        System.out.println(service.compute(50,909090));
+
     }
 
 }

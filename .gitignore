@@ -5,5 +5,8 @@
 # IntelliJ project files
 .idea
 *.iml
+logs
 out
 gen
+/logs/
+/target/
