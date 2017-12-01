@@ -60,7 +60,7 @@ public class RpcRequestManager {
          */
         public Object computeRpcRequest() {
             try{
-                Class<?> serviceClass= TestInterface.class;
+                Class<?> serviceClass= Class.forName(rpcRequest.getServiceName());
                 Method method = serviceClass.getMethod(rpcRequest.getMethodName(), rpcRequest.getParamTypes());
                 Object invoke = method.invoke(serviceClass.newInstance(), rpcRequest.getParamValues());
                 return new RpcResponse(rpcRequest.getId(),invoke,true);

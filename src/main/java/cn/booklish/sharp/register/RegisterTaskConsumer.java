@@ -9,11 +9,11 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class RegisterTaskConsumer implements Runnable {
 
-    private final LinkedBlockingQueue<RegisterEntry> queue;
+    private final LinkedBlockingQueue<RegisterBean> queue;
 
     private final ZkClient zkClient;
 
-    public RegisterTaskConsumer(LinkedBlockingQueue<RegisterEntry> queue, ZkClient zkClient) {
+    public RegisterTaskConsumer(LinkedBlockingQueue<RegisterBean> queue, ZkClient zkClient) {
         this.queue = queue;
         this.zkClient = zkClient;
     }
@@ -24,8 +24,8 @@ public class RegisterTaskConsumer implements Runnable {
 
         while (true) {
             try {
-                RegisterEntry entry = queue.take();
-                zkClient.createPath(entry.getKey(),entry.getValue());
+                RegisterBean entry = queue.take();
+                zkClient.createPath(entry.getPath(),entry.getValue());
             } catch(InterruptedException e){
                 break;
             }

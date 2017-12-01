@@ -2,39 +2,34 @@ package cn.booklish.sharp.register;
 
 
 import cn.booklish.sharp.annotation.RpcService;
-import cn.booklish.sharp.constant.RpcConfigInfo;
 import cn.booklish.sharp.zookeeper.ZkClient;
+import cn.booklish.test.TestImpl;
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Properties;
 
 /**
  * Rpc服务扫描器
  */
-@Component
 public class ServiceScanner {
 
     private static final Logger logger = Logger.getLogger(ZkClient.class);
 
-    private final RpcConfigInfo rpcConfigInfo;
+    private final String autoScanPath;
 
-    @Autowired
-    public ServiceScanner(RpcConfigInfo rpcConfigInfo) {
-        this.rpcConfigInfo = rpcConfigInfo;
-        if(rpcConfigInfo.server_autoScan_enable){
-            scan(rpcConfigInfo.server_autoScan_base,rpcConfigInfo.server_service_regiter_address);
-        }
+    private final String registerAddress;
+
+    public ServiceScanner(String autoScanPath, String registerAddress) {
+        this.autoScanPath = autoScanPath;
+        this.registerAddress = registerAddress;
+        scan(autoScanPath,registerAddress);
     }
 
     /**
@@ -47,8 +42,8 @@ public class ServiceScanner {
             Annotation annotation = clazz.getAnnotation(RpcService.class);
             if(annotation!=null){
                 String pathPrefix = ((RpcService) annotation).pathPrefix();
-                RegisterEntry entry = new RegisterEntry(pathPrefix + "/" + clazz.getSimpleName()
-                        , registerAddress);
+                RegisterBean entry = new RegisterBean(pathPrefix + "/" + clazz.getSimpleName()
+                        , clazz.getTypeName(),registerAddress);
                 RegisterManager.submit(entry);
             }
         });

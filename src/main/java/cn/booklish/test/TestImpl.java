@@ -7,7 +7,7 @@ import cn.booklish.sharp.annotation.RpcService;
  * @create 2017-11-21-14:05
  **/
 
-@RpcService(pathPrefix = "/test")
+@RpcService(pathPrefix = "/aaa/bbb/ccc")
 public class TestImpl implements TestInterface {
     public String compute(Integer x, Integer y) {
         return x+"/"+y+" = "+(x/y);

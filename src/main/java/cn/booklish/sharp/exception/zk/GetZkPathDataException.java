@@ -1,4 +1,4 @@
-package cn.booklish.sharp.exception;
+package cn.booklish.sharp.exception.zk;
 
 public class GetZkPathDataException extends RuntimeException {
 

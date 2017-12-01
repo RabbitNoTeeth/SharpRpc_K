@@ -7,20 +7,20 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class RegisterTaskProducer implements Runnable{
 
-    private final LinkedBlockingQueue<RegisterEntry> queue;
+    private final LinkedBlockingQueue<RegisterBean> queue;
 
-    private final RegisterEntry entry;
+    private final RegisterBean bean;
 
-    public RegisterTaskProducer(LinkedBlockingQueue<RegisterEntry> queue, RegisterEntry entry) {
+    public RegisterTaskProducer(LinkedBlockingQueue<RegisterBean> queue, RegisterBean bean) {
         this.queue = queue;
-        this.entry = entry;
+        this.bean = bean;
     }
 
 
     @Override
     public void run() {
         try{
-            queue.put(entry);
+            queue.put(bean);
         }catch (InterruptedException e){
             Thread.currentThread().interrupt();
         }

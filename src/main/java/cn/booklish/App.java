@@ -16,13 +16,10 @@ import org.springframework.context.annotation.Configuration;
 public class App {
 
     public static void main( String[] args ) throws InterruptedException {
+
         ApplicationContext context =
                 new AnnotationConfigApplicationContext(App.class);
 
-        TestInterface service = (TestInterface) RpcClient
-                .getService("/test/TestImpl", TestInterface.class);
-
-        System.out.println(service.compute(50,909090));
 
     }
 

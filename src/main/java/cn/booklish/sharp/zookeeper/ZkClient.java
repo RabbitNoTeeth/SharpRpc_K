@@ -1,9 +1,9 @@
 package cn.booklish.sharp.zookeeper;
 
 
-import cn.booklish.sharp.constant.RpcConfigInfo;
-import cn.booklish.sharp.exception.*;
+import cn.booklish.sharp.exception.zk.*;
 import cn.booklish.sharp.util.KryoUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.api.CuratorWatcher;
@@ -11,27 +11,39 @@ import org.apache.curator.retry.RetryNTimes;
 import org.apache.log4j.Logger;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.ZooDefs;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Component
 public class ZkClient {
 
     private static final Logger logger = Logger.getLogger(ZkClient.class);
 
+    private final String zkAddress;
 
-    private final RpcConfigInfo rpcConfigInfo;
+    private int zkRetryTimes = 10;
 
-    final CuratorFramework client;
+    private int zkSleepBetweenRetry = 5000;
 
-    @Autowired
-    public ZkClient(RpcConfigInfo rpcConfigInfo){
-        this.rpcConfigInfo = rpcConfigInfo;
-        client = CuratorFrameworkFactory.newClient(rpcConfigInfo.base_zk_address,
-                new RetryNTimes(rpcConfigInfo.base_zk_retryTimes, rpcConfigInfo.base_zk_SleepBetweenRetry));
+    private final CuratorFramework client;
+
+    public ZkClient(String zkAddress, int zkRetryTimes, int zkSleepBetweenRetry){
+
+        this.zkAddress = zkAddress;
+        this.zkRetryTimes = zkRetryTimes;
+        this.zkSleepBetweenRetry = zkSleepBetweenRetry;
+        client = CuratorFrameworkFactory.newClient(zkAddress,
+                new RetryNTimes(zkRetryTimes, zkSleepBetweenRetry));
         client.start();
+
+    }
+
+    public ZkClient(String zkAddress){
+
+        this.zkAddress = zkAddress;
+        client = CuratorFrameworkFactory.newClient(zkAddress,
+                new RetryNTimes(this.zkRetryTimes, this.zkSleepBetweenRetry));
+        client.start();
+
     }
 
 
@@ -88,18 +100,43 @@ public class ZkClient {
     public void createPath(String path, Object data){
 
         try {
-            if(!checkPathExists(path))
+            if(!checkPathExists(path)){
+                checkParentExits(path);
                 client.create().withMode(CreateMode.PERSISTENT).withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE)
                         .forPath(path,KryoUtil.writeObjectToByteArray(data));
-            else
+            }
+            else{
                 updatePath(path,data);
-
+            }
         } catch (Exception e) {
             logger.error("创建zookeeper路径["+path+"]失败");
             throw new CreateZkPathException("创建zookeeper路径["+path+"]失败",e);
         }
 
     }
+
+    private void checkParentExits(String path){
+        try{
+            checkAndCreateParent(path.substring(0,path.lastIndexOf("/")));
+        }catch (Exception e){
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void checkAndCreateParent(String path){
+
+        if(StringUtils.isNotBlank(path)){
+            if(!checkPathExists(path)){
+                String parent = path.substring(0, path.lastIndexOf("/"));
+                if(StringUtils.isNotBlank(parent)){
+                    checkAndCreateParent(parent);
+                }
+                createPath(path,"");
+            }
+        }
+
+    }
+
 
     /**
      * 更新节点数据
@@ -146,10 +183,7 @@ public class ZkClient {
     public boolean checkPathExists(String path){
 
         try {
-            if(client.checkExists().forPath(path)!=null)
-                return true;
-            else
-                return false;
+            return client.checkExists().forPath(path) != null;
         } catch (Exception e) {
             logger.error("检查指定的zookeeper路径["+path+"]是否存在失败");
             throw new CheckZkPathExistsException("检查指定的zookeeper路径["+path+"]是否存在失败");

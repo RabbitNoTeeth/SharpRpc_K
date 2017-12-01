@@ -1,6 +1,5 @@
 package cn.booklish.sharp.server;
 
-import cn.booklish.sharp.constant.RpcConfigInfo;
 import cn.booklish.sharp.server.pipeline.ServerPipelineInitializer;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
@@ -9,8 +8,6 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * @Author: liuxindong
@@ -18,28 +15,23 @@ import org.springframework.stereotype.Component;
  * @Create: 2017/11/22 8:36
  * @Modify:
  */
-@Component
 public class RpcServerBootStrap {
 
     private final EventLoopGroup bossGroup = new NioEventLoopGroup();
     private final EventLoopGroup workerGroup = new NioEventLoopGroup();
     private Channel channel;
 
-    private final RpcConfigInfo rpcConfigInfo;
+    private final int port;
 
-    @Autowired
-    public RpcServerBootStrap(RpcConfigInfo rpcConfigInfo) {
-        this.rpcConfigInfo = rpcConfigInfo;
-        if(rpcConfigInfo.server_enable){
-            start(rpcConfigInfo.server_port);
-        }
+    public RpcServerBootStrap(int port) {
+        this.port = port;
     }
 
 
     /**
      * 启动Rpc服务器
      */
-    public void start(int port){
+    public void start(){
 
         try {
             ServerBootstrap b = new ServerBootstrap();

@@ -1,41 +1,46 @@
 package cn.booklish.sharp.register;
 
 import cn.booklish.sharp.zookeeper.ZkClient;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.concurrent.*;
 
 /**
  * Rpc注册请求管理器
  */
-@Component
 public class RegisterManager {
 
     private final ZkClient zkClient;
 
-    private static final LinkedBlockingQueue<RegisterEntry> queue = new LinkedBlockingQueue<>();
+    private static final LinkedBlockingQueue<RegisterBean> queue = new LinkedBlockingQueue<>();
 
     /**
      * 线程池
      */
     private static final ExecutorService exec = Executors.newFixedThreadPool(2);
 
-    @Autowired
     public RegisterManager(ZkClient zkClient) {
         this.zkClient = zkClient;
-        start();
     }
 
-
-    private void start(){
+    /**
+     * 启动消费者线程,等待并将服务注册到zookeeper
+     */
+    public void start(){
         exec.execute(new RegisterTaskConsumer(queue, zkClient));
     }
 
-    public static void submit(RegisterEntry entry){
+    /**
+     * 提交服务注册任务到管理器
+     * @param entry
+     */
+    public static void submit(RegisterBean entry){
 
         exec.execute(new RegisterTaskProducer(queue,entry));
 
+    }
+
+    public void shutdown(){
+        exec.shutdown();
     }
 
 
