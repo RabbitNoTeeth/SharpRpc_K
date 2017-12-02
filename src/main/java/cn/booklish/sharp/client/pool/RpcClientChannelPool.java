@@ -10,6 +10,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.Attribute;
+import org.apache.log4j.Logger;
 
 import java.net.InetSocketAddress;
 import java.util.Map;
@@ -18,12 +19,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 
 /**
- * @Author: liuxindong
- * @Description: channel连接池
- * @Create: 2017/11/23 13:43
- * @Modify:
+ * @author: 刘新冬(www.booklish.cn)
+ * @date: 2017/12/2 15:37
+ * @desc: 客户端Channel连接池
  */
 public class RpcClientChannelPool {
+
+    private static final Logger logger = Logger.getLogger(RpcClientChannelPool.class);
 
     private final int capacity;
 
@@ -96,13 +98,14 @@ public class RpcClientChannelPool {
                     Attribute<Map<Integer,Object>> attribute = channel.attr(ChannelAttributeUtils.KEY);
                     ConcurrentHashMap<Integer, Object> dataMap = new ConcurrentHashMap<>();
                     attribute.set(dataMap);
-                    return channelFuture.channel();
+                    return channel;
                 }else{
                     return null;
                 }
             }catch (InterruptedException e){
                 Thread.currentThread().interrupt();
                 //重试
+                logger.info("[SharpRpc]: 客户端channel连接失败,重新尝试连接...");
             }
         }while (true);
     }

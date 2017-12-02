@@ -2,8 +2,6 @@ package cn.booklish.sharp.register;
 
 
 import cn.booklish.sharp.annotation.RpcService;
-import cn.booklish.sharp.zookeeper.ZkClient;
-import cn.booklish.test.TestImpl;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -16,17 +14,19 @@ import java.util.Enumeration;
 import java.util.List;
 
 /**
- * Rpc服务扫描器
+ * @author: 刘新冬(www.booklish.cn)
+ * @date: 2017/12/2 15:52
+ * @desc: Rpc服务扫描器
  */
-public class ServiceScanner {
+public class RpcServiceAutoScanner {
 
-    private static final Logger logger = Logger.getLogger(ZkClient.class);
+    private static final Logger logger = Logger.getLogger(RpcServiceAutoScanner.class);
 
     private final String autoScanPath;
 
     private final String registerAddress;
 
-    public ServiceScanner(String autoScanPath, String registerAddress) {
+    public RpcServiceAutoScanner(String autoScanPath, String registerAddress) {
         this.autoScanPath = autoScanPath;
         this.registerAddress = registerAddress;
         scan(autoScanPath,registerAddress);

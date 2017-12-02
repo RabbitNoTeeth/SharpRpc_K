@@ -5,7 +5,9 @@ import cn.booklish.sharp.zookeeper.ZkClient;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
- * Rpc注册请求消费者
+ * @author: 刘新冬(www.booklish.cn)
+ * @date: 2017/12/2 15:52
+ * @desc: Rpc注册请求消费者
  */
 public class RegisterTaskConsumer implements Runnable {
 

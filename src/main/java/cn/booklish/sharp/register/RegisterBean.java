@@ -1,6 +1,11 @@
 package cn.booklish.sharp.register;
 
 
+/**
+ * @author: 刘新冬(www.booklish.cn)
+ * @date: 2017/12/2 15:51
+ * @desc: rpc服务注册实体
+ */
 public class RegisterBean {
 
     private final String path;

@@ -2,14 +2,15 @@ package cn.booklish.sharp.config;
 
 import cn.booklish.sharp.exception.config.SharpConfigException;
 import org.apache.log4j.Logger;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
 /**
- * sharp.properties配置文件对应的属性类
+ * @author: 刘新冬(www.booklish.cn)
+ * @date: 2017/12/2 15:44
+ * @desc: SharpRpc配置文件属性bean
  */
 public class SharpRpcConfig {
 

@@ -7,22 +7,24 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import org.apache.log4j.Logger;
 
 /**
- * @Author: liuxindong
- * @Description:  Rpc请求响应处理器
- * @Create: 2017/11/23 10:16
- * @Modify:
+ * @author: 刘新冬(www.booklish.cn)
+ * @date: 2017/12/2 14:50
+ * @desc: 客户端Rpc响应处理器
  */
 @ChannelHandler.Sharable
 public class RpcResponseHandler extends SimpleChannelInboundHandler<Object> {
 
+    private static final Logger logger = Logger.getLogger(RpcResponseHandler.class);
 
-    @Override
-    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("[Rpc-Client]: channel-"+ctx.channel().id()+" 断开连接");
-    }
-
+    /**
+     * 处理接受到的Rpc请求响应
+     * @param ctx
+     * @param response
+     * @throws Exception
+     */
     protected void channelRead0(ChannelHandlerContext ctx, Object response) throws Exception {
 
         RpcResponse rpcResponse = (RpcResponse) response;
@@ -31,17 +33,23 @@ public class RpcResponseHandler extends SimpleChannelInboundHandler<Object> {
         if(rpcResponse.isSuccess()){
             callback.receiveMessage(rpcResponse.getResult());
         }else{
-            System.out.println("[Rpc异常 : 请求id="+rpcResponse.getId()+"] : 服务器计算出现异常,请检查客户端调用参数或者服务器日志");
+            logger.warn("[SharpRpc]: 请求id="+rpcResponse.getId()+"在服务器计算时出现异常,请检查客户端调用参数或者服务器日志");
             callback.receiveMessage(rpcResponse.getE());
         }
 
 
     }
 
+    /**
+     * 异常处理
+     * @param ctx
+     * @param cause
+     * @throws Exception
+     */
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 
-        System.out.println("[Rpc-Client]: 客户端入站流发生异常,打印异常信息如下");
+        logger.error("[SharpRpc]: 客户端入站处理器捕获到异常,请查看详细的打印堆栈信息");
         cause.printStackTrace();
         ctx.close();
 

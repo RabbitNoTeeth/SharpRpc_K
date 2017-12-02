@@ -2,13 +2,15 @@ package cn.booklish.sharp.config;
 
 import cn.booklish.sharp.client.RpcClient;
 import cn.booklish.sharp.register.RegisterManager;
-import cn.booklish.sharp.register.ServiceScanner;
+import cn.booklish.sharp.register.RpcServiceAutoScanner;
 import cn.booklish.sharp.server.RpcServerBootStrap;
 import cn.booklish.sharp.zookeeper.ZkClient;
 import org.apache.log4j.Logger;
 
 /**
- * Sharp自动配置中心,根据 SharpRpcConfig 中的配置项自动创建服务流程
+ * @author: 刘新冬(www.booklish.cn)
+ * @date: 2017/12/2 15:44
+ * @desc: Sharp自动配置中心
  */
 public class SharpAutoConfigureCenter {
 
@@ -24,7 +26,7 @@ public class SharpAutoConfigureCenter {
     /**
      * 服务自动扫描器
      */
-    private ServiceScanner scanner;
+    private RpcServiceAutoScanner scanner;
 
     /**
      * 客户端
@@ -67,7 +69,7 @@ public class SharpAutoConfigureCenter {
             // 启动服务自动扫描器
             if(config.isServer_autoScan_enable()){
                 if(scanner==null){
-                    scanner = new ServiceScanner(config.getServer_autoScan_base(),config.getServer_service_register_address());
+                    scanner = new RpcServiceAutoScanner(config.getServer_autoScan_base(),config.getServer_service_register_address());
                 }
                 logger.info("[SharpRpc]: ServiceScanner配置完成");
             }
@@ -93,11 +95,11 @@ public class SharpAutoConfigureCenter {
         this.zkClient = zkClient;
     }
 
-    public ServiceScanner getScanner() {
+    public RpcServiceAutoScanner getScanner() {
         return scanner;
     }
 
-    public void setScanner(ServiceScanner scanner) {
+    public void setScanner(RpcServiceAutoScanner scanner) {
         this.scanner = scanner;
     }
 

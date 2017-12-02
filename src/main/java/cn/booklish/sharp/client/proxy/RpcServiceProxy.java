@@ -13,10 +13,9 @@ import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 
 /**
- * @Author: liuxindong
- * @Description: Service代理接口实现类
- * @Create: 2017/11/23 10:16
- * @Modify:
+ * @author: 刘新冬(www.booklish.cn)
+ * @date: 2017/12/2 15:41
+ * @desc: Rpc服务代理接口回调
  */
 public class RpcServiceProxy implements MethodInterceptor {
 
@@ -29,6 +28,15 @@ public class RpcServiceProxy implements MethodInterceptor {
         this.serviceName = serviceName;
     }
 
+    /**
+     * 拦截对代理接口的方法调用,内部请求服务器,将服务器的计算结果返回
+     * @param o
+     * @param method
+     * @param args
+     * @param methodProxy
+     * @return
+     * @throws Throwable
+     */
     @Override
     public Object intercept(Object o, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
 

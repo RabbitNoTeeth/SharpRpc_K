@@ -8,13 +8,17 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 
 /**
- * @Author: liuxindong
- * @Description: 构建Rpc的channelPipeline链
- * @Create: 2017/11/21 11:27
- * @Modify:
+ * @author: 刘新冬(www.booklish.cn)
+ * @date: 2017/12/2 16:13
+ * @desc: 服务器channel pipeline链
  */
 public class ServerPipelineInitializer extends ChannelInitializer<SocketChannel>{
 
+    /**
+     * 创建pipeline链
+     * @param socketChannel
+     * @throws Exception
+     */
     protected void initChannel(SocketChannel socketChannel) throws Exception {
 
         ChannelPipeline pipeline = socketChannel.pipeline();

@@ -3,10 +3,9 @@ package cn.booklish.sharp.server.manage;
 import java.util.concurrent.Callable;
 
 /**
- * @Author: liuxindong
- * @Description: 异步处理Rpc请求
- * @Create: 2017/11/22 9:18
- * @Modify:
+ * @author: 刘新冬(www.booklish.cn)
+ * @date: 2017/12/2 16:12
+ * @desc: Rpc异步计算类
  */
 public class RpcAsyncComputeCallable implements Callable<Object>{
 

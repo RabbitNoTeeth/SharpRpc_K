@@ -9,10 +9,9 @@ import org.objenesis.strategy.StdInstantiatorStrategy;
 import java.io.*;
 
 /**
- * @Author: liuxindong
- * @Description: Kryo序列化工具类
- * @Create: 2017/11/23 8:21
- * @Modify:
+ * @author: 刘新冬(www.booklish.cn)
+ * @date: 2017/12/2 16:14
+ * @desc: Kryo序列化工具类
  */
 @SuppressWarnings("Duplicates")
 public class KryoUtil {

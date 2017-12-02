@@ -11,10 +11,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 /**
- * @Author: liuxindong
- * @Description: Rpc请求消息管理器
- * @Create: 2017/11/21 13:40
- * @Modify:
+ * @author: 刘新冬(www.booklish.cn)
+ * @date: 2017/12/2 16:13
+ * @desc: Rpc请求消息管理器
  */
 public class RpcRequestManager {
 

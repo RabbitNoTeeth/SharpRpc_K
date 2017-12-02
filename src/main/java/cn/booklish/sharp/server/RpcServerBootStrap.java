@@ -10,10 +10,9 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 
 /**
- * @Author: liuxindong
- * @Description: 服务器引导类
- * @Create: 2017/11/22 8:36
- * @Modify:
+ * @author: 刘新冬(www.booklish.cn)
+ * @date: 2017/12/2 16:14
+ * @desc: 服务器引导类
  */
 public class RpcServerBootStrap {
 

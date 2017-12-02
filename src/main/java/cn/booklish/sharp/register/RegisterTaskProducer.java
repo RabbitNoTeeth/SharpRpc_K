@@ -3,7 +3,9 @@ package cn.booklish.sharp.register;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
- * Rpc注册请求生产者
+ * @author: 刘新冬(www.booklish.cn)
+ * @date: 2017/12/2 15:52
+ * @desc: Rpc注册请求生产者
  */
 public class RegisterTaskProducer implements Runnable{
 

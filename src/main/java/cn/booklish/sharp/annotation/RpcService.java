@@ -3,7 +3,9 @@ package cn.booklish.sharp.annotation;
 import java.lang.annotation.*;
 
 /**
- * 标记需要发布为Rpc服务的类
+ * @author: 刘新冬(www.booklish.cn)
+ * @date: 2017/12/2 14:48
+ * @desc: 标记需要发布为Rpc服务的类
  */
 @Documented
 @Target(ElementType.TYPE)

@@ -1,7 +1,9 @@
 package cn.booklish.sharp.exception.config;
 
 /**
- * sharp配置文件异常类
+ * @author: 刘新冬(www.booklish.cn)
+ * @date: 2017/12/2 15:49
+ * @desc: sharp配置文件异常类
  */
 public class SharpConfigException extends RuntimeException {
 

@@ -14,6 +14,11 @@ import org.apache.zookeeper.ZooDefs;
 
 import java.util.List;
 
+/**
+ * @author: 刘新冬(www.booklish.cn)
+ * @date: 2017/12/2 16:14
+ * @desc: zookeeper工具类
+ */
 public class ZkClient {
 
     private static final Logger logger = Logger.getLogger(ZkClient.class);

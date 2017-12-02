@@ -3,10 +3,9 @@ package cn.booklish.sharp.model;
 import java.io.Serializable;
 
 /**
- * @Author: liuxindong
- * @Description: Rpc请求实体
- * @Create: 2017/11/21 10:17
- * @Modify:
+ * @author: 刘新冬(www.booklish.cn)
+ * @date: 2017/12/2 15:50
+ * @desc: Rpc请求实体
  */
 public class RpcRequest implements Serializable{
 

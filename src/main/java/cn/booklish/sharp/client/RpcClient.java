@@ -5,16 +5,13 @@ import cn.booklish.sharp.zookeeper.ZkClient;
 import net.sf.cglib.proxy.Enhancer;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.net.InetSocketAddress;
 
 /**
- * @Author: liuxindong
- * @Description: Rpc客户端
- * @Create: 2017/11/22 10:04
- * @Modify:
+ * @author: 刘新冬(www.booklish.cn)
+ * @date: 2017/12/2 15:42
+ * @desc: Rpc客户端
  */
 public class RpcClient {
 
@@ -59,7 +56,7 @@ public class RpcClient {
                     new InetSocketAddress(split_2[0],Integer.parseInt(split_2[1])),split_1[0]
             );
         }
-        logger.warn("未找到名称为["+path+"]的Rpc服务");
+        logger.warn("[SharpRpc]: 未找到名称为["+path+"]的Rpc服务");
         return null;
     }
 
