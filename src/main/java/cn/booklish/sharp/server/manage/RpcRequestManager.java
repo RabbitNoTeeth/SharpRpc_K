@@ -3,7 +3,6 @@ package cn.booklish.sharp.server.manage;
 
 import cn.booklish.sharp.model.RpcRequest;
 import cn.booklish.sharp.model.RpcResponse;
-import cn.booklish.test.TestInterface;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.ExecutorService;

@@ -9,6 +9,9 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 /**
  * @author: 刘新冬(www.booklish.cn)
  * @date: 2017/12/2 16:14
@@ -19,6 +22,8 @@ public class RpcServerBootStrap {
     private final EventLoopGroup bossGroup = new NioEventLoopGroup();
     private final EventLoopGroup workerGroup = new NioEventLoopGroup();
     private Channel channel;
+
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     private final int port;
 
@@ -32,23 +37,14 @@ public class RpcServerBootStrap {
      */
     public void start(){
 
-        try {
-            ServerBootstrap b = new ServerBootstrap();
-            b.group(bossGroup, workerGroup)
-                    .channel(NioServerSocketChannel.class)
-                    .childHandler(new ServerPipelineInitializer())
-                    .option(ChannelOption.SO_BACKLOG, 128)
-                    .childOption(ChannelOption.SO_KEEPALIVE, true);
+        ServerBootstrap b = new ServerBootstrap();
+        b.group(bossGroup, workerGroup)
+                .channel(NioServerSocketChannel.class)
+                .childHandler(new ServerPipelineInitializer())
+                .option(ChannelOption.SO_BACKLOG, 128)
+                .childOption(ChannelOption.SO_KEEPALIVE, true);
 
-            ChannelFuture f = b.bind(port).sync();
-            channel = f.channel();
-            f.channel().closeFuture().sync();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        } finally {
-            workerGroup.shutdownGracefully();
-            bossGroup.shutdownGracefully();
-        }
+        executor.execute(new ServerStartTask(b,port));
 
     }
 
@@ -56,8 +52,35 @@ public class RpcServerBootStrap {
         if(channel!=null){
             channel.closeFuture().syncUninterruptibly();
         }
+        executor.shutdown();
         workerGroup.shutdownGracefully();
         bossGroup.shutdownGracefully();
+    }
+
+    private class ServerStartTask implements Runnable{
+
+        private final ServerBootstrap serverBootstrap;
+
+        private final int port;
+
+        private ServerStartTask(ServerBootstrap serverBootstrap, int port) {
+            this.serverBootstrap = serverBootstrap;
+            this.port = port;
+        }
+
+        @Override
+        public void run() {
+            try {
+                ChannelFuture f = serverBootstrap.bind(port).sync();
+                channel = f.channel();
+                f.channel().closeFuture().sync();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            } finally {
+                workerGroup.shutdownGracefully();
+                bossGroup.shutdownGracefully();
+            }
+        }
     }
 
 

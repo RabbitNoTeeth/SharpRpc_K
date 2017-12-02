@@ -76,7 +76,7 @@ public class SharpRpcConfig {
             pop.load(resource);
             checkNessesaryItems(pop);
             checkServerEnable(pop);
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new SharpConfigException("Sharp配置文件加载失败",e);
         }
 
@@ -132,6 +132,13 @@ public class SharpRpcConfig {
             this.base_zk_address = (String) zkAddress;
         else
             throw new SharpConfigException("Sharp配置文件错误: 配置项[base.zookeeper.address]不能为空");
+
+        Object zkRetryTimes = pop.get("base.zookeeper.retryTimes");
+        if(zkRetryTimes!=null)
+            this.base_zk_retryTimes = Integer.parseInt((String) zkRetryTimes);
+        Object zkSleepBetweenRetry = pop.get("base.zookeeper.sleepBetweenRetry");
+        if(zkSleepBetweenRetry!=null)
+            this.base_zk_SleepBetweenRetry = Integer.parseInt((String) zkSleepBetweenRetry);
 
 
     }

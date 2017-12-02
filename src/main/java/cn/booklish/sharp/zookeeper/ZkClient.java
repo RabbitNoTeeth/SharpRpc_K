@@ -7,12 +7,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.api.CuratorWatcher;
+import org.apache.curator.framework.imps.CuratorFrameworkState;
 import org.apache.curator.retry.RetryNTimes;
 import org.apache.log4j.Logger;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.ZooDefs;
 
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.Semaphore;
 
 /**
  * @author: 刘新冬(www.booklish.cn)
@@ -25,31 +28,45 @@ public class ZkClient {
 
     private final String zkAddress;
 
+    private int connectionPoolSize = 15;
+
     private int zkRetryTimes = 10;
 
     private int zkSleepBetweenRetry = 5000;
 
-    private final CuratorFramework client;
+    private final ZkConnectionPool pool;
+
+    public ZkClient(String zkAddress){
+        this.zkAddress = zkAddress;
+        this.pool = new ZkConnectionPool(zkAddress,connectionPoolSize,zkRetryTimes,zkSleepBetweenRetry);
+    }
+
+    public ZkClient(String zkAddress,int connectionPoolSize){
+        this.zkAddress = zkAddress;
+        this.connectionPoolSize = connectionPoolSize;
+        this.pool = new ZkConnectionPool(zkAddress,connectionPoolSize,zkRetryTimes,zkSleepBetweenRetry);
+    }
 
     public ZkClient(String zkAddress, int zkRetryTimes, int zkSleepBetweenRetry){
 
         this.zkAddress = zkAddress;
         this.zkRetryTimes = zkRetryTimes;
         this.zkSleepBetweenRetry = zkSleepBetweenRetry;
-        client = CuratorFrameworkFactory.newClient(zkAddress,
-                new RetryNTimes(zkRetryTimes, zkSleepBetweenRetry));
-        client.start();
+        this.pool = new ZkConnectionPool(zkAddress,connectionPoolSize,zkRetryTimes,zkSleepBetweenRetry);
 
     }
 
-    public ZkClient(String zkAddress){
+    public ZkClient(String zkAddress, int connectionPoolSize, int zkRetryTimes, int zkSleepBetweenRetry){
 
         this.zkAddress = zkAddress;
-        client = CuratorFrameworkFactory.newClient(zkAddress,
-                new RetryNTimes(this.zkRetryTimes, this.zkSleepBetweenRetry));
-        client.start();
+        this.connectionPoolSize = connectionPoolSize;
+        this.zkRetryTimes = zkRetryTimes;
+        this.zkSleepBetweenRetry = zkSleepBetweenRetry;
+        this.pool = new ZkConnectionPool(zkAddress,connectionPoolSize,zkRetryTimes,zkSleepBetweenRetry);
 
     }
+
+
 
 
     /**
@@ -60,7 +77,7 @@ public class ZkClient {
      */
     public List<String> getChildrenPath(String path, CuratorWatcher watcher){
         try {
-            return client.getChildren().usingWatcher(watcher).forPath(path);
+            return pool.getConnection().getChildren().usingWatcher(watcher).forPath(path);
         } catch (Exception e) {
             logger.warn("获取zookeeper子节点列表失败");
             throw new RuntimeException(e);
@@ -74,7 +91,7 @@ public class ZkClient {
      */
     public byte[] getData(String path){
         try {
-            return client.getData().forPath(path);
+            return pool.getConnection().getData().forPath(path);
         } catch (Exception e) {
             logger.error("获取zookeeper路径["+path+"]数据失败");
             throw new GetZkPathDataException("获取zookeeper路径["+path+"]数据失败",e);
@@ -90,7 +107,7 @@ public class ZkClient {
      */
     public <T> T getData(String path,Class<T> clazz){
         try {
-            return KryoUtil.readObjectFromByteArray(client.getData().forPath(path),clazz);
+            return KryoUtil.readObjectFromByteArray(pool.getConnection().getData().forPath(path),clazz);
         } catch (Exception e) {
             logger.error("获取zookeeper路径["+path+"]数据失败");
             throw new GetZkPathDataException("获取zookeeper路径["+path+"]数据失败",e);
@@ -107,7 +124,7 @@ public class ZkClient {
         try {
             if(!checkPathExists(path)){
                 checkParentExits(path);
-                client.create().withMode(CreateMode.PERSISTENT).withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE)
+                pool.getConnection().create().withMode(CreateMode.PERSISTENT).withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE)
                         .forPath(path,KryoUtil.writeObjectToByteArray(data));
             }
             else{
@@ -153,7 +170,7 @@ public class ZkClient {
         try {
 
             if(checkPathExists(path))
-                client.setData().forPath(path,KryoUtil.writeToByteArray(data));
+                pool.getConnection().setData().forPath(path,KryoUtil.writeToByteArray(data));
 
         } catch (Exception e) {
             logger.error("更新指定的zookeeper路径["+path+"]失败");
@@ -171,7 +188,7 @@ public class ZkClient {
         try {
 
             if(checkPathExists(path))
-                client.delete().withVersion(-1).forPath(path);
+                pool.getConnection().delete().withVersion(-1).forPath(path);
 
         } catch (Exception e) {
             logger.error("删除指定的zookeeper路径["+path+"]失败");
@@ -188,10 +205,75 @@ public class ZkClient {
     public boolean checkPathExists(String path){
 
         try {
-            return client.checkExists().forPath(path) != null;
+            return pool.getConnection().checkExists().forPath(path) != null;
         } catch (Exception e) {
             logger.error("检查指定的zookeeper路径["+path+"]是否存在失败");
             throw new CheckZkPathExistsException("检查指定的zookeeper路径["+path+"]是否存在失败");
+        }
+
+    }
+
+    private class ZkConnectionPool{
+
+        private final String zkAddress;
+
+        private final int poolSize;
+
+        private final int zkRetryTimes;
+
+        private final int zkSleepBetweenRetry;
+
+        private final CuratorFramework[] pool;
+
+        private final Object[] locks;
+
+        public ZkConnectionPool(String zkAddress, int poolSize, int zkRetryTimes, int zkSleepBetweenRetry){
+            this.zkAddress = zkAddress;
+            this.poolSize = poolSize;
+            this.zkRetryTimes = zkRetryTimes;
+            this.zkSleepBetweenRetry = zkSleepBetweenRetry;
+            this.pool = new CuratorFramework[poolSize];
+            this.locks = new Object[poolSize];
+            for(int x=0;x<poolSize;x++){
+                locks[x] = new Object();
+            }
+        }
+
+        public CuratorFramework getConnection(){
+            int index = new Random().nextInt(poolSize);
+            CuratorFramework connection = pool[index];
+            if(connection!=null && connection.getState().equals(CuratorFrameworkState.STARTED)){
+                return connection;
+            }
+            synchronized (locks[index]){
+                connection = pool[index];
+                if(connection!=null && connection.getState().equals(CuratorFrameworkState.STARTED)){
+                    return connection;
+                }
+                CuratorFramework newConnection = createConnection(zkAddress, zkRetryTimes, zkSleepBetweenRetry);
+                pool[index] = newConnection;
+                return newConnection;
+            }
+        }
+
+        private CuratorFramework createConnection(String zkAddress, int zkRetryTimes, int zkSleepBetweenRetry) {
+            //设置信号量,最多允许重试5次
+            Semaphore semaphore = new Semaphore(5);
+            do {
+                try{
+                    if(semaphore.tryAcquire()){
+                        CuratorFramework connection = CuratorFrameworkFactory.newClient(zkAddress,
+                                new RetryNTimes(zkRetryTimes, zkSleepBetweenRetry));
+                        connection.start();
+                        return connection;
+                    }else{
+                        return null;
+                    }
+                }catch (Exception e){
+                    //重试
+                    logger.info("[SharpRpc]: 获取zookeeper连接失败,重新尝试连接...");
+                }
+            }while (true);
         }
 
     }

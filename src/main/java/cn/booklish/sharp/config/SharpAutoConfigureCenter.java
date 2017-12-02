@@ -71,7 +71,7 @@ public class SharpAutoConfigureCenter {
                 if(scanner==null){
                     scanner = new RpcServiceAutoScanner(config.getServer_autoScan_base(),config.getServer_service_register_address());
                 }
-                logger.info("[SharpRpc]: ServiceScanner配置完成");
+                logger.info("[SharpRpc]: ServiceAutoScanner服务自动扫描器配置完成");
             }
 
             // 启动服务器
@@ -79,7 +79,7 @@ public class SharpAutoConfigureCenter {
                 serverBootStrap = new RpcServerBootStrap(config.getServer_port());
             }
             serverBootStrap.start();
-            logger.info("[SharpRpc]: RpcServerBootStrap启动成功");
+            logger.info("[SharpRpc]: RpcServerBootStrap引导配置完成");
 
 
         }
