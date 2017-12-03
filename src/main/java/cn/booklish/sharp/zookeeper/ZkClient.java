@@ -170,7 +170,7 @@ public class ZkClient {
         try {
 
             if(checkPathExists(path))
-                pool.getConnection().setData().forPath(path,KryoUtil.writeToByteArray(data));
+                pool.getConnection().setData().forPath(path,KryoUtil.writeObjectToByteArray(data));
 
         } catch (Exception e) {
             logger.error("更新指定的zookeeper路径["+path+"]失败");
