@@ -4,6 +4,8 @@ import cn.booklish.sharp.client.SharpClient;
 import cn.booklish.sharp.register.RegisterManager;
 import cn.booklish.sharp.register.RpcServiceAutoScanner;
 import cn.booklish.sharp.server.RpcServerBootStrap;
+import cn.booklish.sharp.server.manage.ServerRpcRequestManager;
+import cn.booklish.sharp.server.manage.ServiceBeanFactory;
 import cn.booklish.sharp.zookeeper.ZkClient;
 import org.apache.log4j.Logger;
 
@@ -17,6 +19,8 @@ public class SharpAutoConfigureCenter {
     private static final Logger logger = Logger.getLogger(SharpAutoConfigureCenter.class);
 
     private final SharpRpcConfig config;
+
+    private final ServiceBeanFactory serviceBeanFactory;
 
     /**
      * zookeeper操作工具类
@@ -38,8 +42,9 @@ public class SharpAutoConfigureCenter {
      */
     private RpcServerBootStrap serverBootStrap;
 
-    public SharpAutoConfigureCenter(SharpRpcConfig config) {
+    public SharpAutoConfigureCenter(SharpRpcConfig config, ServiceBeanFactory serviceBeanFactory) {
         this.config = config;
+        this.serviceBeanFactory = serviceBeanFactory;
     }
 
     /**
@@ -76,6 +81,7 @@ public class SharpAutoConfigureCenter {
 
             // 启动服务器
             if(serverBootStrap==null){
+                ServerRpcRequestManager serverRpcRequestManager = new ServerRpcRequestManager(serviceBeanFactory);
                 serverBootStrap = new RpcServerBootStrap(config.getServer_port(), serverRpcRequestManager);
             }
             serverBootStrap.start();
