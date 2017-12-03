@@ -14,7 +14,7 @@ import java.io.*;
  * @desc: Kryo序列化工具类
  */
 @SuppressWarnings("Duplicates")
-public class KryoUtil {
+public class KryoSerializerUtil {
 
     private static final String DEFAULT_ENCODING = "UTF-8";
 

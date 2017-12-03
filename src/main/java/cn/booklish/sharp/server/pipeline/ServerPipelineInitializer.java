@@ -1,7 +1,8 @@
 package cn.booklish.sharp.server.pipeline;
 
-import cn.booklish.sharp.server.codec.KyoServerCodec;
-import cn.booklish.sharp.server.handler.ServerInboundHandler;
+import cn.booklish.sharp.server.codec.ServerMessageCodec;
+import cn.booklish.sharp.server.handler.DefaultServerChannelInboundHandler;
+import cn.booklish.sharp.server.manage.ServerRpcRequestManager;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
@@ -14,6 +15,12 @@ import io.netty.handler.timeout.ReadTimeoutHandler;
  */
 public class ServerPipelineInitializer extends ChannelInitializer<SocketChannel>{
 
+    private final ServerRpcRequestManager serverRpcRequestManager;
+
+    public ServerPipelineInitializer(ServerRpcRequestManager serverRpcRequestManager) {
+        this.serverRpcRequestManager = serverRpcRequestManager;
+    }
+
     /**
      * 创建pipeline链
      * @param socketChannel
@@ -22,9 +29,9 @@ public class ServerPipelineInitializer extends ChannelInitializer<SocketChannel>
     protected void initChannel(SocketChannel socketChannel) throws Exception {
 
         ChannelPipeline pipeline = socketChannel.pipeline();
-        pipeline.addLast(new KyoServerCodec())
+        pipeline.addLast(new ServerMessageCodec())
                 .addLast(new ReadTimeoutHandler(15))
-                .addLast(new ServerInboundHandler(true))
+                .addLast(new DefaultServerChannelInboundHandler(serverRpcRequestManager,true))
 
         ;
     }

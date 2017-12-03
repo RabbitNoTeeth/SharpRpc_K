@@ -2,10 +2,9 @@ package cn.booklish.sharp.client.util;
 
 
 /**
- * @Author: liuxindong
- * @Description:
- * @Create: 2017/11/23 16:31
- * @Modify:
+ * @author: 刘新冬(www.booklish.cn)
+ * @date: 2017/12/3 23:21
+ * @desc: 封装Rpc响应的结果
  */
 public class ResponseCallback {
 

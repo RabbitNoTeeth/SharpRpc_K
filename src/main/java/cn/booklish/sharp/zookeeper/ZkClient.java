@@ -1,8 +1,8 @@
 package cn.booklish.sharp.zookeeper;
 
 
-import cn.booklish.sharp.exception.zk.*;
-import cn.booklish.sharp.util.KryoUtil;
+import cn.booklish.sharp.exception.zookeeper.*;
+import cn.booklish.sharp.util.KryoSerializerUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -107,7 +107,7 @@ public class ZkClient {
      */
     public <T> T getData(String path,Class<T> clazz){
         try {
-            return KryoUtil.readObjectFromByteArray(pool.getConnection().getData().forPath(path),clazz);
+            return KryoSerializerUtil.readObjectFromByteArray(pool.getConnection().getData().forPath(path),clazz);
         } catch (Exception e) {
             logger.error("获取zookeeper路径["+path+"]数据失败");
             throw new GetZkPathDataException("获取zookeeper路径["+path+"]数据失败",e);
@@ -125,7 +125,7 @@ public class ZkClient {
             if(!checkPathExists(path)){
                 checkParentExits(path);
                 pool.getConnection().create().withMode(CreateMode.PERSISTENT).withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE)
-                        .forPath(path,KryoUtil.writeObjectToByteArray(data));
+                        .forPath(path, KryoSerializerUtil.writeObjectToByteArray(data));
             }
             else{
                 updatePath(path,data);
@@ -170,7 +170,7 @@ public class ZkClient {
         try {
 
             if(checkPathExists(path))
-                pool.getConnection().setData().forPath(path,KryoUtil.writeObjectToByteArray(data));
+                pool.getConnection().setData().forPath(path, KryoSerializerUtil.writeObjectToByteArray(data));
 
         } catch (Exception e) {
             logger.error("更新指定的zookeeper路径["+path+"]失败");
@@ -258,7 +258,7 @@ public class ZkClient {
 
         private CuratorFramework createConnection(String zkAddress, int zkRetryTimes, int zkSleepBetweenRetry) {
             //设置信号量,最多允许重试5次
-            Semaphore semaphore = new Semaphore(5);
+            Semaphore semaphore = new Semaphore(3);
             do {
                 try{
                     if(semaphore.tryAcquire()){

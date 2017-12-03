@@ -2,7 +2,7 @@ package cn.booklish.sharp.server.codec;
 
 
 import cn.booklish.sharp.model.RpcResponse;
-import cn.booklish.sharp.util.KryoUtil;
+import cn.booklish.sharp.util.KryoSerializerUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
@@ -14,9 +14,9 @@ import org.apache.log4j.Logger;
  * @Create: 2017/11/21 11:16
  * @Modify:
  */
-public class KyroServerEncoder extends MessageToByteEncoder<RpcResponse>{
+public class ServerMessageEncoder extends MessageToByteEncoder<RpcResponse>{
 
-    private static final Logger logger = Logger.getLogger(KyroServerEncoder.class);
+    private static final Logger logger = Logger.getLogger(ServerMessageEncoder.class);
 
     /**
      * 编码出站数据
@@ -25,7 +25,7 @@ public class KyroServerEncoder extends MessageToByteEncoder<RpcResponse>{
      * @param byteBuf
      */
     protected void encode(ChannelHandlerContext channelHandlerContext, RpcResponse response, ByteBuf byteBuf) {
-        byteBuf.writeBytes(KryoUtil.writeObjectToByteArray(response));
+        byteBuf.writeBytes(KryoSerializerUtil.writeObjectToByteArray(response));
     }
 
     @Override

@@ -1,5 +1,6 @@
 package cn.booklish.sharp.server;
 
+import cn.booklish.sharp.server.manage.ServerRpcRequestManager;
 import cn.booklish.sharp.server.pipeline.ServerPipelineInitializer;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
@@ -27,8 +28,11 @@ public class RpcServerBootStrap {
 
     private final int port;
 
-    public RpcServerBootStrap(int port) {
+    private final ServerRpcRequestManager serverRpcRequestManager;
+
+    public RpcServerBootStrap(int port, ServerRpcRequestManager serverRpcRequestManager) {
         this.port = port;
+        this.serverRpcRequestManager = serverRpcRequestManager;
     }
 
 
@@ -40,7 +44,7 @@ public class RpcServerBootStrap {
         ServerBootstrap b = new ServerBootstrap();
         b.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)
-                .childHandler(new ServerPipelineInitializer())
+                .childHandler(new ServerPipelineInitializer(serverRpcRequestManager))
                 .option(ChannelOption.SO_BACKLOG, 128)
                 .childOption(ChannelOption.SO_KEEPALIVE, true);
 
@@ -48,6 +52,9 @@ public class RpcServerBootStrap {
 
     }
 
+    /**
+     * 停止服务器
+     */
     public void stop(){
         if(channel!=null){
             channel.closeFuture().syncUninterruptibly();
@@ -56,6 +63,7 @@ public class RpcServerBootStrap {
         workerGroup.shutdownGracefully();
         bossGroup.shutdownGracefully();
     }
+
 
     private class ServerStartTask implements Runnable{
 

@@ -1,6 +1,6 @@
 package cn.booklish.sharp.config;
 
-import cn.booklish.sharp.client.RpcClient;
+import cn.booklish.sharp.client.SharpClient;
 import cn.booklish.sharp.register.RegisterManager;
 import cn.booklish.sharp.register.RpcServiceAutoScanner;
 import cn.booklish.sharp.server.RpcServerBootStrap;
@@ -31,7 +31,7 @@ public class SharpAutoConfigureCenter {
     /**
      * 客户端
      */
-    private RpcClient rpcClient;
+    private SharpClient sharpClient;
 
     /**
      * 服务引导
@@ -55,7 +55,7 @@ public class SharpAutoConfigureCenter {
         logger.info("[SharpRpc]: ZkClient配置完成");
 
         // 创建客户端
-        rpcClient = new RpcClient(zkClient);
+        sharpClient = new SharpClient(zkClient);
         logger.info("[SharpRpc]: RpcClient配置完成");
 
         // 启动Rpc服务器功能
@@ -76,7 +76,7 @@ public class SharpAutoConfigureCenter {
 
             // 启动服务器
             if(serverBootStrap==null){
-                serverBootStrap = new RpcServerBootStrap(config.getServer_port());
+                serverBootStrap = new RpcServerBootStrap(config.getServer_port(), serverRpcRequestManager);
             }
             serverBootStrap.start();
             logger.info("[SharpRpc]: RpcServerBootStrap引导配置完成");
@@ -109,5 +109,9 @@ public class SharpAutoConfigureCenter {
 
     public void setServerBootStrap(RpcServerBootStrap serverBootStrap) {
         this.serverBootStrap = serverBootStrap;
+    }
+
+    public SharpClient getSharpClient() {
+        return sharpClient;
     }
 }

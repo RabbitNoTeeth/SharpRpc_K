@@ -14,10 +14,16 @@ import java.util.concurrent.Future;
  * @date: 2017/12/2 16:13
  * @desc: Rpc请求消息管理器
  */
-public class RpcRequestManager {
+public class ServerRpcRequestManager {
 
     //Rpc请求消息异步处理线程池
     private static final ExecutorService exec = Executors.newFixedThreadPool(2);
+
+    private final ServiceBeanFactory serviceBeanFactory;
+
+    public ServerRpcRequestManager(ServiceBeanFactory serviceBeanFactory) {
+        this.serviceBeanFactory = serviceBeanFactory;
+    }
 
     /**
      * 同步处理Rpc请求消息
@@ -25,8 +31,8 @@ public class RpcRequestManager {
      * @return
      * @throws Exception
      */
-    public static Object submit(RpcRequest rpcRequest) throws Exception {
-        return new RpcRequestHandler(rpcRequest).computeRpcRequest();
+    public Object submit(RpcRequest rpcRequest) throws Exception {
+        return new RpcRequestHandler(rpcRequest, serviceBeanFactory).computeRpcRequest();
     }
 
     /**
@@ -35,8 +41,8 @@ public class RpcRequestManager {
      * @return
      * @throws Exception
      */
-    public static Object submitAsync(RpcRequest rpcRequest) throws Exception {
-        Future<Object> future = exec.submit(new RpcAsyncComputeCallable(new RpcRequestHandler(rpcRequest)));
+    public Object submitAsync(RpcRequest rpcRequest) throws Exception {
+        Future<Object> future = exec.submit(new ServerRpcAsyncComputeCallable(new RpcRequestHandler(rpcRequest, serviceBeanFactory)));
         return future.get();
     }
 
@@ -47,8 +53,11 @@ public class RpcRequestManager {
 
         private final RpcRequest rpcRequest;
 
-        public RpcRequestHandler(RpcRequest rpcRequest){
+        private final ServiceBeanFactory serviceBeanFactory;
+
+        public RpcRequestHandler(RpcRequest rpcRequest, ServiceBeanFactory serviceBeanFactory){
             this.rpcRequest = rpcRequest;
+            this.serviceBeanFactory = serviceBeanFactory;
         }
 
         /**
@@ -60,9 +69,10 @@ public class RpcRequestManager {
             try{
                 Class<?> serviceClass= Class.forName(rpcRequest.getServiceName());
                 Method method = serviceClass.getMethod(rpcRequest.getMethodName(), rpcRequest.getParamTypes());
-                Object invoke = method.invoke(serviceClass.newInstance(), rpcRequest.getParamValues());
+                Object invoke = method.invoke(serviceBeanFactory.getServiceBean(serviceClass), rpcRequest.getParamValues());
                 return new RpcResponse(rpcRequest.getId(),invoke,true);
             }catch (Exception e){
+                e.printStackTrace();
                 return new RpcResponse(rpcRequest.getId(),false,e);
             }
         }

@@ -1,6 +1,6 @@
 package cn.booklish.sharp.server.handler;
 
-import cn.booklish.sharp.server.manage.RpcRequestManager;
+import cn.booklish.sharp.server.manage.ServerRpcRequestManager;
 import cn.booklish.sharp.model.RpcRequest;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -15,24 +15,23 @@ import org.apache.log4j.Logger;
  * @desc: Rpc请求处理器
  */
 @ChannelHandler.Sharable
-public class ServerInboundHandler extends ChannelInboundHandlerAdapter {
+public class DefaultServerChannelInboundHandler extends ChannelInboundHandlerAdapter {
 
-    private static final Logger logger = Logger.getLogger(ServerInboundHandler.class);
+    private static final Logger logger = Logger.getLogger(DefaultServerChannelInboundHandler.class);
 
     private final boolean asyncComputeRpcRequest;
 
-    /**
-     * 使用默认的Rpc请求消息处理方式:在当前线程中计算请求结果
-     */
-    public ServerInboundHandler(){
-        asyncComputeRpcRequest = false;
+    private final ServerRpcRequestManager serverRpcRequestManager;
+
+    public DefaultServerChannelInboundHandler(ServerRpcRequestManager serverRpcRequestManager, boolean asyncComputeRpcRequest){
+        this.serverRpcRequestManager = serverRpcRequestManager;
+        this.asyncComputeRpcRequest = asyncComputeRpcRequest;
     }
 
-    /**
-     * 自定义Rpc请求消息的处理方式:是否异步处理
-     */
-    public ServerInboundHandler(boolean asyncComputeRpcRequest){
-        this.asyncComputeRpcRequest = asyncComputeRpcRequest;
+
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        System.out.println("新的channel连接++++++++++");
     }
 
     /**
@@ -73,14 +72,14 @@ public class ServerInboundHandler extends ChannelInboundHandlerAdapter {
             Object computeResult;
             if(rpcRequest.isAsync()){                   // 1.首先根据客户端请求判断是否需要异步处理
                 //异步计算请求结果
-                computeResult = RpcRequestManager.submitAsync(rpcRequest);
+                computeResult = serverRpcRequestManager.submitAsync(rpcRequest);
             }else{
                 if(asyncComputeRpcRequest){             // 2.客户端不需要异步处理,那么判断服务器自身设置是否使用异步处理
                     //异步计算请求结果
-                    computeResult = RpcRequestManager.submitAsync(rpcRequest);
+                    computeResult = serverRpcRequestManager.submitAsync(rpcRequest);
                 }else {
                     //同步计算请求结果
-                    computeResult = RpcRequestManager.submit(rpcRequest);
+                    computeResult = serverRpcRequestManager.submit(rpcRequest);
                 }
             }
             ctx.write(computeResult);

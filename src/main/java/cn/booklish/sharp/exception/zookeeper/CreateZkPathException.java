@@ -1,4 +1,4 @@
-package cn.booklish.sharp.exception.zk;
+package cn.booklish.sharp.exception.zookeeper;
 
 /**
  * @author: 刘新冬(www.booklish.cn)

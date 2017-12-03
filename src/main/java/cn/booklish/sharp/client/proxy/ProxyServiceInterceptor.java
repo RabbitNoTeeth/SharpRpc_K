@@ -17,13 +17,13 @@ import java.net.InetSocketAddress;
  * @date: 2017/12/2 15:41
  * @desc: Rpc服务代理接口回调
  */
-public class RpcServiceProxy implements MethodInterceptor {
+public class ProxyServiceInterceptor implements MethodInterceptor {
 
     private final InetSocketAddress location;
 
     private final String serviceName;
 
-    public RpcServiceProxy(InetSocketAddress location, String serviceName) {
+    public ProxyServiceInterceptor(InetSocketAddress location, String serviceName) {
         this.location = location;
         this.serviceName = serviceName;
     }

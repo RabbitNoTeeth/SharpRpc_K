@@ -7,11 +7,11 @@ import java.util.concurrent.Callable;
  * @date: 2017/12/2 16:12
  * @desc: Rpc异步计算类
  */
-public class RpcAsyncComputeCallable implements Callable<Object>{
+public class ServerRpcAsyncComputeCallable implements Callable<Object>{
 
-    private final RpcRequestManager.RpcRequestHandler handler;
+    private final ServerRpcRequestManager.RpcRequestHandler handler;
 
-    public RpcAsyncComputeCallable(RpcRequestManager.RpcRequestHandler handler) {
+    public ServerRpcAsyncComputeCallable(ServerRpcRequestManager.RpcRequestHandler handler) {
         this.handler = handler;
     }
 

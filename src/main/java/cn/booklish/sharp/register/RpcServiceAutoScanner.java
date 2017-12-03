@@ -129,4 +129,11 @@ public class RpcServiceAutoScanner {
 
     }
 
+    public String getAutoScanPath() {
+        return autoScanPath;
+    }
+
+    public String getRegisterAddress() {
+        return registerAddress;
+    }
 }

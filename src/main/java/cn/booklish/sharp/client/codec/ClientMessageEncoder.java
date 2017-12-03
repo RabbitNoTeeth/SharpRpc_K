@@ -1,7 +1,7 @@
 package cn.booklish.sharp.client.codec;
 
 import cn.booklish.sharp.model.RpcRequest;
-import cn.booklish.sharp.util.KryoUtil;
+import cn.booklish.sharp.util.KryoSerializerUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
@@ -12,9 +12,9 @@ import org.apache.log4j.Logger;
  * @date: 2017/12/2 14:49
  * @desc: 客户端编码器
  */
-public class KyroClientEncoder extends MessageToByteEncoder<RpcRequest> {
+public class ClientMessageEncoder extends MessageToByteEncoder<RpcRequest> {
 
-    private static final Logger logger = Logger.getLogger(KyroClientEncoder.class);
+    private static final Logger logger = Logger.getLogger(ClientMessageEncoder.class);
 
     /**
      * 编码出站数据
@@ -23,7 +23,7 @@ public class KyroClientEncoder extends MessageToByteEncoder<RpcRequest> {
      * @param byteBuf
      */
     protected void encode(ChannelHandlerContext channelHandlerContext, RpcRequest rpcRequest, ByteBuf byteBuf) {
-        byteBuf.writeBytes(KryoUtil.writeObjectToByteArray(rpcRequest));
+        byteBuf.writeBytes(KryoSerializerUtil.writeObjectToByteArray(rpcRequest));
     }
 
     /**

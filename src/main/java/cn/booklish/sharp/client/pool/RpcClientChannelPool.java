@@ -1,6 +1,6 @@
 package cn.booklish.sharp.client.pool;
 
-import cn.booklish.sharp.client.pipeline.RpcPipelineInitializer;
+import cn.booklish.sharp.client.pipeline.DefaultClientChannelInitializer;
 import cn.booklish.sharp.client.util.ChannelAttributeUtils;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -82,8 +82,8 @@ public class RpcClientChannelPool {
     private Channel addNewChannelToPool(InetSocketAddress address) {
 
         Bootstrap bootstrap = new Bootstrap();
-        //设置信号量,最多允许重试10次
-        Semaphore semaphore = new Semaphore(10);
+        //设置信号量,最多允许重试3次
+        Semaphore semaphore = new Semaphore(3);
         do {
             try{
                 if(semaphore.tryAcquire()){
@@ -91,7 +91,7 @@ public class RpcClientChannelPool {
                             .channel(NioSocketChannel.class)
                             .option(ChannelOption.SO_KEEPALIVE, Boolean.TRUE)
                             .option(ChannelOption.TCP_NODELAY, Boolean.TRUE)
-                            .handler(new RpcPipelineInitializer());
+                            .handler(new DefaultClientChannelInitializer());
                     ChannelFuture channelFuture = bootstrap.connect(address).sync();
                     Channel channel = channelFuture.channel();
                     //为刚刚创建的channel，初始化channel属性
@@ -104,6 +104,10 @@ public class RpcClientChannelPool {
                 }
             }catch (InterruptedException e){
                 Thread.currentThread().interrupt();
+                //重试
+                logger.info("[SharpRpc]: 客户端channel连接失败,重新尝试连接...");
+            } catch (Exception e) {
+                e.printStackTrace();
                 //重试
                 logger.info("[SharpRpc]: 客户端channel连接失败,重新尝试连接...");
             }

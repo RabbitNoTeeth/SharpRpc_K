@@ -2,7 +2,7 @@ package cn.booklish.sharp.server.codec;
 
 
 import cn.booklish.sharp.model.RpcRequest;
-import cn.booklish.sharp.util.KryoUtil;
+import cn.booklish.sharp.util.KryoSerializerUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
@@ -15,9 +15,9 @@ import java.util.List;
  * @date: 2017/12/2 15:55
  * @desc: 服务器解码器
  */
-public class KyroServerDecoder extends ByteToMessageDecoder{
+public class ServerMessageDecoder extends ByteToMessageDecoder{
 
-    private static final Logger logger = Logger.getLogger(KyroServerDecoder.class);
+    private static final Logger logger = Logger.getLogger(ServerMessageDecoder.class);
 
     /**
      * 解码入站数据
@@ -32,7 +32,7 @@ public class KyroServerDecoder extends ByteToMessageDecoder{
         byte[] bytes = new byte[length];
         //将字节复制到该数组
         byteBuf.readBytes(bytes);
-        RpcRequest rpcRequest = KryoUtil.readObjectFromByteArray(bytes, RpcRequest.class);
+        RpcRequest rpcRequest = KryoSerializerUtil.readObjectFromByteArray(bytes, RpcRequest.class);
         list.add(rpcRequest);
     }
 
