@@ -33,7 +33,7 @@ public class ClientMessageDecoder extends ByteToMessageDecoder {
         // 将字节复制到该数组
         byteBuf.readBytes(bytes);
         // 将字节反序列化为Rpc响应实体
-        Object rpcRequest = KryoSerializerUtil.readObjectFromByteArray(bytes, RpcResponse.class);
+        RpcResponse rpcRequest = KryoSerializerUtil.readObjectFromByteArray(bytes, RpcResponse.class);
 
         list.add(rpcRequest);
 

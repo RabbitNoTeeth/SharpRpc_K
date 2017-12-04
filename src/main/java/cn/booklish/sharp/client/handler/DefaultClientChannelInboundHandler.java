@@ -3,6 +3,8 @@ package cn.booklish.sharp.client.handler;
 import cn.booklish.sharp.client.util.ChannelAttributeUtils;
 import cn.booklish.sharp.client.util.ResponseCallback;
 import cn.booklish.sharp.model.RpcResponse;
+import cn.booklish.sharp.util.RpcMessageUtil;
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -15,18 +17,19 @@ import org.apache.log4j.Logger;
  * @desc: 客户端Rpc响应处理器
  */
 @ChannelHandler.Sharable
-public class DefaultClientChannelInboundHandler extends SimpleChannelInboundHandler<RpcResponse> {
+public class DefaultClientChannelInboundHandler extends SimpleChannelInboundHandler<ByteBuf> {
 
     private static final Logger logger = Logger.getLogger(DefaultClientChannelInboundHandler.class);
 
     /**
      * 处理接受到的Rpc请求响应
      * @param ctx
-     * @param response
+     * @param byteBuf
      * @throws Exception
      */
-    protected void channelRead0(ChannelHandlerContext ctx, RpcResponse response) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, ByteBuf byteBuf) throws Exception {
 
+        RpcResponse response = RpcMessageUtil.bytesToObject(byteBuf, RpcResponse.class);
         Channel channel = ctx.channel();
         ResponseCallback callback = ChannelAttributeUtils.getResponseCallback(channel, response.getId());
         if(response.isSuccess()){

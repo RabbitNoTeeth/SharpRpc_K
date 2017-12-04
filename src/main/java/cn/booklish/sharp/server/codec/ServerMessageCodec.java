@@ -1,6 +1,8 @@
 package cn.booklish.sharp.server.codec;
 
 import io.netty.channel.CombinedChannelDuplexHandler;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import io.netty.handler.codec.LengthFieldPrepender;
 import org.apache.log4j.Logger;
 
 
@@ -9,12 +11,11 @@ import org.apache.log4j.Logger;
  * @date: 2017/12/2 15:55
  * @desc: 服务器编解码器
  */
-public class ServerMessageCodec extends CombinedChannelDuplexHandler<ServerMessageDecoder,ServerMessageEncoder> {
-
-    private static final Logger logger = Logger.getLogger(ServerMessageCodec.class);
+public class ServerMessageCodec extends CombinedChannelDuplexHandler<LengthFieldBasedFrameDecoder,LengthFieldPrepender> {
 
     public ServerMessageCodec(){
-        super(new ServerMessageDecoder(),new ServerMessageEncoder());
+        super(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE,0,4,0,4)
+                ,new LengthFieldPrepender(4, false));
     }
 
 }

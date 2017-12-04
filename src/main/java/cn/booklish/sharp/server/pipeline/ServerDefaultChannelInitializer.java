@@ -13,11 +13,11 @@ import io.netty.handler.timeout.ReadTimeoutHandler;
  * @date: 2017/12/2 16:13
  * @desc: 服务器channel pipeline链
  */
-public class ServerPipelineInitializer extends ChannelInitializer<SocketChannel>{
+public class ServerDefaultChannelInitializer extends ChannelInitializer<SocketChannel>{
 
     private final ServerRpcRequestManager serverRpcRequestManager;
 
-    public ServerPipelineInitializer(ServerRpcRequestManager serverRpcRequestManager) {
+    public ServerDefaultChannelInitializer(ServerRpcRequestManager serverRpcRequestManager) {
         this.serverRpcRequestManager = serverRpcRequestManager;
     }
 

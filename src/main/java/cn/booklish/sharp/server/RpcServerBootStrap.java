@@ -1,7 +1,7 @@
 package cn.booklish.sharp.server;
 
 import cn.booklish.sharp.server.manage.ServerRpcRequestManager;
-import cn.booklish.sharp.server.pipeline.ServerPipelineInitializer;
+import cn.booklish.sharp.server.pipeline.ServerDefaultChannelInitializer;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -44,7 +44,7 @@ public class RpcServerBootStrap {
         ServerBootstrap b = new ServerBootstrap();
         b.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)
-                .childHandler(new ServerPipelineInitializer(serverRpcRequestManager))
+                .childHandler(new ServerDefaultChannelInitializer(serverRpcRequestManager))
                 .option(ChannelOption.SO_BACKLOG, 128)
                 .childOption(ChannelOption.SO_KEEPALIVE, true);
 

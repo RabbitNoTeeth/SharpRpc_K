@@ -8,13 +8,17 @@ package cn.booklish.sharp.client.util;
  */
 public class ResponseCallback {
 
-    public volatile Object result;
+    private volatile Object result;
 
     public void receiveMessage(Object result) throws Exception {
         synchronized (this) {
             this.result = result;
             this.notify();
         }
+    }
+
+    public Object getResult() {
+        return result;
     }
 
 }
