@@ -4,6 +4,7 @@ import cn.booklish.sharp.client.util.ChannelAttributeUtils;
 import cn.booklish.sharp.client.util.ResponseCallback;
 import cn.booklish.sharp.model.RpcResponse;
 import cn.booklish.sharp.util.RpcMessageUtil;
+import cn.booklish.sharp.zookeeper.GsonUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
@@ -29,7 +30,8 @@ public class DefaultClientChannelInboundHandler extends SimpleChannelInboundHand
      */
     protected void channelRead0(ChannelHandlerContext ctx, ByteBuf byteBuf) throws Exception {
 
-        RpcResponse response = RpcMessageUtil.bytesToObject(byteBuf, RpcResponse.class);
+        RpcResponse response =
+                GsonUtil.jsonToObject(RpcMessageUtil.bytesToObject(byteBuf, String.class),RpcResponse.class);
         Channel channel = ctx.channel();
         ResponseCallback callback = ChannelAttributeUtils.getResponseCallback(channel, response.getId());
         if(response.isSuccess()){

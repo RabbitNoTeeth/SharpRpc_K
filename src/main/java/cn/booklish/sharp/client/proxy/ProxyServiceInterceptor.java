@@ -6,6 +6,7 @@ import cn.booklish.sharp.client.util.ResponseCallback;
 import cn.booklish.sharp.client.util.RpcRequestIdGenerator;
 import cn.booklish.sharp.model.RpcRequest;
 import cn.booklish.sharp.util.RpcMessageUtil;
+import cn.booklish.sharp.zookeeper.GsonUtil;
 import io.netty.channel.Channel;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
@@ -49,10 +50,10 @@ public class ProxyServiceInterceptor implements MethodInterceptor {
             RpcRequest rpcRequest = new RpcRequest(id, serviceName,method.getName(),false);
             rpcRequest.setParamTypes(method.getParameterTypes());
             rpcRequest.setParamValues(args);
-            channel.writeAndFlush(RpcMessageUtil.objectToBytes(rpcRequest)).sync();
+            channel.writeAndFlush(RpcMessageUtil.objectToBytes(GsonUtil.toJson(rpcRequest))).sync();
             callback.wait();
         }
-        return callback.getResult();
+        return GsonUtil.toJson(callback.getResult());
 
     }
 }

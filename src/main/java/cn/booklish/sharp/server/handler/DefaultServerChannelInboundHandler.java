@@ -3,6 +3,7 @@ package cn.booklish.sharp.server.handler;
 import cn.booklish.sharp.server.manage.ServerRpcRequestManager;
 import cn.booklish.sharp.model.RpcRequest;
 import cn.booklish.sharp.util.RpcMessageUtil;
+import cn.booklish.sharp.zookeeper.GsonUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -71,7 +72,8 @@ public class DefaultServerChannelInboundHandler extends ChannelInboundHandlerAda
         logger.info("[SharpRpc]: 接收到来自客户端连接"+ctx.channel().id()+"的Rpc请求,开始处理");
 
         try{
-            RpcRequest rpcRequest = RpcMessageUtil.bytesToObject((ByteBuf) msg,RpcRequest.class);
+            RpcRequest rpcRequest =
+                    GsonUtil.jsonToObject(RpcMessageUtil.bytesToObject((ByteBuf) msg,String.class),RpcRequest.class);
             Object computeResult;
             if(rpcRequest.isAsync()){                   // 1.首先根据客户端请求判断是否需要异步处理
                 //异步计算请求结果
@@ -85,7 +87,7 @@ public class DefaultServerChannelInboundHandler extends ChannelInboundHandlerAda
                     computeResult = serverRpcRequestManager.submit(rpcRequest);
                 }
             }
-            ctx.write(RpcMessageUtil.objectToBytes(computeResult));
+            ctx.write(RpcMessageUtil.objectToBytes(GsonUtil.toJson(computeResult)));
         }finally {
             ReferenceCountUtil.release(msg);
         }
