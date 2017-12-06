@@ -1,4 +1,4 @@
-package cn.booklish.sharp.zookeeper;
+package cn.booklish.sharp.util;
 
 import com.google.gson.Gson;
 

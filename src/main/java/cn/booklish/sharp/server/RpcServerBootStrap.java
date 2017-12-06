@@ -28,10 +28,17 @@ public class RpcServerBootStrap {
 
     private final int port;
 
+    private final int clientChannelTimeout;
+
+    private final boolean asyncComputeRpcRequest;
+
     private final ServerRpcRequestManager serverRpcRequestManager;
 
-    public RpcServerBootStrap(int port, ServerRpcRequestManager serverRpcRequestManager) {
+    public RpcServerBootStrap(int port, int clientChannelTimeout, boolean asyncComputeRpcRequest,
+                              ServerRpcRequestManager serverRpcRequestManager) {
         this.port = port;
+        this.clientChannelTimeout = clientChannelTimeout;
+        this.asyncComputeRpcRequest = asyncComputeRpcRequest;
         this.serverRpcRequestManager = serverRpcRequestManager;
     }
 
@@ -44,7 +51,7 @@ public class RpcServerBootStrap {
         ServerBootstrap b = new ServerBootstrap();
         b.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)
-                .childHandler(new ServerDefaultChannelInitializer(serverRpcRequestManager))
+                .childHandler(new ServerDefaultChannelInitializer(serverRpcRequestManager, clientChannelTimeout, asyncComputeRpcRequest))
                 .option(ChannelOption.SO_BACKLOG, 128)
                 .childOption(ChannelOption.SO_KEEPALIVE, true);
 

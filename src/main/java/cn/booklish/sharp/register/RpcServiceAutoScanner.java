@@ -2,6 +2,7 @@ package cn.booklish.sharp.register;
 
 
 import cn.booklish.sharp.annotation.RpcService;
+import cn.booklish.sharp.server.manage.ServerRpcRequestManager;
 import org.apache.log4j.Logger;
 
 import java.io.File;
@@ -26,25 +27,27 @@ public class RpcServiceAutoScanner {
 
     private final String registerAddress;
 
-    public RpcServiceAutoScanner(String autoScanPath, String registerAddress) {
+    private final RegisterManager manager;
+
+    public RpcServiceAutoScanner(String autoScanPath, String registerAddress,RegisterManager manager) {
         this.autoScanPath = autoScanPath;
         this.registerAddress = registerAddress;
-        scan(autoScanPath,registerAddress);
+        this.manager = manager;
+        scan();
     }
 
     /**
      * 扫描需要注册的Rpc服务类,并且将注册信息提交到注册管理器
-     * @param basePackage
      */
-    public void scan(String basePackage,String registerAddress){
-        List<Class> serviceClasses = loadAllClassesByPackage(basePackage);
+    public void scan(){
+        List<Class> serviceClasses = loadAllClassesByPackage(autoScanPath);
         serviceClasses.forEach(clazz -> {
             Annotation annotation = clazz.getAnnotation(RpcService.class);
             if(annotation!=null){
                 String pathPrefix = ((RpcService) annotation).pathPrefix();
                 RegisterBean entry = new RegisterBean(pathPrefix + "/" + clazz.getSimpleName()
                         , clazz.getTypeName(),registerAddress);
-                RegisterManager.submit(entry);
+                manager.submit(entry);
             }
         });
     }

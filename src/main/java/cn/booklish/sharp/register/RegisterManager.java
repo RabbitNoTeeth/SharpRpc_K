@@ -3,6 +3,7 @@ package cn.booklish.sharp.register;
 import cn.booklish.sharp.zookeeper.ZkClient;
 
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author: 刘新冬(www.booklish.cn)
@@ -11,17 +12,22 @@ import java.util.concurrent.*;
  */
 public class RegisterManager {
 
+    private static AtomicReference<RegisterManager> instance;
+
     private final ZkClient zkClient;
 
     private static final LinkedBlockingQueue<RegisterBean> queue = new LinkedBlockingQueue<>();
 
-    /**
-     * 线程池
-     */
-    private static final ExecutorService exec = Executors.newFixedThreadPool(2);
+    private final ExecutorService exec;
 
-    public RegisterManager(ZkClient zkClient) {
+    private RegisterManager(ZkClient zkClient, int threadPoolSize) {
         this.zkClient = zkClient;
+        exec = Executors.newFixedThreadPool(threadPoolSize);
+    }
+
+    public static RegisterManager getInstance(ZkClient zkClient, int threadPoolSize){
+        instance.compareAndSet(null,new RegisterManager(zkClient,threadPoolSize));
+        return instance.get();
     }
 
     /**
@@ -35,7 +41,7 @@ public class RegisterManager {
      * 提交服务注册任务到管理器
      * @param entry
      */
-    public static void submit(RegisterBean entry){
+    public void submit(RegisterBean entry){
 
         exec.execute(new RegisterTaskProducer(queue,entry));
 

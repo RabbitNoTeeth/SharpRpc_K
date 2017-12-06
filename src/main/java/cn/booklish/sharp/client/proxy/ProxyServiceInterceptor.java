@@ -1,12 +1,12 @@
 package cn.booklish.sharp.client.proxy;
 
-import cn.booklish.sharp.client.pool.RpcClientChannelManager;
+import cn.booklish.sharp.client.pool.ClientChannelManager;
 import cn.booklish.sharp.client.util.ChannelAttributeUtils;
 import cn.booklish.sharp.client.util.ResponseCallback;
 import cn.booklish.sharp.client.util.RpcRequestIdGenerator;
 import cn.booklish.sharp.model.RpcRequest;
 import cn.booklish.sharp.util.RpcMessageUtil;
-import cn.booklish.sharp.zookeeper.GsonUtil;
+import cn.booklish.sharp.util.GsonUtil;
 import io.netty.channel.Channel;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
@@ -25,9 +25,12 @@ public class ProxyServiceInterceptor implements MethodInterceptor {
 
     private final String serviceName;
 
-    public ProxyServiceInterceptor(InetSocketAddress location, String serviceName) {
+    private final ClientChannelManager manager;
+
+    public ProxyServiceInterceptor(InetSocketAddress location, String serviceName, ClientChannelManager manager) {
         this.location = location;
         this.serviceName = serviceName;
+        this.manager = manager;
     }
 
     /**
@@ -42,7 +45,7 @@ public class ProxyServiceInterceptor implements MethodInterceptor {
     @Override
     public Object intercept(Object o, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
 
-        Channel channel = RpcClientChannelManager.getChannel(location);
+        Channel channel = manager.getChannel(location);
         Integer id = RpcRequestIdGenerator.getId();
         ResponseCallback callback = new ResponseCallback();
         ChannelAttributeUtils.putResponseCallback(channel,id,callback);

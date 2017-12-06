@@ -28,33 +28,13 @@ public class ZkClient {
 
     private final String zkAddress;
 
-    private int connectionPoolSize = 15;
+    private final int connectionPoolSize;
 
-    private int zkRetryTimes = 10;
+    private final int zkRetryTimes;
 
-    private int zkSleepBetweenRetry = 5000;
+    private final int zkSleepBetweenRetry;
 
     private final ZkConnectionPool pool;
-
-    public ZkClient(String zkAddress){
-        this.zkAddress = zkAddress;
-        this.pool = new ZkConnectionPool(zkAddress,connectionPoolSize,zkRetryTimes,zkSleepBetweenRetry);
-    }
-
-    public ZkClient(String zkAddress,int connectionPoolSize){
-        this.zkAddress = zkAddress;
-        this.connectionPoolSize = connectionPoolSize;
-        this.pool = new ZkConnectionPool(zkAddress,connectionPoolSize,zkRetryTimes,zkSleepBetweenRetry);
-    }
-
-    public ZkClient(String zkAddress, int zkRetryTimes, int zkSleepBetweenRetry){
-
-        this.zkAddress = zkAddress;
-        this.zkRetryTimes = zkRetryTimes;
-        this.zkSleepBetweenRetry = zkSleepBetweenRetry;
-        this.pool = new ZkConnectionPool(zkAddress,connectionPoolSize,zkRetryTimes,zkSleepBetweenRetry);
-
-    }
 
     public ZkClient(String zkAddress, int connectionPoolSize, int zkRetryTimes, int zkSleepBetweenRetry){
 
@@ -65,8 +45,6 @@ public class ZkClient {
         this.pool = new ZkConnectionPool(zkAddress,connectionPoolSize,zkRetryTimes,zkSleepBetweenRetry);
 
     }
-
-
 
 
     /**
@@ -213,6 +191,9 @@ public class ZkClient {
 
     }
 
+    /**
+     * zookeeper连接池
+     */
     private class ZkConnectionPool{
 
         private final String zkAddress;
@@ -257,6 +238,13 @@ public class ZkClient {
         }
 
         private CuratorFramework createConnection(String zkAddress, int zkRetryTimes, int zkSleepBetweenRetry) {
+
+            CuratorFramework connection = CuratorFrameworkFactory.newClient(zkAddress,
+                    new RetryNTimes(zkRetryTimes, zkSleepBetweenRetry));
+            connection.start();
+            return connection;
+
+            /*
             //设置信号量,最多允许重试5次
             Semaphore semaphore = new Semaphore(3);
             do {
@@ -274,6 +262,7 @@ public class ZkClient {
                     logger.info("[SharpRpc]: 获取zookeeper连接失败,重新尝试连接...");
                 }
             }while (true);
+            */
         }
 
     }

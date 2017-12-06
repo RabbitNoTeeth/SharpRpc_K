@@ -16,10 +16,7 @@ public class SharpRpcConfig {
 
     private static final Logger logger = Logger.getLogger(SharpRpcConfig.class);
 
-    /**
-     * 配置文件名称(配置文件必须在classpath路径下)
-     */
-    private final String propertiesFileName;
+    private static final SharpRpcConfig instance = new SharpRpcConfig();
 
     /**
      * zookeeper地址
@@ -35,6 +32,10 @@ public class SharpRpcConfig {
      * zookeeper重连间隔
      */
     private int base_zk_SleepBetweenRetry = 5000;
+    /**
+     * zookeeper连接池大小（默认为15）
+     */
+    private int base_zk_poolSize = 15;
 
     /**
      * 是否启用rpc服务器
@@ -45,6 +46,11 @@ public class SharpRpcConfig {
      * rpc服务器默认监听端口
      */
     private int server_port = 11220;
+
+    /**
+     * 服务器eventLoopGroup初始大小
+     */
+    private int server_eventLoopGroup_size = 0;
 
     /**
      * 是否开启服务自动扫描
@@ -61,9 +67,45 @@ public class SharpRpcConfig {
      */
     private String server_service_register_address;
 
-    public SharpRpcConfig(String propertiesFileName){
-        this.propertiesFileName = propertiesFileName;
+    /**
+     * 服务器是否异步处理Rpc请求
+     */
+    private Boolean server_compute_async = true;
+
+    /**
+     * 服务器异步处理Rpc请求的线程池大小
+     */
+    private int server_compute_poolSize = 2;
+
+    /**
+     * 客户端连接池大小
+     */
+    private int client_channel_poolSize = 15;
+
+    /**
+     * 客户端eventLoopGroup初始大小（0为不设置，采用netty默认值）
+     */
+    private int client_eventLoopGroup_size = 0;
+
+    /**
+     * 客户端channel连接过期时间大小（单位为s，默认30）
+     */
+    private int client_channel_timeout = 30;
+
+    /**
+     * 服务器服务注册管理器线程池大小
+     */
+    private int server_register_manager_poolSize = 2;
+
+    private SharpRpcConfig(){}
+
+    public static SharpRpcConfig getInstance(){
+        return instance;
+    }
+
+    public SharpRpcConfig load(String propertiesFileName){
         loadProperties(propertiesFileName);
+        return instance;
     }
 
     /**
@@ -74,37 +116,66 @@ public class SharpRpcConfig {
             InputStream resource = this.getClass().getClassLoader().getResourceAsStream(propertiesFileName);
             Properties pop = new Properties();
             pop.load(resource);
-            checkNessesaryItems(pop);
-            checkServerEnable(pop);
+            loadZookeeperConfig(pop);
+            loadServerConfig(pop);
+            loadClientConfig(pop);
         } catch (Exception e) {
             throw new SharpConfigException("Sharp配置文件加载失败",e);
         }
 
     }
 
+
     /**
-     * 检查是否开启服务器配置
+     * 加载zookeeper配置项
      * @param pop
      */
-    private void checkServerEnable(Properties pop) {
+    private void loadZookeeperConfig(Properties pop) {
+
+        Object zkAddress = pop.get("base.zookeeper.address");
+        if(zkAddress!=null)
+            this.base_zk_address = (String) zkAddress;
+        else
+            throw new SharpConfigException("Sharp配置文件错误: 配置项[base.zookeeper.address]不能为空");
+
+        Object zkRetryTimes = pop.get("base.zookeeper.retryTimes");
+        if(zkRetryTimes!=null){
+            this.base_zk_retryTimes = Integer.parseInt((String) zkRetryTimes);
+        }
+
+        Object zkSleepBetweenRetry = pop.get("base.zookeeper.sleepBetweenRetry");
+        if(zkSleepBetweenRetry!=null){
+            this.base_zk_SleepBetweenRetry = Integer.parseInt((String) zkSleepBetweenRetry);
+        }
+
+        Object poolSize = pop.get("base.zookeeper.poolSize");
+        if(poolSize!=null){
+            this.base_zk_poolSize = Integer.parseInt((String) poolSize);
+        }
+
+    }
+
+    /**
+     * 加载服务器配置
+     * @param pop
+     */
+    private void loadServerConfig(Properties pop) {
 
         Object serverEnable = pop.get("server.enable");
         if(serverEnable !=null){
             this.server_enable = Boolean.valueOf((String) serverEnable);
-            //开启rpc服务器
+            // 开启rpc服务器
             if(this.server_enable){
-                //开启服务器后,服务的注册地址变为必填
+
+                // 开启服务器后,服务的注册地址变为必填
                 Object registerAddress = pop.get("server.service.register.address");
                 if(registerAddress!=null){
                     this.server_service_register_address = (String) registerAddress;
                 }else{
                     throw new SharpConfigException("Sharp配置文件错误: 配置项[server.enable]为true时,配置项[server.service.register.address]不能为空");
                 }
-                //设置自定义端口,否则使用默认端口
-                if(pop.get("server.port")!=null){
-                    this.server_port = Integer.parseInt((String) pop.get("server.port"));
-                }
-                //判断是否开启自动扫描服务
+
+                // 判断是否开启自动扫描服务
                 Object autoScanEnable = pop.get("server.autoScan.enable");
                 if(autoScanEnable !=null){
                     this.server_autoScan_enable = Boolean.valueOf((String) autoScanEnable);
@@ -116,32 +187,60 @@ public class SharpRpcConfig {
                             throw new SharpConfigException("Sharp配置文件错误: 配置项[server.autoScan.enable]为true时,配置项[server.service.autoScan.base]不能为空");
                     }
                 }
+
+                // 设置自定义端口,否则使用默认端口
+                if(pop.get("server.port")!=null){
+                    this.server_port = Integer.parseInt((String) pop.get("server.port"));
+                }
+
+                // 设置eventLoopGroup初始大小
+                if(pop.get("server.eventLoopGroup.size")!=null){
+                    this.server_eventLoopGroup_size = Integer.parseInt((String) pop.get("server.eventLoopGroup.size"));
+                }
+
+                // 服务器收到Rpc请求后是否进行异步计算
+                if(pop.get("server.compute.async")!=null){
+                    this.server_compute_async = Boolean.valueOf((String) pop.get("server.compute.async"));
+                }
+
+                // 设置服务器异步处理Rpc请求的线程池大小
+                if(pop.get("server.compute.poolSize")!=null){
+                    this.server_compute_poolSize = Integer.parseInt((String) pop.get("server.compute.poolSize"));
+                }
+
+                // 设置服务注册管理器线程池大小
+                if(pop.get("server.register.manager.poolSize")!=null){
+                    this.server_register_manager_poolSize = Integer.parseInt((String) pop.get("server.register.manager.poolSize"));
+                }
+
             }
         }
 
     }
 
     /**
-     * 检查必填的zookeeper配置项
+     * 加载客户端配置
      * @param pop
      */
-    private void checkNessesaryItems(Properties pop) {
+    private void loadClientConfig(Properties pop) {
 
-        Object zkAddress = pop.get("base.zookeeper.address");
-        if(zkAddress!=null)
-            this.base_zk_address = (String) zkAddress;
-        else
-            throw new SharpConfigException("Sharp配置文件错误: 配置项[base.zookeeper.address]不能为空");
+        // 客户端连接池大小
+        if(pop.get("client.channel.poolSize")!=null){
+            this.client_channel_poolSize = Integer.parseInt((String) pop.get("client.channel.poolSize"));
+        }
 
-        Object zkRetryTimes = pop.get("base.zookeeper.retryTimes");
-        if(zkRetryTimes!=null)
-            this.base_zk_retryTimes = Integer.parseInt((String) zkRetryTimes);
-        Object zkSleepBetweenRetry = pop.get("base.zookeeper.sleepBetweenRetry");
-        if(zkSleepBetweenRetry!=null)
-            this.base_zk_SleepBetweenRetry = Integer.parseInt((String) zkSleepBetweenRetry);
+        // 客户端eventLoopGroup初始大小（0为不设置，采用netty默认值）
+        if(pop.get("client.eventLoopGroup.size")!=null){
+            this.client_eventLoopGroup_size = Integer.parseInt((String) pop.get("client.eventLoopGroup.size"));
+        }
 
+        // 客户端channel连接过期时间大小（单位为s，默认30）
+        if(pop.get("client.channel.timeout")!=null){
+            this.client_channel_timeout = Integer.parseInt((String) pop.get("client.channel.timeout"));
+        }
 
     }
+
 
     public String getBase_zk_address() {
         return base_zk_address;
@@ -155,59 +254,59 @@ public class SharpRpcConfig {
         return base_zk_retryTimes;
     }
 
-    public void setBase_zk_retryTimes(int base_zk_retryTimes) {
-        this.base_zk_retryTimes = base_zk_retryTimes;
-    }
-
     public int getBase_zk_SleepBetweenRetry() {
         return base_zk_SleepBetweenRetry;
     }
 
-    public void setBase_zk_SleepBetweenRetry(int base_zk_SleepBetweenRetry) {
-        this.base_zk_SleepBetweenRetry = base_zk_SleepBetweenRetry;
+    public int getBase_zk_poolSize() {
+        return base_zk_poolSize;
     }
 
     public boolean isServer_enable() {
         return server_enable;
     }
 
-    public void setServer_enable(boolean server_enable) {
-        this.server_enable = server_enable;
+    public boolean isServer_autoScan_enable() {
+        return server_autoScan_enable;
     }
 
     public int getServer_port() {
         return server_port;
     }
 
-    public void setServer_port(int server_port) {
-        this.server_port = server_port;
-    }
-
-    public boolean isServer_autoScan_enable() {
-        return server_autoScan_enable;
-    }
-
-    public void setServer_autoScan_enable(boolean server_autoScan_enable) {
-        this.server_autoScan_enable = server_autoScan_enable;
+    public int getServer_eventLoopGroup_size() {
+        return server_eventLoopGroup_size;
     }
 
     public String getServer_autoScan_base() {
         return server_autoScan_base;
     }
 
-    public void setServer_autoScan_base(String server_autoScan_base) {
-        this.server_autoScan_base = server_autoScan_base;
-    }
-
     public String getServer_service_register_address() {
         return server_service_register_address;
     }
 
-    public void setServer_service_register_address(String server_service_register_address) {
-        this.server_service_register_address = server_service_register_address;
+    public Boolean getServer_compute_async() {
+        return server_compute_async;
     }
 
-    public String getPropertiesFileName() {
-        return propertiesFileName;
+    public int getServer_compute_poolSize() {
+        return server_compute_poolSize;
+    }
+
+    public int getClient_channel_poolSize() {
+        return client_channel_poolSize;
+    }
+
+    public int getClient_eventLoopGroup_size() {
+        return client_eventLoopGroup_size;
+    }
+
+    public int getClient_channel_timeout() {
+        return client_channel_timeout;
+    }
+
+    public int getServer_register_manager_poolSize() {
+        return server_register_manager_poolSize;
     }
 }

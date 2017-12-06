@@ -17,8 +17,14 @@ public class ServerDefaultChannelInitializer extends ChannelInitializer<SocketCh
 
     private final ServerRpcRequestManager serverRpcRequestManager;
 
-    public ServerDefaultChannelInitializer(ServerRpcRequestManager serverRpcRequestManager) {
+    private final int clientChannelTimeout;
+
+    private final boolean asyncComputeRpcRequest;
+
+    public ServerDefaultChannelInitializer(ServerRpcRequestManager serverRpcRequestManager, int clientChannelTimeout, boolean asyncComputeRpcRequest) {
         this.serverRpcRequestManager = serverRpcRequestManager;
+        this.clientChannelTimeout = clientChannelTimeout;
+        this.asyncComputeRpcRequest = asyncComputeRpcRequest;
     }
 
     /**
@@ -30,8 +36,8 @@ public class ServerDefaultChannelInitializer extends ChannelInitializer<SocketCh
 
         ChannelPipeline pipeline = socketChannel.pipeline();
         pipeline.addLast(new ServerMessageCodec())
-                .addLast(new ReadTimeoutHandler(15))
-                .addLast(new DefaultServerChannelInboundHandler(serverRpcRequestManager,true))
+                .addLast(new ReadTimeoutHandler(clientChannelTimeout))
+                .addLast(new DefaultServerChannelInboundHandler(serverRpcRequestManager,asyncComputeRpcRequest))
 
         ;
     }

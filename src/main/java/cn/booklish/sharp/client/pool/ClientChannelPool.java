@@ -23,9 +23,9 @@ import java.util.concurrent.Semaphore;
  * @date: 2017/12/2 15:37
  * @desc: 客户端Channel连接池
  */
-public class RpcClientChannelPool {
+public class ClientChannelPool {
 
-    private static final Logger logger = Logger.getLogger(RpcClientChannelPool.class);
+    private static final Logger logger = Logger.getLogger(ClientChannelPool.class);
 
     private final int capacity;
 
@@ -39,10 +39,11 @@ public class RpcClientChannelPool {
      * 通过共享EventLoopGroup,达到多个代理调用共享Channel,多个Channel共享EventLoop的目的.
      * 后期可以通过调整EventLoopGroup的大小来管理其内部线程数量,来实现更灵活的伸缩性能
      */
-    private static final EventLoopGroup eventLoopGroup = new NioEventLoopGroup();
+    private final EventLoopGroup eventLoopGroup;
 
-    public RpcClientChannelPool(int capacity) {
+    public ClientChannelPool(int capacity,int eventLoopGroupSize) {
         this.capacity = capacity;
+        this.eventLoopGroup = new NioEventLoopGroup(eventLoopGroupSize);
         channelBucket = new Channel[capacity];
         lockBucket = new Object[capacity];
         for(int x=0;x<capacity;x++){

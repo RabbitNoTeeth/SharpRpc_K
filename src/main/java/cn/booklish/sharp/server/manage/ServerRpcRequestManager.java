@@ -8,6 +8,7 @@ import java.lang.reflect.Method;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author: 刘新冬(www.booklish.cn)
@@ -16,13 +17,21 @@ import java.util.concurrent.Future;
  */
 public class ServerRpcRequestManager {
 
+    private static AtomicReference<ServerRpcRequestManager> instance;
+
     //Rpc请求消息异步处理线程池
-    private static final ExecutorService exec = Executors.newFixedThreadPool(2);
+    private final ExecutorService exec;
 
     private final ServiceBeanFactory serviceBeanFactory;
 
-    public ServerRpcRequestManager(ServiceBeanFactory serviceBeanFactory) {
+    private ServerRpcRequestManager(int threadPoolSize,ServiceBeanFactory serviceBeanFactory) {
+        this.exec = Executors.newFixedThreadPool(threadPoolSize);
         this.serviceBeanFactory = serviceBeanFactory;
+    }
+
+    public static ServerRpcRequestManager getInstance(int threadPoolSize,ServiceBeanFactory serviceBeanFactory){
+        instance.compareAndSet(null,new ServerRpcRequestManager(threadPoolSize,serviceBeanFactory));
+        return instance.get();
     }
 
     /**

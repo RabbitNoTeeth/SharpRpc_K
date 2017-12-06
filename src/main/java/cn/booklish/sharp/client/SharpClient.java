@@ -1,5 +1,6 @@
 package cn.booklish.sharp.client;
 
+import cn.booklish.sharp.client.pool.ClientChannelManager;
 import cn.booklish.sharp.client.proxy.ProxyServiceInterceptor;
 import cn.booklish.sharp.zookeeper.ZkClient;
 import net.sf.cglib.proxy.Enhancer;
@@ -19,8 +20,11 @@ public class SharpClient {
 
     private final ZkClient zkClient;
 
-    public SharpClient(ZkClient zkClient) {
+    private final ClientChannelManager manager;
+
+    public SharpClient(ZkClient zkClient, ClientChannelManager manager) {
         this.zkClient = zkClient;
+        this.manager = manager;
     }
 
     /**
@@ -53,8 +57,7 @@ public class SharpClient {
             String[] split_1 = data.split(";");
             String[] split_2 = split_1[1].split(":");
             return new ProxyServiceInterceptor(
-                    new InetSocketAddress(split_2[0],Integer.parseInt(split_2[1])),split_1[0]
-            );
+                    new InetSocketAddress(split_2[0],Integer.parseInt(split_2[1])),split_1[0],manager);
         }
         logger.warn("[SharpRpc]: 未找到名称为["+path+"]的Rpc服务");
         return null;

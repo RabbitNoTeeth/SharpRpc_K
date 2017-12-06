@@ -3,7 +3,7 @@ package cn.booklish.sharp.server.handler;
 import cn.booklish.sharp.server.manage.ServerRpcRequestManager;
 import cn.booklish.sharp.model.RpcRequest;
 import cn.booklish.sharp.util.RpcMessageUtil;
-import cn.booklish.sharp.zookeeper.GsonUtil;
+import cn.booklish.sharp.util.GsonUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -11,7 +11,6 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.timeout.ReadTimeoutException;
 import io.netty.util.ReferenceCountUtil;
 import org.apache.log4j.Logger;
-import org.jboss.netty.buffer.ChannelBuffer;
 
 /**
  * @author: 刘新冬(www.booklish.cn)

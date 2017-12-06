@@ -4,7 +4,7 @@ import cn.booklish.sharp.client.util.ChannelAttributeUtils;
 import cn.booklish.sharp.client.util.ResponseCallback;
 import cn.booklish.sharp.model.RpcResponse;
 import cn.booklish.sharp.util.RpcMessageUtil;
-import cn.booklish.sharp.zookeeper.GsonUtil;
+import cn.booklish.sharp.util.GsonUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
