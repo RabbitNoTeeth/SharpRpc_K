@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class ClientChannelManager {
 
-    private static AtomicReference<ClientChannelManager> instence;
+    private static AtomicReference<ClientChannelManager> instance = new AtomicReference<>();
 
     private static final Map<InetSocketAddress,ClientChannelPool> channelMap =
             new ConcurrentHashMap<>();
@@ -28,9 +28,9 @@ public class ClientChannelManager {
         this.eventLoopGroupSize = eventLoopGroupSize;
     }
 
-    public static ClientChannelManager getInstence(int poolSize,int eventLoopGroupSize){
-        instence.compareAndSet(null,new ClientChannelManager(poolSize,eventLoopGroupSize));
-        return instence.get();
+    public static ClientChannelManager getInstance(int poolSize,int eventLoopGroupSize){
+        instance.compareAndSet(null,new ClientChannelManager(poolSize,eventLoopGroupSize));
+        return instance.get();
     }
 
     /**

@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class RegisterManager {
 
-    private static AtomicReference<RegisterManager> instance;
+    private static AtomicReference<RegisterManager> instance = new AtomicReference<>();
 
     private final ZkClient zkClient;
 

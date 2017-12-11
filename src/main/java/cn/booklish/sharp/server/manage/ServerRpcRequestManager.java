@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class ServerRpcRequestManager {
 
-    private static AtomicReference<ServerRpcRequestManager> instance;
+    private static AtomicReference<ServerRpcRequestManager> instance = new AtomicReference<>();
 
     //Rpc请求消息异步处理线程池
     private final ExecutorService exec;

@@ -115,7 +115,7 @@ public class SharpAutoConfigureCenter {
     private void configureClient() {
 
         // 创建客户端连接池管理器
-        ClientChannelManager manager = ClientChannelManager.getInstence(config.getClient_channel_poolSize(),
+        ClientChannelManager manager = ClientChannelManager.getInstance(config.getClient_channel_poolSize(),
                 config.getClient_eventLoopGroup_size());
 
         // 创建客户端
