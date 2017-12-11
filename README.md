@@ -2,9 +2,9 @@
 基于Netty4的分布式rpc框架
 
 #### 配置使用
-***1. 普通java项目***
+***1. 普通 java 项目***
 
-*****配置SharpRpc*****
+*****配置 SharpRpc*****
 <pre><code>
 //加载配置文件(配置文件需要在classpath根路径)
 SharpRpcConfig sharpRpcConfig = SharpRpcConfig.getInstance().load("sharp.properties");
@@ -20,9 +20,9 @@ ArticleClassifyService service = (ArticleClassifyService) sharpAutoConfigureCent
                 .getService("rpc服务的注册地址", ArticleClassifyService.class);
 </code></pre>
 
-***2. spring项目***
+***2. spring 项目***
 
-*****配置SharpRpc*****
+*****配置 SharpRpc*****
 <pre><code>
 @Configuration
 public class SharpRpcAutoConfig {
