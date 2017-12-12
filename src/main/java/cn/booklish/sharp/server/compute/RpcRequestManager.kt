@@ -82,9 +82,3 @@ object RpcRequestHandler{
     }
 }
 
-/**
- * 服务类实体工厂
- */
-interface ServiceBeanFactory{
-    fun getServiceBean(clazz: Class<*>): Any
-}
