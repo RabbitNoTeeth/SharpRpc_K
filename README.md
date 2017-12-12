@@ -2,8 +2,8 @@
 基于Netty4的分布式rpc框架,SharpRpc的Kotlin重构版本,后面该框架的更新将主要在该版本上更新
 
 ## 重构说明
-1.所有代码全部使用Kotlin重构,更加精简
-2.利用Kotlin语言层对单例模式和工厂模式等的支持,重构框架内的各种管理器
+1.所有代码全部使用Kotlin重构,更加精简<br>
+2.利用Kotlin语言层对单例模式和工厂模式等的支持,重构框架内的各种管理器<br>
 3.优化配置文件的加载逻辑,简化配置流程
 
 #### 配置使用
@@ -47,7 +47,7 @@ Test service = (Test) SharpClient.INSTANCE.getService("rpc服务的注册地址"
 
 *****配置 SharpRpc*****
 <pre><code>
-val sharpRpcConfig = SharpRpcConfig("sharp.properties"){clazz -> }
+val sharpRpcConfig = SharpRpcConfig("sharp.properties",serviceBeanFactory的实现)
 sharpRpcConfig.autoConfigure()
 </code></pre>
 
