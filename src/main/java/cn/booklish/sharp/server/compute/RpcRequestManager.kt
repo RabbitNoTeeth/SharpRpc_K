@@ -7,7 +7,10 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 /**
- * Rpc请求管理器
+ * @Author: liuxindong
+ * @Description:  Rpc请求管理器,用于计算Rpc请求并返回结果
+ * @Created: 2017/12/13 8:58
+ * @Modified:
  */
 object RpcRequestManager{
 
@@ -57,7 +60,10 @@ object RpcRequestManager{
 }
 
 /**
- * 进行异步计算Rpc请求的callable
+ * @Author: liuxindong
+ * @Description:  进行异步计算Rpc请求的callable
+ * @Created: 2017/12/13 8:59
+ * @Modified:
  */
 class RpcAsyncComputeCallable(val rpcRequest: RpcRequest,val serviceBeanFactory: ServiceBeanFactory): Callable<RpcResponse>{
     override fun call(): RpcResponse {
@@ -66,7 +72,10 @@ class RpcAsyncComputeCallable(val rpcRequest: RpcRequest,val serviceBeanFactory:
 }
 
 /**
- * 实际进行计算Rpc请求的处理器
+ * @Author: liuxindong
+ * @Description:  实际进行计算Rpc请求的处理器
+ * @Created: 2017/12/13 8:59
+ * @Modified:
  */
 object RpcRequestHandler{
     fun computeRpcRequest(rpcRequest: RpcRequest,serviceBeanFactory: ServiceBeanFactory): RpcResponse {

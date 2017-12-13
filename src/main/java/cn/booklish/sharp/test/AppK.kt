@@ -18,4 +18,6 @@ fun main(args: Array<String>) {
     config.autoConfigure()
 
     val service = SharpClient.getService("/test/TestImpl", Test::class.java) as Test
+
+    println(service.run())
 }

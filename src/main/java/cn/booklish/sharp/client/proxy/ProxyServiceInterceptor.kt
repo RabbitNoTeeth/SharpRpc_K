@@ -12,7 +12,12 @@ import net.sf.cglib.proxy.MethodProxy
 import java.lang.reflect.Method
 import java.net.InetSocketAddress
 
-
+/**
+ * @Author: liuxindong
+ * @Description:  客户端Rpc服务代理类的方法拦截器,实现了cglib的MethodInterceptor
+ * @Created: 2017/12/13 8:47
+ * @Modified:
+ */
 class ProxyServiceInterceptor(val location: InetSocketAddress, val serviceName:String): MethodInterceptor {
 
     override fun intercept(obj: Any, method: Method, args: Array<Any>, methodProxy: MethodProxy): Any? {

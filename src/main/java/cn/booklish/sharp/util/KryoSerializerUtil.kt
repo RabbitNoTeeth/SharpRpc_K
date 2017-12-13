@@ -9,7 +9,10 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 
 /**
- * kryo序列化工具类
+ * @Author: liuxindong
+ * @Description:  kryo序列化工具类
+ * @Created: 2017/12/13 9:05
+ * @Modified:
  */
 class KryoSerializerUtil {
 

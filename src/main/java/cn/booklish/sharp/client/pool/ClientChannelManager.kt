@@ -16,7 +16,10 @@ import java.util.concurrent.Semaphore
 
 
 /**
- * 客户端channel连接管理器
+ * @Author: liuxindong
+ * @Description:  客户端channel连接管理器
+ * @Created: 2017/12/13 8:47
+ * @Modified:
  */
 object ClientChannelManager{
 
@@ -38,7 +41,7 @@ object ClientChannelManager{
     fun getChannel(serverAddress:InetSocketAddress): Channel? {
         val channelPool = channelPoolMap[serverAddress]
         if(channelPool==null){
-            channelPoolMap.putIfAbsent(serverAddress, ClientChannelPool(poolSize, eventLoopGroupSize))
+            channelPoolMap.putIfAbsent(serverAddress, ClientChannelPool(this.poolSize, this.eventLoopGroupSize))
         }
         return channelPoolMap[serverAddress]!!.getChannel(serverAddress)
     }

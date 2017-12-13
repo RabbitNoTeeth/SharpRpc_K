@@ -15,7 +15,10 @@ import org.apache.log4j.Logger
 
 
 /**
- * 默认的客户端Rpc响应处理器
+ * @Author: liuxindong
+ * @Description:  默认的客户端入站处理器,处理由服务器返回的Rpc响应消息
+ * @Created: 2017/12/13 8:55
+ * @Modified:
  */
 @ChannelHandler.Sharable
 class DefaultClientChannelInboundHandler: SimpleChannelInboundHandler<ByteBuf>() {
@@ -52,7 +55,10 @@ class DefaultClientChannelInboundHandler: SimpleChannelInboundHandler<ByteBuf>()
 }
 
 /**
- * 默认的服务器Rpc请求处理器
+ * @Author: liuxindong
+ * @Description:  默认的服务器入站处理器,处理来自客户端的Rpc请求消息
+ * @Created: 2017/12/13 8:56
+ * @Modified:
  */
 @ChannelHandler.Sharable
 class DefaultServerChannelInboundHandler: SimpleChannelInboundHandler<ByteBuf>(){

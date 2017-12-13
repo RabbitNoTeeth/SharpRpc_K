@@ -1,7 +1,10 @@
 package cn.booklish.sharp.exception
 
 /**
- * 检查zk节点是否存在失败异常
+ * @Author: liuxindong
+ * @Description: 检查zk节点是否存在失败的异常基类
+ * @Created: 2017/12/13 8:53
+ * @Modified:
  */
 class CheckZkPathExistsException:RuntimeException{
     constructor(message: String):super(message)
@@ -9,7 +12,10 @@ class CheckZkPathExistsException:RuntimeException{
 }
 
 /**
- * 创建zk节点失败异常
+ * @Author: liuxindong
+ * @Description:  创建zk节点失败的异常基类
+ * @Created: 2017/12/13 8:53
+ * @Modified:
  */
 class CreateZkPathException:RuntimeException{
     constructor(message: String):super(message)
@@ -17,7 +23,10 @@ class CreateZkPathException:RuntimeException{
 }
 
 /**
- * 删除zk节点失败异常
+ * @Author: liuxindong
+ * @Description:  删除zk节点失败的异常基类
+ * @Created: 2017/12/13 8:54
+ * @Modified:
  */
 class DeleteZkPathException:RuntimeException{
     constructor(message: String):super(message)
@@ -25,7 +34,10 @@ class DeleteZkPathException:RuntimeException{
 }
 
 /**
- * 获取zk节点数据失败异常
+ * @Author: liuxindong
+ * @Description:  获取zk节点数据失败的异常基类
+ * @Created: 2017/12/13 8:54
+ * @Modified:
  */
 class GetZkPathDataException:RuntimeException{
     constructor(message: String):super(message)
@@ -33,7 +45,10 @@ class GetZkPathDataException:RuntimeException{
 }
 
 /**
- * zk节点不存在异常
+ * @Author: liuxindong
+ * @Description:  zk节点不存在的异常基类
+ * @Created: 2017/12/13 8:54
+ * @Modified:
  */
 class NoSuchZkPathException:RuntimeException{
     constructor(message: String):super(message)
@@ -41,7 +56,10 @@ class NoSuchZkPathException:RuntimeException{
 }
 
 /**
- * 更新zk节点数据失败异常
+ * @Author: liuxindong
+ * @Description:  更新zk节点数据失败的异常基类
+ * @Created: 2017/12/13 8:54
+ * @Modified:
  */
 class UpdateZkPathException:RuntimeException{
     constructor(message: String):super(message)

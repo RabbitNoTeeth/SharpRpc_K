@@ -9,7 +9,10 @@ import java.net.URLDecoder
 import java.util.*
 
 /**
- * Rpc服务自动扫描器
+ * @Author: liuxindong
+ * @Description:  Rpc服务自动扫描器,自动扫描被标记为Rpc服务的类并发布到zookeeper
+ * @Created: 2017/12/13 9:02
+ * @Modified:
  */
 class RpcServiceAutoScanner(val autoScanPath:String,val registerAddress:String) {
 

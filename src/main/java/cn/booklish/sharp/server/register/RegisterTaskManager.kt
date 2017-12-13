@@ -7,7 +7,10 @@ import java.util.concurrent.LinkedBlockingQueue
 
 
 /**
- * 服务注册任务管理器
+ * @Author: liuxindong
+ * @Description:  Rpc服务注册任务管理器
+ * @Created: 2017/12/13 9:01
+ * @Modified:
  */
 object RegisterTaskManager{
 
@@ -30,7 +33,10 @@ object RegisterTaskManager{
 }
 
 /**
- * 服务注册任务生产者
+ * @Author: liuxindong
+ * @Description:  Rpc服务注册任务生产者
+ * @Created: 2017/12/13 9:02
+ * @Modified:
  */
 class RegisterTaskProducer(val queue: LinkedBlockingQueue<RegisterInfo>,val registerInfo: RegisterInfo):Runnable{
     override fun run() {
@@ -43,7 +49,10 @@ class RegisterTaskProducer(val queue: LinkedBlockingQueue<RegisterInfo>,val regi
 }
 
 /**
- * 服务注册任务消费者
+ * @Author: liuxindong
+ * @Description:  Rpc服务注册任务消费者
+ * @Created: 2017/12/13 9:02
+ * @Modified:
  */
 class RegisterTaskConsumer(val queue: LinkedBlockingQueue<RegisterInfo>):Runnable{
     override fun run() {
@@ -61,7 +70,10 @@ class RegisterTaskConsumer(val queue: LinkedBlockingQueue<RegisterInfo>):Runnabl
 }
 
 /**
- * 服务注册信息实体
+ * @Author: liuxindong
+ * @Description:  Rpc服务注册信息实体
+ * @Created: 2017/12/13 9:02
+ * @Modified:
  */
 data class RegisterInfo(val path:String,val serviceTypeName:String,val serviceAddress:String){
     val value = "$serviceTypeName;$serviceAddress"

@@ -4,7 +4,10 @@ import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 
 /**
- * Rpc消息系列化工具
+ * @Author: liuxindong
+ * @Description:  Rpc消息序列化工具
+ * @Created: 2017/12/13 9:05
+ * @Modified:
  */
 class RpcMessageSerializerUtil {
 

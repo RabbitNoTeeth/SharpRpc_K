@@ -5,6 +5,12 @@ import io.netty.util.AttributeKey
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 
+/**
+ * @Author: liuxindong
+ * @Description:  channel属性设置工具类
+ * @Created: 2017/12/13 8:49
+ * @Modified:
+ */
 object ChannelAttributeUtils {
 
     val key = AttributeKey.valueOf<ConcurrentHashMap<Int,ResponseCallbackBean>>("dataMap")
@@ -19,7 +25,10 @@ object ChannelAttributeUtils {
 }
 
 /**
- * 封装Rpc响应数据的实体
+ * @Author: liuxindong
+ * @Description:  封装Rpc响应数据的实体
+ * @Created: 2017/12/13 8:49
+ * @Modified:
  */
 class ResponseCallbackBean {
 
@@ -37,7 +46,10 @@ class ResponseCallbackBean {
 }
 
 /**
- * Rpc请求id生成器
+ * @Author: liuxindong
+ * @Description:  Rpc请求id生成器
+ * @Created: 2017/12/13 8:49
+ * @Modified:
  */
 object RpcRequestIdGenerator{
 

@@ -10,7 +10,10 @@ import org.apache.log4j.Logger
 
 
 /**
- * 客户端pipeline
+ * @Author: liuxindong
+ * @Description:  客户端Channel初始化器,用于创建channel的pipeline链
+ * @Created: 2017/12/13 8:57
+ * @Modified:
  */
 class DefaultClientChannelInitializer: ChannelInitializer<SocketChannel>() {
 
@@ -27,7 +30,10 @@ class DefaultClientChannelInitializer: ChannelInitializer<SocketChannel>() {
 }
 
 /**
- * 服务器pipeline
+ * @Author: liuxindong
+ * @Description:  服务器Channel初始化器,用于创建channel的pipeline链
+ * @Created: 2017/12/13 8:57
+ * @Modified:
  */
 class DefaultServerChannelInitializer(val clientChannelTimeout: Int = 40): ChannelInitializer<SocketChannel>() {
 

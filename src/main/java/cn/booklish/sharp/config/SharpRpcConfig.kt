@@ -8,12 +8,18 @@ import cn.booklish.sharp.server.compute.ServiceBeanFactory
 import cn.booklish.sharp.server.register.RegisterTaskManager
 import cn.booklish.sharp.server.register.RpcServiceAutoScanner
 import cn.booklish.sharp.zookeeper.ZkClient
+import org.apache.log4j.Logger
 import java.util.*
 
 /**
- * SharpRpc配置入口
+ * @Author: liuxindong
+ * @Description:  SharpRpc配置类,读取配置文件并提供自动配置方法
+ * @Created: 2017/12/13 8:51
+ * @Modified:
  */
 class SharpRpcConfig(fileName:String, val serviceBeanFactory:ServiceBeanFactory) {
+
+    val logger: Logger = Logger.getLogger(this.javaClass)
 
     val configMap = HashMap<String,Any>()
 
@@ -24,12 +30,14 @@ class SharpRpcConfig(fileName:String, val serviceBeanFactory:ServiceBeanFactory)
         loadZookeeperConfig(pop)
         loadServerConfig(pop)
         loadClientConfig(pop)
+        logger.info("[Sharp-config]: 配置文件加载完成")
     }
 
     /**
-     * 开始自动配置
+     * 开始自动配置,可以在调用该方法前对serverBootstrap进行拓展,实现一定程度的定制化
      */
     fun autoConfigure(){
+        logger.info("[Sharp-config]: 开始自动化配置")
         configureZookeeper()
         configureServer()
         configureClient()
@@ -43,6 +51,7 @@ class SharpRpcConfig(fileName:String, val serviceBeanFactory:ServiceBeanFactory)
                       configMap["base.zookeeper.poolSize"]!!.toString().toInt(),
                       configMap["base.zookeeper.retryTimes"]!!.toString().toInt(),
                       configMap["base.zookeeper.sleepBetweenRetry"]!!.toString().toInt())
+        logger.info("[Sharp-config]: Zookeeper客户端ZkClient配置完成")
     }
 
     /**
@@ -51,6 +60,7 @@ class SharpRpcConfig(fileName:String, val serviceBeanFactory:ServiceBeanFactory)
     private fun configureClient() {
         ClientChannelManager.init(configMap["client.channel.poolSize"]!!.toString().toInt(),
                                   configMap["client.eventLoopGroup.size"]!!.toString().toInt())
+        logger.info("[Sharp-config]: 客户端配置完成")
     }
 
     /**
@@ -58,17 +68,26 @@ class SharpRpcConfig(fileName:String, val serviceBeanFactory:ServiceBeanFactory)
      */
     private fun configureServer() {
         if(configMap["server.enable"].toString().toBoolean()){
+            logger.info("[Sharp-config]: 开始服务器配置")
+
             RegisterTaskManager.start(configMap["server.compute.poolSize"]!!.toString().toInt())
+            logger.info("[Sharp-config]: RegisterTaskManager管理器启动成功")
+
             if(configMap["server.autoScan.enable"].toString().toBoolean()){
                 RpcServiceAutoScanner(configMap["server.service.autoScan.base"].toString(),
                                       configMap["server.service.register.address"].toString())
                         .scan()
+                logger.info("[Sharp-config]: RpcServiceAutoScanner服务扫描器配启动成功")
             }
+
             RpcRequestManager.start(serviceBeanFactory,
                                     configMap["server.compute.async"]!!.toString().toBoolean(),
                                     configMap["server.compute.poolSize"]!!.toString().toInt())
+            logger.info("[Sharp-config]: RpcRequestManager管理器启动成功")
+
             RpcServerBootStrap.defaultConfigureAndStart(configMap["server.port"]!!.toString().toInt(),
                                                         configMap["client.channel.timeout"]!!.toString().toInt())
+            logger.info("[Sharp-config]: RpcServerBootStrap引导启动成功,服务器启动完成")
         }
     }
 
@@ -127,9 +146,6 @@ class SharpRpcConfig(fileName:String, val serviceBeanFactory:ServiceBeanFactory)
 
                 // 设置自定义端口,否则使用默认端口
                 configMap["server.port"] = pop["server.port"]!!
-
-                // 设置eventLoopGroup初始大小
-                configMap["server.eventLoopGroup.size"] = pop["server.eventLoopGroup.size"]!!
 
                 // 服务器收到Rpc请求后是否进行异步计算
                 configMap["server.compute.async"] = pop["server.compute.async"]!!

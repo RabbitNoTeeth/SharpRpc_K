@@ -8,7 +8,10 @@ import org.apache.log4j.Logger
 import java.net.InetSocketAddress
 
 /**
- * Rpc客户端
+ * @Author: liuxindong
+ * @Description:  Rpc客户端,用于获取Rpc服务代理类
+ * @Created: 2017/12/13 8:50
+ * @Modified:
  */
 object SharpClient {
 

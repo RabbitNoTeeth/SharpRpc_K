@@ -3,7 +3,10 @@ package cn.booklish.sharp.util
 import com.google.gson.Gson
 
 /**
- * json转化工具
+ * @Author: liuxindong
+ * @Description:  json转化工具
+ * @Created: 2017/12/13 9:05
+ * @Modified:
  */
 class GsonUtil {
 

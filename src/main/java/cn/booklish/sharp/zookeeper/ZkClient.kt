@@ -1,7 +1,6 @@
 package cn.booklish.sharp.zookeeper
 
 import cn.booklish.sharp.exception.*
-import cn.booklish.sharp.server.register.RegisterTaskManager
 import cn.booklish.sharp.util.KryoSerializerUtil
 import org.apache.commons.lang3.StringUtils
 import org.apache.curator.framework.CuratorFramework
@@ -15,20 +14,23 @@ import org.apache.zookeeper.ZooDefs
 import java.util.*
 
 /**
- * zookeeper操作客户端
+ * @Author: liuxindong
+ * @Description:  zookeeper客户端,封装curator提供的zookeeper客户端,重新封装并提供更加便于调用的节点操作方法
+ * @Created: 2017/12/13 9:05
+ * @Modified:
  */
 object ZkClient {
 
     val logger: Logger = Logger.getLogger(this.javaClass)
 
     var zkAddress = ""
-    var connectionPoolSize = 20
+    var connectionPoolSize = 15
     var zkRetryTimes = 3
     var zkSleepBetweenRetry = 3000
 
     private val pool = ConnectionPool()
 
-    fun init(zkAddress:String,connectionPoolSize:Int = 20,zkRetryTimes:Int = 3,zkSleepBetweenRetry:Int = 3000){
+    fun init(zkAddress:String,connectionPoolSize:Int = 15,zkRetryTimes:Int = 3,zkSleepBetweenRetry:Int = 3000){
         this.zkAddress = zkAddress
         this.connectionPoolSize = connectionPoolSize
         this.zkRetryTimes = zkRetryTimes
