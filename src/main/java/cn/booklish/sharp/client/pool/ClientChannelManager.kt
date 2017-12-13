@@ -49,7 +49,10 @@ object ClientChannelManager{
 }
 
 /**
- * 客户端channel连接池
+ * @Author: liuxindong
+ * @Description:  客户端channel连接池
+ * @Created: 2017/12/13 17:26
+ * @Modified:
  */
 class ClientChannelPool(private val capacity:Int = 10, private val eventLoopGroupSize:Int = 0){
 
