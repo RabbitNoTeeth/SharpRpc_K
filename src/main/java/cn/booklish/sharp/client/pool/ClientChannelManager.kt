@@ -75,7 +75,7 @@ class ClientChannelPool(private val capacity:Int = 10, private val eventLoopGrou
             if (channel2!=null && channel2.isActive) {
                 return channel2
             }
-            val newChannel = addNewChannelToPool(address)
+            val newChannel = createChannel(address)
             channels[index] = newChannel!!
             return newChannel
         }
@@ -83,7 +83,7 @@ class ClientChannelPool(private val capacity:Int = 10, private val eventLoopGrou
     }
 
 
-    private fun addNewChannelToPool(address: InetSocketAddress): Channel? {
+    private fun createChannel(address: InetSocketAddress): Channel? {
         val bootstrap = Bootstrap()
         //设置信号量,最多允许重试3次
         val semaphore = Semaphore(3)
