@@ -45,14 +45,14 @@ object RpcRequestManager{
     /**
      * 同步计算Rpc请求
      */
-    fun submitSync(rpcRequest: RpcRequest): RpcResponse {
+    private fun submitSync(rpcRequest: RpcRequest): RpcResponse {
         return RpcRequestHandler.computeRpcRequest(rpcRequest, serviceBeanFactory!!)
     }
 
     /**
      * 异步计算Rpc请求
      */
-    fun submitAsync(rpcRequest: RpcRequest): RpcResponse{
+    private fun submitAsync(rpcRequest: RpcRequest): RpcResponse{
         val call = exec!!.submit(RpcAsyncComputeCallable(rpcRequest, serviceBeanFactory!!))
         return call.get()
     }
@@ -79,14 +79,14 @@ class RpcAsyncComputeCallable(val rpcRequest: RpcRequest,val serviceBeanFactory:
  */
 object RpcRequestHandler{
     fun computeRpcRequest(rpcRequest: RpcRequest,serviceBeanFactory: ServiceBeanFactory): RpcResponse {
-        try {
+        return try {
             val serviceClass = Class.forName(rpcRequest.serviceName)
             val method = serviceClass.getMethod(rpcRequest.methodName, *rpcRequest.paramTypes)
             val invoke = method.invoke(serviceBeanFactory.getServiceBean(serviceClass), *rpcRequest.paramValues)
-            return RpcResponse(rpcRequest.id, invoke)
+            RpcResponse(rpcRequest.id, invoke)
         } catch (e: Exception) {
             e.printStackTrace()
-            return RpcResponse(rpcRequest.id, null, false, e)
+            RpcResponse(rpcRequest.id, null, false, e)
         }
     }
 }

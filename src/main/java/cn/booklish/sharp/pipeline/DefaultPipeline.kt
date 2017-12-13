@@ -17,7 +17,7 @@ import org.apache.log4j.Logger
  */
 class DefaultClientChannelInitializer: ChannelInitializer<SocketChannel>() {
 
-    val logger:Logger = Logger.getLogger(this.javaClass)
+    private val logger:Logger = Logger.getLogger(this.javaClass)
 
     override fun initChannel(socketChannel: SocketChannel) {
         val pipeline = socketChannel.pipeline()
@@ -35,9 +35,9 @@ class DefaultClientChannelInitializer: ChannelInitializer<SocketChannel>() {
  * @Created: 2017/12/13 8:57
  * @Modified:
  */
-class DefaultServerChannelInitializer(val clientChannelTimeout: Int = 40): ChannelInitializer<SocketChannel>() {
+class DefaultServerChannelInitializer(private val clientChannelTimeout: Int = 40): ChannelInitializer<SocketChannel>() {
 
-    val logger:Logger = Logger.getLogger(this.javaClass)
+    private val logger:Logger = Logger.getLogger(this.javaClass)
 
     override fun initChannel(socketChannel: SocketChannel) {
         val pipeline = socketChannel.pipeline()

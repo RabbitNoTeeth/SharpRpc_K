@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger
  */
 object ChannelAttributeUtils {
 
-    val key = AttributeKey.valueOf<ConcurrentHashMap<Int,ResponseCallbackBean>>("dataMap")
+    val key = AttributeKey.valueOf<ConcurrentHashMap<Int,ResponseCallbackBean>>("dataMap")!!
 
     fun putResponseCallback(channel: Channel, id: Int, callback: ResponseCallbackBean) {
         channel.attr(key).get()[id] = callback

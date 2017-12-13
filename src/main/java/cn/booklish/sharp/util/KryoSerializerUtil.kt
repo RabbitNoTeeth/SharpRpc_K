@@ -18,9 +18,9 @@ class KryoSerializerUtil {
 
     companion object{
 
-        val DEFAULT_ENCODING = "UTF-8"
+        private val DEFAULT_ENCODING = "UTF-8"
 
-        val kryoLocal:ThreadLocal<Kryo> = object : ThreadLocal<Kryo>() {
+        private val kryoLocal:ThreadLocal<Kryo> = object : ThreadLocal<Kryo>() {
 
             override fun initialValue(): Kryo {
                 val kryo = Kryo()

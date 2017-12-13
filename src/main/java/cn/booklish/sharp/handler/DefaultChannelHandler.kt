@@ -23,7 +23,7 @@ import org.apache.log4j.Logger
 @ChannelHandler.Sharable
 class DefaultClientChannelInboundHandler: SimpleChannelInboundHandler<ByteBuf>() {
 
-    val logger: Logger = Logger.getLogger(this.javaClass)
+    private val logger: Logger = Logger.getLogger(this.javaClass)
 
     /**
      * 处理服务器返回的Rpc请求响应
@@ -63,7 +63,7 @@ class DefaultClientChannelInboundHandler: SimpleChannelInboundHandler<ByteBuf>()
 @ChannelHandler.Sharable
 class DefaultServerChannelInboundHandler: SimpleChannelInboundHandler<ByteBuf>(){
 
-    val logger: Logger = Logger.getLogger(this.javaClass)
+    private val logger: Logger = Logger.getLogger(this.javaClass)
 
     override fun channelActive(ctx: ChannelHandlerContext) {
         logger.info("[SharpRpc-server]: 客户端连接" + ctx.channel().id() + "准备就绪")

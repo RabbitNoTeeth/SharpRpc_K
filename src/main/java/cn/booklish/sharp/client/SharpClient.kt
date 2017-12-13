@@ -15,7 +15,7 @@ import java.net.InetSocketAddress
  */
 object SharpClient {
 
-    val logger:Logger = Logger.getLogger(this.javaClass)
+    private val logger:Logger = Logger.getLogger(this.javaClass)
 
     /**
      * 获得service服务代理
@@ -39,10 +39,10 @@ object SharpClient {
         val data = ZkClient.getData(path, String::class.java)
         // data格式为->   服务全类名;ip地址:端口
         if (StringUtils.isNotBlank(data)) {
-            val split_1 = data.split(";".toRegex())
-            val split_2 = split_1[1].split(":".toRegex())
+            val first = data.split(";".toRegex())
+            val second = first[1].split(":".toRegex())
             return ProxyServiceInterceptor(
-                    InetSocketAddress(split_2[0], split_2[1].toInt()), split_1[0])
+                    InetSocketAddress(second[0], second[1].toInt()), first[0])
         }
         logger.warn("[SharpRpc-client]: 未找到名称为[$path]的Rpc服务")
         return null

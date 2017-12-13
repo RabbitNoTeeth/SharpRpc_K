@@ -21,7 +21,7 @@ object RpcServerBootStrap {
     private val workerGroup = NioEventLoopGroup()
     private var channel: Channel? = null
     private val executor = Executors.newSingleThreadExecutor()
-    val b = ServerBootstrap()
+    private val b = ServerBootstrap()
 
     /**
      * 默认配置并启动

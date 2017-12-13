@@ -14,9 +14,9 @@ import java.util.*
  * @Created: 2017/12/13 9:02
  * @Modified:
  */
-class RpcServiceAutoScanner(val autoScanPath:String,val registerAddress:String) {
+class RpcServiceAutoScanner(private val autoScanPath:String, private val registerAddress:String) {
 
-    val logger: Logger = Logger.getLogger(this.javaClass)
+    private val logger: Logger = Logger.getLogger(this.javaClass)
 
     /**
      * 扫描需要注册的Rpc服务类,并且将注册信息提交到注册管理器
@@ -38,7 +38,7 @@ class RpcServiceAutoScanner(val autoScanPath:String,val registerAddress:String) 
      * 读取指定package下的所有class文件
      * @param packageName
      */
-    fun loadAllClassesByPackage(packageName: String): List<Class<*>> {
+    private fun loadAllClassesByPackage(packageName: String): List<Class<*>> {
 
         //存放所有class的list集合
         val classList = ArrayList<Class<*>>()

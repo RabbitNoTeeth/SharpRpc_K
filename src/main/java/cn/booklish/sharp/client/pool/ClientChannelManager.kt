@@ -23,7 +23,7 @@ import java.util.concurrent.Semaphore
  */
 object ClientChannelManager{
 
-    val channelPoolMap = ConcurrentHashMap<InetSocketAddress,ClientChannelPool>()
+    private val channelPoolMap = ConcurrentHashMap<InetSocketAddress,ClientChannelPool>()
     var poolSize = 10
     var eventLoopGroupSize = 0
 
@@ -51,13 +51,13 @@ object ClientChannelManager{
 /**
  * 客户端channel连接池
  */
-class ClientChannelPool(val capacity:Int = 10,val eventLoopGroupSize:Int = 0){
+class ClientChannelPool(private val capacity:Int = 10, private val eventLoopGroupSize:Int = 0){
 
-    val logger: Logger = Logger.getLogger(this.javaClass)
+    private val logger: Logger = Logger.getLogger(this.javaClass)
 
-    val channels = arrayOfNulls<Channel>(capacity)
-    val locks = Array(capacity,{ x -> Any() })
-    val eventLoopGroup = NioEventLoopGroup(eventLoopGroupSize)
+    private val channels = arrayOfNulls<Channel>(capacity)
+    private val locks = Array(capacity,{ Any() })
+    private val eventLoopGroup = NioEventLoopGroup(eventLoopGroupSize)
 
 
     /**
@@ -67,16 +67,16 @@ class ClientChannelPool(val capacity:Int = 10,val eventLoopGroupSize:Int = 0){
 
         val index = Random().nextInt(capacity)
         val channel = channels[index]
-        if (channel != null && channel.isActive) {
+        if (channel!=null && channel.isActive) {
             return channel
         }
         synchronized(locks[index]) {
-            val channel = channels[index]
-            if (channel != null && channel.isActive) {
-                return channel
+            val channel2 = channels[index]
+            if (channel2!=null && channel2.isActive) {
+                return channel2
             }
             val newChannel = addNewChannelToPool(address)
-            channels[index] = channel
+            channels[index] = newChannel!!
             return newChannel
         }
 

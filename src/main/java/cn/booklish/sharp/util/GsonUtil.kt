@@ -12,7 +12,7 @@ class GsonUtil {
 
     companion object{
 
-        val gson:Gson = Gson()
+        private val gson:Gson = Gson()
 
         fun objectToJson(obj: Any):String{
             return gson.toJson(obj)

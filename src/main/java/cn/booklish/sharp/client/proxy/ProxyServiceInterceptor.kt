@@ -18,7 +18,7 @@ import java.net.InetSocketAddress
  * @Created: 2017/12/13 8:47
  * @Modified:
  */
-class ProxyServiceInterceptor(val location: InetSocketAddress, val serviceName:String): MethodInterceptor {
+class ProxyServiceInterceptor(private val location: InetSocketAddress, private val serviceName:String): MethodInterceptor {
 
     override fun intercept(obj: Any, method: Method, args: Array<Any>, methodProxy: MethodProxy): Any? {
         val channel = ClientChannelManager.getChannel(location)

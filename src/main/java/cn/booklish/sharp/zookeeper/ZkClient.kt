@@ -21,7 +21,7 @@ import java.util.*
  */
 object ZkClient {
 
-    val logger: Logger = Logger.getLogger(this.javaClass)
+    private val logger: Logger = Logger.getLogger(this.javaClass)
 
     var zkAddress = ""
     var connectionPoolSize = 15
@@ -177,7 +177,7 @@ object ZkClient {
     private class ConnectionPool{
 
         val pool = arrayOfNulls<CuratorFramework>(connectionPoolSize)
-        val locks = Array(connectionPoolSize,{ x -> Any() })
+        val locks = Array(connectionPoolSize,{ Any() })
 
         fun getConnection(): CuratorFramework{
             val index = Random().nextInt(connectionPoolSize)
@@ -186,9 +186,9 @@ object ZkClient {
                 return connection
             }
             synchronized(locks[index]) {
-                val connection = pool[index]
-                if (connection != null && connection.state == CuratorFrameworkState.STARTED) {
-                    return connection
+                val connection2 = pool[index]
+                if (connection2!=null && connection2.state == CuratorFrameworkState.STARTED) {
+                    return connection2
                 }
                 val newConnection = createConnection()
                 pool[index] = newConnection

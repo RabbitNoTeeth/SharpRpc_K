@@ -14,7 +14,7 @@ import java.util.concurrent.LinkedBlockingQueue
  */
 object RegisterTaskManager{
 
-    val queue = LinkedBlockingQueue<RegisterInfo>()
+    private val queue = LinkedBlockingQueue<RegisterInfo>()
 
     var exec: ExecutorService? = null
 
@@ -38,7 +38,7 @@ object RegisterTaskManager{
  * @Created: 2017/12/13 9:02
  * @Modified:
  */
-class RegisterTaskProducer(val queue: LinkedBlockingQueue<RegisterInfo>,val registerInfo: RegisterInfo):Runnable{
+class RegisterTaskProducer(private val queue: LinkedBlockingQueue<RegisterInfo>, private val registerInfo: RegisterInfo):Runnable{
     override fun run() {
         try {
             queue.put(registerInfo)
@@ -54,7 +54,7 @@ class RegisterTaskProducer(val queue: LinkedBlockingQueue<RegisterInfo>,val regi
  * @Created: 2017/12/13 9:02
  * @Modified:
  */
-class RegisterTaskConsumer(val queue: LinkedBlockingQueue<RegisterInfo>):Runnable{
+class RegisterTaskConsumer(private val queue: LinkedBlockingQueue<RegisterInfo>):Runnable{
     override fun run() {
         while (true) {
             try {

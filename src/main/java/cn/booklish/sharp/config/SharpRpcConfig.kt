@@ -17,11 +17,11 @@ import java.util.*
  * @Created: 2017/12/13 8:51
  * @Modified:
  */
-class SharpRpcConfig(fileName:String, val serviceBeanFactory:ServiceBeanFactory) {
+class SharpRpcConfig(private val fileName:String, private val serviceBeanFactory:ServiceBeanFactory) {
 
-    val logger: Logger = Logger.getLogger(this.javaClass)
+    private val logger: Logger = Logger.getLogger(this.javaClass)
 
-    val configMap = HashMap<String,Any>()
+    private val configMap = HashMap<String,Any>()
 
     init {
         val resource = this.javaClass.classLoader.getResourceAsStream(fileName)
