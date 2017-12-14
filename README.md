@@ -1,5 +1,5 @@
 # SharpRpc_K
-基于Netty4的分布式rpc框架,SharpRpc的Kotlin重构版本,后面该框架的更新将主要在该版本上更新
+基于Netty4+Zookeeper的分布式rpc框架,SharpRpc的Kotlin重构版本,后面该框架的更新将主要在该版本上更新
 
 ## 重构说明
 1.所有代码全部使用Kotlin重构,更加精简<br>
