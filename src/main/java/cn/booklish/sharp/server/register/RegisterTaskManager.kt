@@ -16,19 +16,22 @@ object RegisterTaskManager{
 
     private val queue = LinkedBlockingQueue<RegisterInfo>()
 
-    var exec: ExecutorService? = null
+    private lateinit var exec: ExecutorService
 
-    fun start(threadPoolSize: Int = 2){
-        exec = Executors.newFixedThreadPool(threadPoolSize)
-        exec!!.execute(RegisterTaskConsumer(queue))
+    private var threadPoolSize = 2
+
+    fun start(threadPoolSize: Int?){
+        threadPoolSize?.let { this.threadPoolSize = it }
+        exec = Executors.newFixedThreadPool(this.threadPoolSize)
+        exec.execute(RegisterTaskConsumer(queue))
     }
 
     fun submit(registerInfo: RegisterInfo){
-        exec!!.execute(RegisterTaskProducer(queue, registerInfo))
+        exec.execute(RegisterTaskProducer(queue, registerInfo))
     }
 
     fun stop(){
-        exec!!.shutdown()
+        exec.shutdown()
     }
 }
 

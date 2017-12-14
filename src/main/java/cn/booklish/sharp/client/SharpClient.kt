@@ -38,14 +38,15 @@ object SharpClient {
     private fun getServiceLocation(path: String): ProxyServiceInterceptor? {
         val data = ZkClient.getData(path, String::class.java)
         // data格式为->   服务全类名;ip地址:端口
-        if (StringUtils.isNotBlank(data)) {
+        return if (data.isNotBlank()) {
             val first = data.split(";".toRegex())
             val second = first[1].split(":".toRegex())
-            return ProxyServiceInterceptor(
+            ProxyServiceInterceptor(
                     InetSocketAddress(second[0], second[1].toInt()), first[0])
+        }else {
+            logger.warn("[SharpRpc-client]: 未找到名称为[$path]的Rpc服务")
+            null
         }
-        logger.warn("[SharpRpc-client]: 未找到名称为[$path]的Rpc服务")
-        return null
     }
 
 }

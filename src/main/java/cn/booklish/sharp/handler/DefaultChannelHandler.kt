@@ -34,11 +34,13 @@ class DefaultClientChannelInboundHandler: SimpleChannelInboundHandler<ByteBuf>()
                 , RpcResponse::class.java)
         val channel = ctx.channel()
         val callback = ChannelAttributeUtils.getResponseCallback(channel, response.id)
-        if (response.success) {
-            callback!!.receiveMessage(response.result)
-        } else {
-            logger.warn("[SharpRpc-client]: 请求id=" + response.id + "在服务器计算时出现异常,请检查客户端调用参数或者服务器日志")
-            callback!!.receiveMessage(response.e)
+        callback?.let {
+            if(response.success){
+                it.receiveMessage(response.result)
+            }else{
+                logger.warn("[SharpRpc-client]: 请求id=" + response.id + "在服务器计算时出现异常,请检查客户端调用参数或者服务器日志")
+                it.receiveMessage(response.e)
+            }
         }
 
     }

@@ -30,9 +30,9 @@ object ClientChannelManager{
     /**
      * 使用自定义的连接池大小和eventLoopGroup大小
      */
-    fun init(poolSize:Int = 10,eventLoopGroupSize:Int = 0){
-        this.poolSize = poolSize
-        this.eventLoopGroupSize = eventLoopGroupSize
+    fun init(poolSize:Int?,eventLoopGroupSize:Int?){
+        poolSize?.let { this.poolSize = it }
+        eventLoopGroupSize?.let { this.eventLoopGroupSize = it }
     }
 
     /**

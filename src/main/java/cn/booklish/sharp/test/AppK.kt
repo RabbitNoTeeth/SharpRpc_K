@@ -13,7 +13,7 @@ import cn.booklish.sharp.test.service.TestImpl
 
 fun main(args: Array<String>) {
 
-    val config = SharpRpcConfig("sharp.properties",ServiceBeanFactory { clazz -> TestImpl()})
+    val config = SharpRpcConfig("sharp.properties",ServiceBeanFactory { TestImpl()})
 
     config.autoConfigure()
 

@@ -14,18 +14,21 @@ import java.util.concurrent.Executors
  */
 object RpcRequestManager{
 
-    var exec: ExecutorService? = null
+    private lateinit var exec: ExecutorService
 
-    var serviceBeanFactory:ServiceBeanFactory? = null
+    private lateinit var serviceBeanFactory:ServiceBeanFactory
 
-    var async = true
+    private var async = true
+
+    private var threadPoolSize = 2
 
     /**
      * 启动管理器
      */
-    fun start(serviceBeanFactory:ServiceBeanFactory,async:Boolean = true,threadPoolSize:Int = 2){
-        this.async = async
-        this.exec = Executors.newFixedThreadPool(threadPoolSize)
+    fun start(serviceBeanFactory:ServiceBeanFactory,async:Boolean?,threadPoolSize:Int?){
+        async?.let { this.async = it }
+        threadPoolSize?.let { this.threadPoolSize = it }
+        this.exec = Executors.newFixedThreadPool(this.threadPoolSize)
         this.serviceBeanFactory = serviceBeanFactory
     }
 
@@ -46,14 +49,14 @@ object RpcRequestManager{
      * 同步计算Rpc请求
      */
     private fun submitSync(rpcRequest: RpcRequest): RpcResponse {
-        return RpcRequestHandler.computeRpcRequest(rpcRequest, serviceBeanFactory!!)
+        return RpcRequestHandler.computeRpcRequest(rpcRequest, serviceBeanFactory)
     }
 
     /**
      * 异步计算Rpc请求
      */
     private fun submitAsync(rpcRequest: RpcRequest): RpcResponse{
-        val call = exec!!.submit(RpcAsyncComputeCallable(rpcRequest, serviceBeanFactory!!))
+        val call = exec.submit(RpcAsyncComputeCallable(rpcRequest, serviceBeanFactory))
         return call.get()
     }
 
@@ -65,7 +68,7 @@ object RpcRequestManager{
  * @Created: 2017/12/13 8:59
  * @Modified:
  */
-class RpcAsyncComputeCallable(val rpcRequest: RpcRequest,val serviceBeanFactory: ServiceBeanFactory): Callable<RpcResponse>{
+class RpcAsyncComputeCallable(private val rpcRequest: RpcRequest, private val serviceBeanFactory: ServiceBeanFactory): Callable<RpcResponse>{
     override fun call(): RpcResponse {
         return RpcRequestHandler.computeRpcRequest(rpcRequest,serviceBeanFactory)
     }

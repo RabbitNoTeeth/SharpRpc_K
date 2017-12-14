@@ -19,21 +19,26 @@ object RpcServerBootStrap {
 
     private val bossGroup = NioEventLoopGroup()
     private val workerGroup = NioEventLoopGroup()
-    private var channel: Channel? = null
+    private lateinit var channel: Channel
     private val executor = Executors.newSingleThreadExecutor()
     private val b = ServerBootstrap()
+
+    private var port = 12200
+    private var clientChannelTimeout = 40
 
     /**
      * 默认配置并启动
      */
-    fun defaultConfigureAndStart(port:Int = 12200,clientChannelTimeout:Int = 40){
+    fun defaultConfigureAndStart(port:Int?,clientChannelTimeout:Int?){
+        port?.let { this.port = it }
+        clientChannelTimeout?.let { this.clientChannelTimeout = it }
         b.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel::class.java)
-                .childHandler(DefaultServerChannelInitializer(clientChannelTimeout))
+                .childHandler(DefaultServerChannelInitializer(this.clientChannelTimeout))
                 .option(ChannelOption.SO_BACKLOG, 128)
                 .childOption(ChannelOption.SO_KEEPALIVE, true)
 
-        start(b,port)
+        start(b,this.port)
     }
 
     /**
@@ -49,7 +54,7 @@ object RpcServerBootStrap {
      * 停止服务器
      */
     fun stop() {
-        channel!!.closeFuture().syncUninterruptibly()
+        channel.closeFuture().syncUninterruptibly()
         executor.shutdown()
         workerGroup.shutdownGracefully()
         bossGroup.shutdownGracefully()

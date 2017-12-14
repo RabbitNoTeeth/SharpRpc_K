@@ -30,11 +30,11 @@ object ZkClient {
 
     private val pool = ConnectionPool()
 
-    fun init(zkAddress:String,connectionPoolSize:Int = 15,zkRetryTimes:Int = 3,zkSleepBetweenRetry:Int = 3000){
+    fun init(zkAddress:String,connectionPoolSize:Int?,zkRetryTimes:Int?,zkSleepBetweenRetry:Int?){
         this.zkAddress = zkAddress
-        this.connectionPoolSize = connectionPoolSize
-        this.zkRetryTimes = zkRetryTimes
-        this.zkSleepBetweenRetry = zkSleepBetweenRetry
+        connectionPoolSize?.let { this.connectionPoolSize = it }
+        zkRetryTimes?.let { this.zkRetryTimes = it }
+        zkSleepBetweenRetry?.let { this.zkSleepBetweenRetry = it }
     }
 
     /**

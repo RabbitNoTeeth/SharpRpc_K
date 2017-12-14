@@ -23,7 +23,6 @@ class DefaultClientChannelInitializer: ChannelInitializer<SocketChannel>() {
         val pipeline = socketChannel.pipeline()
         pipeline.addLast(RpcMessageCodec())
                 .addLast(DefaultClientChannelInboundHandler())
-
         logger.info("[SharpRpc-client]: 客户端Channel处理器链Pipeline创建完成")
     }
 
