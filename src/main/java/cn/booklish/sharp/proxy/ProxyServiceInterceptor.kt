@@ -19,15 +19,15 @@ class ProxyServiceInterceptor(private val location: InetSocketAddress, private v
 
     override fun intercept(obj: Any, method: Method, args: Array<Any>, methodProxy: MethodProxy): Any? {
         val channel = ClientChannelManager.getChannel(location)
-        channel?.let { channel ->
+        channel?.let { ch ->
             val id = RpcRequestIdGenerator.getId()
             val callback = ResponseCallbackBean()
-            ChannelAttributeUtils.putResponseCallback(channel, id, callback)
+            ChannelAttributeUtils.putResponseCallback(ch, id, callback)
             synchronized(callback.lock) {
                 val rpcRequest = RpcRequest(id, serviceName, method.name)
                 rpcRequest.paramTypes = method.parameterTypes
                 rpcRequest.paramValues = args
-                channel.writeAndFlush(RpcMessageSerializer.objectToBytes(GsonSerializer.objectToJson(rpcRequest))).sync()
+                ch.writeAndFlush(RpcMessageSerializer.objectToBytes(GsonSerializer.objectToJson(rpcRequest))).sync()
                 callback.lock.wait()
             }
             return callback.result?.let { result -> GsonSerializer.objectToJson(result) }

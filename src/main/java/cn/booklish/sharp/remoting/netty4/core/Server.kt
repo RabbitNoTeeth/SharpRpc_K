@@ -1,7 +1,7 @@
 package cn.booklish.sharp.remoting.netty4.core
 
 import cn.booklish.sharp.constant.Constants
-import cn.booklish.sharp.remoting.netty4.api.ServerChannelInOperator
+import cn.booklish.sharp.remoting.netty4.api.ServerChannelOperator
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.Channel
 import io.netty.channel.ChannelOption
@@ -9,14 +9,13 @@ import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioServerSocketChannel
 import java.util.concurrent.Executors
 
-
 /**
  * @Author: liuxindong
- * @Description:  Rpc服务器引导
- * @Created: 2017/12/13 9:04
- * @Modified:
+ * @Description:
+ * @Create: don9 2017/12/18
+ * @Modify:
  */
-object RpcServerBootStrap {
+object Server {
 
     private val bossGroup = NioEventLoopGroup()
     private val workerGroup = NioEventLoopGroup()
@@ -29,14 +28,14 @@ object RpcServerBootStrap {
     /**
      * 默认配置并启动
      */
-    fun init(port:Int?,clientChannelTimeout:Int?):RpcServerBootStrap{
+    fun init(port:Int?,clientChannelTimeout:Int?):Server{
         port?.let { this.port = it }
         clientChannelTimeout?.let { this.clientChannelTimeout = it }
         bootstrap.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel::class.java)
                 .option(ChannelOption.SO_BACKLOG, 128)
                 .childOption(ChannelOption.SO_KEEPALIVE, true)
-                .childHandler(ServerChannelInitializer(this.clientChannelTimeout,ServerChannelInOperator()))
+                .childHandler(ServerChannelInitializer(this.clientChannelTimeout, ServerChannelOperator()))
         return this
     }
 
@@ -45,7 +44,18 @@ object RpcServerBootStrap {
      */
     fun start() {
 
-        executor.execute(ServerStartTask(this.bootstrap, this.port))
+        executor.execute(Runnable {
+            try {
+                val f = this.bootstrap.bind(this.port).sync()
+                channel = f.channel()
+                f.channel().closeFuture().sync()
+            } catch (e: InterruptedException) {
+                Thread.currentThread().interrupt()
+            } finally {
+                workerGroup.shutdownGracefully()
+                bossGroup.shutdownGracefully()
+            }
+        })
 
     }
 
@@ -58,26 +68,5 @@ object RpcServerBootStrap {
         workerGroup.shutdownGracefully()
         bossGroup.shutdownGracefully()
     }
-
-
-    /**
-     * 服务启动runnable类
-     */
-    private class ServerStartTask(val serverBootstrap: ServerBootstrap, val port: Int) : Runnable {
-
-        override fun run() {
-            try {
-                val f = serverBootstrap.bind(port).sync()
-                channel = f.channel()
-                f.channel().closeFuture().sync()
-            } catch (e: InterruptedException) {
-                Thread.currentThread().interrupt()
-            } finally {
-                workerGroup.shutdownGracefully()
-                bossGroup.shutdownGracefully()
-            }
-        }
-    }
-
 
 }

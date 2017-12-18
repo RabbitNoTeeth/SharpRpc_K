@@ -29,12 +29,7 @@ class ClientHandler(private val channelOperator: ChannelOperator): ChannelDuplex
     }
 
     override fun channelRead(ctx: ChannelHandlerContext, msg: Any) {
-        super.channelRead(ctx, msg)
         channelOperator.receive(ctx.channel(),msg)
-    }
-
-    override fun write(ctx: ChannelHandlerContext, msg: Any, promise: ChannelPromise) {
-        channelOperator.send(ctx.channel(),msg)
     }
 
     override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {

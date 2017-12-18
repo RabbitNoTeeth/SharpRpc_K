@@ -31,10 +31,6 @@ class ServerHandler(private val channelOperator: ChannelOperator) : ChannelDuple
         channelOperator.receive(ctx.channel(),message)
     }
 
-    override fun write(ctx: ChannelHandlerContext, msg: Any, promise: ChannelPromise) {
-        channelOperator.send(ctx.channel(),msg)
-    }
-
     override fun exceptionCaught(ctx: ChannelHandlerContext, cause: Throwable) {
         channelOperator.caught(ctx.channel(),cause)
     }

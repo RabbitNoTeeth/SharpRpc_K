@@ -1,6 +1,6 @@
 package cn.booklish.sharp.remoting.netty4.core
 
-import cn.booklish.sharp.remoting.netty4.api.ClientChannelInOperator
+import cn.booklish.sharp.remoting.netty4.api.ClientChannelOperator
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel.Channel
 import io.netty.channel.ChannelOption
@@ -18,12 +18,12 @@ object Client {
     private val eventLoopGroup = NioEventLoopGroup()
     private val bootstrap = Bootstrap()
 
-    fun init() {
+    init {
         bootstrap.group(eventLoopGroup)
                 .channel(NioSocketChannel::class.java)
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.TCP_NODELAY, true)
-                .handler(ClientChannelInitializer(ClientChannelInOperator()))
+                .handler(ClientChannelInitializer(ClientChannelOperator()))
     }
 
     fun newChannel(address: InetSocketAddress):Channel?{
@@ -31,7 +31,7 @@ object Client {
         val semaphore = Semaphore(3)
         do {
             try {
-                val channelFuture = bootstrap.clone().connect(address).sync()
+                val channelFuture = bootstrap.connect(address).sync()
                 return channelFuture.channel()
             } catch (e: InterruptedException) {
                 Thread.currentThread().interrupt()
@@ -43,7 +43,7 @@ object Client {
                 logger.info("[SharpRpc-client]: 客户端channel连接失败,重新尝试连接...")
             }
         } while (semaphore.tryAcquire())
-       return null
+        return null
     }
 
 }

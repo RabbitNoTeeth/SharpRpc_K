@@ -11,7 +11,7 @@ import io.netty.util.ReferenceCountUtil
 import org.apache.log4j.Logger
 
 
-class ServerChannelInOperator :ChannelOperator {
+class ServerChannelOperator :ChannelOperator {
 
     private val logger: Logger = Logger.getLogger(this.javaClass)
 
@@ -34,7 +34,7 @@ class ServerChannelInOperator :ChannelOperator {
             val rpcRequest = GsonSerializer.jsonToObject(RpcMessageSerializer.bytesToObject(message as ByteBuf,String::class.java),
                     RpcRequest::class.java)
             val computeResult = RpcRequestManager.submit(rpcRequest)
-            channel.write(RpcMessageSerializer.objectToBytes(GsonSerializer.objectToJson(computeResult)))
+            channel.writeAndFlush(RpcMessageSerializer.objectToBytes(GsonSerializer.objectToJson(computeResult)))
         }finally {
             ReferenceCountUtil.release(message)
         }

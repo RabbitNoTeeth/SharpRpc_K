@@ -6,7 +6,7 @@ object Constants {
     /**
      * 默认zookeeper连接地址
      */
-    val DEFAULT_ZOOKEEPER_ADDRESS = "127.0.0.1:2181"
+    val DEFAULT_ZOOKEEPER_ADDRESS = "47.94.206.26:2181"
 
     /**
      * 默认zookeeper连接池大小
