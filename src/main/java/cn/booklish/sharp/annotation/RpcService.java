@@ -13,6 +13,6 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RpcService {
 
-    String pathPrefix() default "";
+    String path() default "";
 
 }

@@ -1,7 +1,7 @@
 package cn.booklish.sharp.test;
 
 
-import cn.booklish.sharp.client.SharpClient;
+import cn.booklish.sharp.proxy.ServiceProxyFactory;
 import cn.booklish.sharp.config.SharpRpcConfig;
 import cn.booklish.sharp.test.service.Test;
 import cn.booklish.sharp.test.service.TestImpl;
@@ -14,14 +14,14 @@ public class App {
 
     public static void main(String[] args) throws InterruptedException {
 
-        SharpRpcConfig config = new SharpRpcConfig("sharp.properties",clazz -> new TestImpl());
+        /*SharpRpcConfig config = new SharpRpcConfig("sharp.properties",clazz -> new TestImpl());
 
         config.autoConfigure();
 
         Thread.sleep(3000);
 
-        Test service = (Test) SharpClient.INSTANCE.getService("/test/TestImpl", Test.class);
-        System.out.println(service.run());
+        Test service = (Test) ServiceProxyFactory.INSTANCE.getService("/test/TestImpl", Test.class);
+        System.out.println(service.run());*/
 
     }
 

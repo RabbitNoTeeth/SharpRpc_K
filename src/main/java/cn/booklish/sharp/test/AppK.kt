@@ -1,8 +1,8 @@
 package cn.booklish.sharp.test
 
-import cn.booklish.sharp.client.SharpClient
+import cn.booklish.sharp.proxy.ServiceProxyFactory
 import cn.booklish.sharp.config.SharpRpcConfig
-import cn.booklish.sharp.server.compute.ServiceBeanFactory
+import cn.booklish.sharp.compute.ServiceBeanFactory
 import cn.booklish.sharp.test.service.Test
 import cn.booklish.sharp.test.service.TestImpl
 
@@ -13,11 +13,11 @@ import cn.booklish.sharp.test.service.TestImpl
 
 fun main(args: Array<String>) {
 
-    val config = SharpRpcConfig("sharp.properties",ServiceBeanFactory { TestImpl()})
+    val config = SharpRpcConfig(ServiceBeanFactory { TestImpl() })
 
     config.autoConfigure()
 
-    val service = SharpClient.getService("/test/TestImpl", Test::class.java) as Test
+    val service = ServiceProxyFactory.getService("/test2/TestImpl", Test::class.java) as Test
 
     println(service.run())
 }
