@@ -14,7 +14,7 @@ import java.io.ByteArrayOutputStream
  * @Created: 2017/12/13 9:05
  * @Modified:
  */
-class KryoSerializer {
+class KryoUtil {
 
     companion object{
 

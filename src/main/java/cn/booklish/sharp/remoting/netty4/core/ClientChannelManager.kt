@@ -1,5 +1,6 @@
 package cn.booklish.sharp.remoting.netty4.core
 
+import cn.booklish.sharp.constant.Constants
 import cn.booklish.sharp.proxy.ChannelAttributeUtils
 import cn.booklish.sharp.proxy.ResponseCallbackBean
 import io.netty.channel.Channel
@@ -17,12 +18,11 @@ import java.util.concurrent.ConcurrentHashMap
 object ClientChannelManager{
 
     private val channelPoolMap = ConcurrentHashMap<InetSocketAddress, ClientChannelPool>()
-    var poolSize = 10
+    var poolSize = Constants.DEFAULT_CLIENT_CHANNEL_POOL_SIZE
     /**
      * 使用自定义的连接池大小和eventLoopGroup大小
      */
-    fun init(poolSize:Int?){
-        poolSize?.let { ClientChannelManager.poolSize = it }
+    fun init(){
     }
 
     /**
@@ -44,7 +44,7 @@ object ClientChannelManager{
  * @Created: 2017/12/13 17:26
  * @Modified:
  */
-class ClientChannelPool(private val capacity:Int = 10){
+class ClientChannelPool(private val capacity:Int){
 
     private val channels = arrayOfNulls<Channel>(capacity)
     private val locks = Array(capacity,{ Any() })

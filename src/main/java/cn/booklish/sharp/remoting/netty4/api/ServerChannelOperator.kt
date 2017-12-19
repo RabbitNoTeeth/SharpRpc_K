@@ -1,10 +1,8 @@
 package cn.booklish.sharp.remoting.netty4.api
 
 import cn.booklish.sharp.model.RpcRequest
-import cn.booklish.sharp.serialize.GsonSerializer
-import cn.booklish.sharp.serialize.RpcMessageSerializer
+import cn.booklish.sharp.serialize.GsonUtil
 import cn.booklish.sharp.compute.RpcRequestManager
-import io.netty.buffer.ByteBuf
 import io.netty.channel.Channel
 import io.netty.handler.timeout.ReadTimeoutException
 import io.netty.util.ReferenceCountUtil
@@ -31,10 +29,10 @@ class ServerChannelOperator :ChannelOperator {
     override fun receive(channel: Channel, message: Any) {
         logger.info("[SharpRpc-server]: 接收到来自客户端连接" + channel.id() + "的Rpc请求,开始处理")
         try{
-            val rpcRequest = GsonSerializer.jsonToObject(RpcMessageSerializer.bytesToObject(message as ByteBuf,String::class.java),
-                    RpcRequest::class.java)
+            val rpcRequest = GsonUtil.jsonToObject(message.toString(),RpcRequest::class.java)
             val computeResult = RpcRequestManager.submit(rpcRequest)
-            channel.writeAndFlush(RpcMessageSerializer.objectToBytes(GsonSerializer.objectToJson(computeResult)))
+            logger.info("[SharpRpc-server]: 来自客户端连接" + channel.id() + "的Rpc请求处理完成,返回结果给客户端")
+            channel.writeAndFlush(computeResult)
         }finally {
             ReferenceCountUtil.release(message)
         }

@@ -1,6 +1,9 @@
 package cn.booklish.sharp.remoting.netty4.core
 
+import cn.booklish.sharp.remoting.netty4.api.ChannelOperator
 import cn.booklish.sharp.remoting.netty4.api.ClientChannelOperator
+import cn.booklish.sharp.serialize.api.RpcSerializer
+import cn.booklish.sharp.serialize.kryo.KryoSerializer
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel.Channel
 import io.netty.channel.ChannelOption
@@ -18,12 +21,15 @@ object Client {
     private val eventLoopGroup = NioEventLoopGroup()
     private val bootstrap = Bootstrap()
 
-    init {
+    var rpcSerializer: RpcSerializer = KryoSerializer()
+    var channelOperator: ChannelOperator = ClientChannelOperator()
+
+    fun init(){
         bootstrap.group(eventLoopGroup)
                 .channel(NioSocketChannel::class.java)
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.TCP_NODELAY, true)
-                .handler(ClientChannelInitializer(ClientChannelOperator()))
+                .handler(ClientChannelInitializer(this.channelOperator,this.rpcSerializer))
     }
 
     fun newChannel(address: InetSocketAddress):Channel?{

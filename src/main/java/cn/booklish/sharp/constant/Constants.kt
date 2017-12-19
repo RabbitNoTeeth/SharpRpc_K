@@ -1,12 +1,14 @@
 package cn.booklish.sharp.constant
 
+import kotlin.math.min
+
 
 object Constants {
 
     /**
      * 默认zookeeper连接地址
      */
-    val DEFAULT_ZOOKEEPER_ADDRESS = "47.94.206.26:2181"
+    val DEFAULT_ZOOKEEPER_ADDRESS = "127.0.0.1:2181"
 
     /**
      * 默认zookeeper连接池大小
@@ -31,21 +33,25 @@ object Constants {
     /**
      * 默认Rpc异步处理线程池大小
      */
-    val DEFAULT_RPC_REQUEST_COMPUTE_MANAGER_THREAD_POOL_SIZE = 2
+    val DEFAULT_RPC_REQUEST_COMPUTE_MANAGER_THREAD_POOL_SIZE = min(Runtime.getRuntime().availableProcessors()+1,32)
 
     /**
      * 默认Rpc注册管理器线程池大小
      */
-    val DEFAULT_REGISTER_TASK_MANAGER_THREAD_POOL_SIZE = 2
+    val DEFAULT_REGISTER_TASK_MANAGER_THREAD_POOL_SIZE = min(Runtime.getRuntime().availableProcessors()+1,32)
 
     /**
-     * 默认server监听端口
+     * 默认客户端channel连接池大小
      */
-    val DEFAULT_SERVER_LISTEN_PORT = 12200
+    val DEFAULT_CLIENT_CHANNEL_POOL_SIZE = 15
 
     /**
      * 默认客户端rpc请求连接过期时间
      */
     val DEFAULT_CLIENT_CHANNEL_TIMEOUT = 45
 
+    /**
+     * 默认服务端server监听端口
+     */
+    val DEFAULT_SERVER_LISTEN_PORT = 12200
 }

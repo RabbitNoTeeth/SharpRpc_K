@@ -19,12 +19,11 @@ object RegisterTaskManager{
 
     private lateinit var exec: ExecutorService
 
-    private var threadPoolSize = Constants.DEFAULT_REGISTER_TASK_MANAGER_THREAD_POOL_SIZE
+    var threadPoolSize = Constants.DEFAULT_REGISTER_TASK_MANAGER_THREAD_POOL_SIZE
 
-    fun start(threadPoolSize: Int?,registerClient: RegisterClient){
-        threadPoolSize?.let { RegisterTaskManager.threadPoolSize = it }
-        exec = Executors.newFixedThreadPool(RegisterTaskManager.threadPoolSize)
-        exec.execute(RegisterTaskConsumer(queue,registerClient))
+    fun start(registryCenter: RegistryCenter){
+        exec = Executors.newFixedThreadPool(this.threadPoolSize)
+        exec.execute(RegisterTaskConsumer(queue, registryCenter))
     }
 
     fun submit(registerInfo: RegisterInfo){
@@ -58,12 +57,12 @@ class RegisterTaskProducer(private val queue: LinkedBlockingQueue<RegisterInfo>,
  * @Created: 2017/12/13 9:02
  * @Modified:
  */
-class RegisterTaskConsumer(private val queue: LinkedBlockingQueue<RegisterInfo>,private val registerClient: RegisterClient):Runnable{
+class RegisterTaskConsumer(private val queue: LinkedBlockingQueue<RegisterInfo>,private val registryCenter: RegistryCenter):Runnable{
     override fun run() {
         while (true) {
             try {
                 val info = queue.take()
-                registerClient.createPath(info.path, info)
+                registryCenter.createPath(info.path, info)
             } catch (e: InterruptedException) {
                 break
             }

@@ -1,7 +1,10 @@
 package cn.booklish.sharp.remoting.netty4.core
 
 import cn.booklish.sharp.constant.Constants
+import cn.booklish.sharp.remoting.netty4.api.ChannelOperator
 import cn.booklish.sharp.remoting.netty4.api.ServerChannelOperator
+import cn.booklish.sharp.serialize.api.RpcSerializer
+import cn.booklish.sharp.serialize.kryo.KryoSerializer
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.Channel
 import io.netty.channel.ChannelOption
@@ -22,20 +25,20 @@ object Server {
     private lateinit var channel: Channel
     private val executor = Executors.newSingleThreadExecutor()
     private val bootstrap = ServerBootstrap()
-    private var port = Constants.DEFAULT_SERVER_LISTEN_PORT
-    private var clientChannelTimeout = Constants.DEFAULT_CLIENT_CHANNEL_TIMEOUT
+    var port = Constants.DEFAULT_SERVER_LISTEN_PORT
+    var clientChannelTimeout = Constants.DEFAULT_CLIENT_CHANNEL_TIMEOUT
+    var rpcSerializer: RpcSerializer = KryoSerializer()
+    var channelOperator: ChannelOperator = ServerChannelOperator()
 
     /**
      * 默认配置并启动
      */
-    fun init(port:Int?,clientChannelTimeout:Int?):Server{
-        port?.let { this.port = it }
-        clientChannelTimeout?.let { this.clientChannelTimeout = it }
+    fun init():Server{
         bootstrap.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel::class.java)
                 .option(ChannelOption.SO_BACKLOG, 128)
                 .childOption(ChannelOption.SO_KEEPALIVE, true)
-                .childHandler(ServerChannelInitializer(this.clientChannelTimeout, ServerChannelOperator()))
+                .childHandler(ServerChannelInitializer(this.clientChannelTimeout, this.channelOperator,this.rpcSerializer))
         return this
     }
 
@@ -44,7 +47,7 @@ object Server {
      */
     fun start() {
 
-        executor.execute(Runnable {
+        executor.execute({
             try {
                 val f = this.bootstrap.bind(this.port).sync()
                 channel = f.channel()

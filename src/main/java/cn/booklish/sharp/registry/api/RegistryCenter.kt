@@ -1,7 +1,7 @@
 package cn.booklish.sharp.registry.api
 
 
-interface RegisterClient {
+interface RegistryCenter {
 
     fun getChildrenPath(path: String): List<String>
 

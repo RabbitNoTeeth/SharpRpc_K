@@ -2,11 +2,8 @@ package cn.booklish.sharp.remoting.netty4.api
 
 import cn.booklish.sharp.proxy.ChannelAttributeUtils
 import cn.booklish.sharp.model.RpcResponse
-import cn.booklish.sharp.serialize.GsonSerializer
-import cn.booklish.sharp.serialize.RpcMessageSerializer
-import io.netty.buffer.ByteBuf
+import cn.booklish.sharp.serialize.GsonUtil
 import io.netty.channel.Channel
-import io.netty.util.ReferenceCountUtil
 import org.apache.log4j.Logger
 
 
@@ -21,12 +18,10 @@ class ClientChannelOperator :ChannelOperator {
     }
 
     override fun send(channel: Channel, message: Any) {
-        channel.writeAndFlush(message)
     }
 
     override fun receive(channel: Channel, message: Any) {
-        val response = GsonSerializer.jsonToObject(RpcMessageSerializer.bytesToObject(message as ByteBuf, String::class.java)
-                , RpcResponse::class.java)
+        val response = GsonUtil.jsonToObject(message.toString() , RpcResponse::class.java)
         val callback = ChannelAttributeUtils.getResponseCallback(channel, response.id)
         callback?.let {
             if(response.success){

@@ -2,13 +2,12 @@ package cn.booklish.sharp.registry.zookeeper
 
 import cn.booklish.sharp.constant.Constants
 import cn.booklish.sharp.exception.*
-import cn.booklish.sharp.registry.api.RegisterClient
+import cn.booklish.sharp.registry.api.RegistryCenter
 import cn.booklish.sharp.registry.api.RegisterInfo
-import cn.booklish.sharp.serialize.KryoSerializer
+import cn.booklish.sharp.serialize.KryoUtil
 import org.apache.commons.lang3.StringUtils
 import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.CuratorFrameworkFactory
-import org.apache.curator.framework.api.CuratorWatcher
 import org.apache.curator.framework.imps.CuratorFrameworkState
 import org.apache.curator.retry.RetryNTimes
 import org.apache.log4j.Logger
@@ -22,24 +21,16 @@ import java.util.*
  * @Created: 2017/12/13 9:05
  * @Modified:
  */
-class ZookeeperClient: RegisterClient {
-
-    var zkAddress:String = Constants.DEFAULT_ZOOKEEPER_ADDRESS
-    var connectionPoolSize:Int = Constants.DEFAULT_ZOOKEEPER_CONNECTION_POOL_SIZE
-    var zkRetryTimes:Int = Constants.DEFAULT_ZOOKEEPER_RETRY_TIMES
-    var zkSleepBetweenRetry:Int = Constants.DEFAULT_ZOOKEEPER_SLEEP_BETWEEN_RETRY
+class ZookeeperCenter(var zkAddress:String? = Constants.DEFAULT_ZOOKEEPER_ADDRESS,
+                      var connectionPoolSize:Int? = Constants.DEFAULT_ZOOKEEPER_CONNECTION_POOL_SIZE,
+                      var zkRetryTimes:Int? = Constants.DEFAULT_ZOOKEEPER_RETRY_TIMES,
+                      var zkSleepBetweenRetry:Int? = Constants.DEFAULT_ZOOKEEPER_SLEEP_BETWEEN_RETRY
+) : RegistryCenter {
 
     private val logger: Logger = Logger.getLogger(this.javaClass)
 
     private val pool = ConnectionPool()
 
-    fun init(zkAddress:String?,connectionPoolSize:Int?,zkRetryTimes:Int?,zkSleepBetweenRetry:Int?): ZookeeperClient {
-        zkAddress?.let { this.zkAddress = it }
-        connectionPoolSize?.let { this.connectionPoolSize = it }
-        zkRetryTimes?.let { this.zkRetryTimes = it }
-        zkSleepBetweenRetry?.let { this.zkSleepBetweenRetry = it }
-        return this
-    }
 
     /**
      * 获取指定节点的所有子节点
@@ -61,7 +52,7 @@ class ZookeeperClient: RegisterClient {
     override fun getData(path: String): RegisterInfo {
 
         try {
-            return KryoSerializer.readObjectFromByteArray(pool.getConnection().data.forPath(path), RegisterInfo::class.java)
+            return KryoUtil.readObjectFromByteArray(pool.getConnection().data.forPath(path), RegisterInfo::class.java)
         } catch (e: Exception) {
             logger.error("获取zookeeper路径[$path]数据失败")
             throw GetZkPathDataException("获取zookeeper路径[$path]数据失败", e)
@@ -78,7 +69,7 @@ class ZookeeperClient: RegisterClient {
             if (!checkPathExists(path)) {
                 checkParentExits(path)
                 pool.getConnection().create().withMode(CreateMode.PERSISTENT).withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE)
-                        .forPath(path, KryoSerializer.writeObjectToByteArray(data))
+                        .forPath(path, KryoUtil.writeObjectToByteArray(data))
             } else {
                 updatePath(path, data)
             }
@@ -121,7 +112,7 @@ class ZookeeperClient: RegisterClient {
         try {
 
             if (checkPathExists(path))
-                pool.getConnection().setData().forPath(path, KryoSerializer.writeObjectToByteArray(data))
+                pool.getConnection().setData().forPath(path, KryoUtil.writeObjectToByteArray(data))
 
         } catch (e: Exception) {
             logger.error("更新指定的zookeeper路径[$path]失败")
@@ -166,11 +157,11 @@ class ZookeeperClient: RegisterClient {
      */
     private inner class ConnectionPool{
 
-        val pool = arrayOfNulls<CuratorFramework>(connectionPoolSize)
-        val locks = Array(connectionPoolSize,{ Any() })
+        val pool = arrayOfNulls<CuratorFramework>(connectionPoolSize!!)
+        val locks = Array(connectionPoolSize!!,{ Any() })
 
         fun getConnection(): CuratorFramework{
-            val index = Random().nextInt(connectionPoolSize)
+            val index = Random().nextInt(connectionPoolSize!!)
             val connection = pool[index]
             if(connection!=null && connection.state == CuratorFrameworkState.STARTED){
                 return connection
@@ -187,7 +178,7 @@ class ZookeeperClient: RegisterClient {
         }
 
         private fun createConnection(): CuratorFramework {
-            val connection = CuratorFrameworkFactory.newClient(zkAddress, RetryNTimes(zkRetryTimes, zkSleepBetweenRetry))
+            val connection = CuratorFrameworkFactory.newClient(zkAddress, RetryNTimes(zkRetryTimes!!, zkSleepBetweenRetry!!))
             connection.start()
             return connection
         }

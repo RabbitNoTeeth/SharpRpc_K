@@ -19,16 +19,14 @@ object RpcRequestManager{
 
     private lateinit var serviceBeanFactory: ServiceBeanFactory
 
-    private var async = Constants.DEFAULT_RPC_REQUEST_COMPUTE_MANAGER_ASYNC
+    var async = Constants.DEFAULT_RPC_REQUEST_COMPUTE_MANAGER_ASYNC
 
-    private var threadPoolSize = Constants.DEFAULT_RPC_REQUEST_COMPUTE_MANAGER_THREAD_POOL_SIZE
+    var threadPoolSize = Constants.DEFAULT_RPC_REQUEST_COMPUTE_MANAGER_THREAD_POOL_SIZE
 
     /**
      * 启动管理器
      */
-    fun start(serviceBeanFactory: ServiceBeanFactory, async:Boolean?, threadPoolSize:Int?){
-        async?.let { RpcRequestManager.async = it }
-        threadPoolSize?.let { RpcRequestManager.threadPoolSize = it }
+    fun start(serviceBeanFactory: ServiceBeanFactory){
         exec = Executors.newFixedThreadPool(RpcRequestManager.threadPoolSize)
         RpcRequestManager.serviceBeanFactory = serviceBeanFactory
     }

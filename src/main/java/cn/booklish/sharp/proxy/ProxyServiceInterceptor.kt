@@ -2,8 +2,7 @@ package cn.booklish.sharp.proxy
 
 import cn.booklish.sharp.remoting.netty4.core.ClientChannelManager
 import cn.booklish.sharp.model.RpcRequest
-import cn.booklish.sharp.serialize.GsonSerializer
-import cn.booklish.sharp.serialize.RpcMessageSerializer
+import cn.booklish.sharp.serialize.GsonUtil
 import net.sf.cglib.proxy.MethodInterceptor
 import net.sf.cglib.proxy.MethodProxy
 import java.lang.reflect.Method
@@ -27,10 +26,10 @@ class ProxyServiceInterceptor(private val location: InetSocketAddress, private v
                 val rpcRequest = RpcRequest(id, serviceName, method.name)
                 rpcRequest.paramTypes = method.parameterTypes
                 rpcRequest.paramValues = args
-                ch.writeAndFlush(RpcMessageSerializer.objectToBytes(GsonSerializer.objectToJson(rpcRequest))).sync()
+                ch.writeAndFlush(rpcRequest).sync()
                 callback.lock.wait()
             }
-            return callback.result?.let { result -> GsonSerializer.objectToJson(result) }
+            return callback.result?.let { result -> GsonUtil.objectToJson(result) }
         }
         return null
     }
