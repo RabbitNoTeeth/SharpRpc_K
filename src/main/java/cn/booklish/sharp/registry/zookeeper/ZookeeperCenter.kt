@@ -33,6 +33,7 @@ class ZookeeperCenter(zkAddress:String = Constants.DEFAULT_ZOOKEEPER_ADDRESS,
     private val connectionPool = config.let {
         it.testOnBorrow = true
         it.testOnReturn = true
+        it.blockWhenExhausted = true
         ZkConnectionPoolFactory(zkAddress,zkRetryTimes,zkSleepBetweenRetry,it)
     }
 

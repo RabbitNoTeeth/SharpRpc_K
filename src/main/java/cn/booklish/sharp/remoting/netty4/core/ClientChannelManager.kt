@@ -29,6 +29,7 @@ object ClientChannelManager{
         this.config = config
         this.config!!.testOnBorrow = true
         this.config!!.testOnReturn = true
+        this.config!!.blockWhenExhausted = true
     }
 
     /**
