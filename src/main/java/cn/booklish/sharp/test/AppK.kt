@@ -18,11 +18,9 @@ fun main(args: Array<String>) {
 
     val config = SharpRpcConfig(ServiceBeanFactory { TestImpl() })
 
-    config.setRegistyrCenter(RegistryCenterType.ZOOKEEPER,"47.94.206.26:2181").configure()
+    config.loadProperties("sharp.properties").configure()
 
     RegisterTaskManager.submit(RegisterInfo("/test2/TestImpl","cn.booklish.sharp.test.service.TestImpl","127.0.0.1:12200"))
-
-    Thread.sleep(3000)
 
     val service = ServiceProxyFactory.getService("/test2/TestImpl", Test::class.java) as Test
 

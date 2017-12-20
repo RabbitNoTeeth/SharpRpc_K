@@ -153,16 +153,16 @@ class SharpRpcConfig(private val serviceBeanFactory: ServiceBeanFactory) {
         //--------------------------------配置注册中心--------------------------------
 
         logger.info("[Sharp-config]: 开始Sharp配置 >>>>>>>>>>>>>>>")
-        registryCenter?.let {
+        if(registryCenter==null){
             val registryCenterType:Any? = configMap["registry.center.type"]
             registryCenterType?:throw SharpConfigException("未配置RegistryCenter注册中心类型")
-            this.registryCenter = when(registryCenterType.toString()){
+            registryCenter = when(registryCenterType.toString()){
                 "zookeeper" -> {
                     configMap["zookeeper.address"]?:throw SharpConfigException("未配置RegistryCenter注册中心地址")
-                    ZookeeperCenter(configMap["zookeeper.address"]?.toString(),
-                                    configMap["zookeeper.retryTimes"]?.toString()?.toInt(),
-                                    configMap["zookeeper.sleepBetweenRetry"]?.toString()?.toInt(),
-                                    configMap["zookeeper.poolSize"]?.toString()?.toInt())
+                    ZookeeperCenter(configMap["zookeeper.address"]?.toString()?:Constants.DEFAULT_ZOOKEEPER_ADDRESS,
+                            configMap["zookeeper.retryTimes"]?.toString()?.toInt()?:Constants.DEFAULT_ZOOKEEPER_RETRY_TIMES,
+                            configMap["zookeeper.sleepBetweenRetry"]?.toString()?.toInt()?:Constants.DEFAULT_ZOOKEEPER_SLEEP_BETWEEN_RETRY,
+                            configMap["zookeeper.poolSize"]?.toString()?.toInt()?:Constants.DEFAULT_ZOOKEEPER_CONNECTION_POOL_SIZE)
                 }
                 "redis" -> {
                     null
@@ -175,7 +175,7 @@ class SharpRpcConfig(private val serviceBeanFactory: ServiceBeanFactory) {
         //--------------------------------配置客户端--------------------------------
 
         ServiceProxyFactory.init(registryCenter!!)
-        logger.info("[Sharp-config]: 2.ServiceProxyFactory代理工厂配置完成")
+        logger.info("[Sharp-config]: 2.ServiceProxyFactory客户端服务代理工厂配置完成")
 
         configMap["client.channel.poolSize"]?.let { ClientChannelManager.poolSize = it.toString().toInt() }
         ClientChannelManager.init()
@@ -237,7 +237,7 @@ class SharpRpcConfig(private val serviceBeanFactory: ServiceBeanFactory) {
         //--------------------------------配置客户端--------------------------------
 
         ServiceProxyFactory.init(registryCenter!!)
-        logger.info("[Sharp-config]: 2.ServiceProxyFactory代理工厂配置完成")
+        logger.info("[Sharp-config]: 2.ServiceProxyFactory客户端服务代理工厂配置完成")
 
         ClientChannelManager.init()
         logger.info("[Sharp-config]: 3.ClientChannelManager客户端channel管理器配置完成")

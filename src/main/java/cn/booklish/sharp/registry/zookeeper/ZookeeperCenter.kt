@@ -21,10 +21,10 @@ import java.util.*
  * @Created: 2017/12/13 9:05
  * @Modified:
  */
-class ZookeeperCenter(var zkAddress:String? = Constants.DEFAULT_ZOOKEEPER_ADDRESS,
-                      var connectionPoolSize:Int? = Constants.DEFAULT_ZOOKEEPER_CONNECTION_POOL_SIZE,
-                      var zkRetryTimes:Int? = Constants.DEFAULT_ZOOKEEPER_RETRY_TIMES,
-                      var zkSleepBetweenRetry:Int? = Constants.DEFAULT_ZOOKEEPER_SLEEP_BETWEEN_RETRY
+class ZookeeperCenter(var zkAddress:String = Constants.DEFAULT_ZOOKEEPER_ADDRESS,
+                      var connectionPoolSize:Int = Constants.DEFAULT_ZOOKEEPER_CONNECTION_POOL_SIZE,
+                      var zkRetryTimes:Int = Constants.DEFAULT_ZOOKEEPER_RETRY_TIMES,
+                      var zkSleepBetweenRetry:Int = Constants.DEFAULT_ZOOKEEPER_SLEEP_BETWEEN_RETRY
 ) : RegistryCenter {
 
     private val logger: Logger = Logger.getLogger(this.javaClass)

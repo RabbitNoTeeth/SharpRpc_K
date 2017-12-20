@@ -27,7 +27,7 @@ class ClientChannelInitializer(private val channelOperator: ChannelOperator,
                 .addLast(MessageDecoder(rpcSerializer))
                 .addLast(MessageEncoder(rpcSerializer))
                 .addLast(ClientHandler(channelOperator))
-        logger.info("[SharpRpc-client]: 客户端Channel处理器链Pipeline创建完成")
+        //logger.info("[SharpRpc-client]: 客户端Channel处理器链Pipeline创建完成")
     }
 
 }
@@ -52,7 +52,7 @@ class ServerChannelInitializer(private val clientChannelTimeout: Int = 40,
                 .addLast(MessageEncoder(rpcSerializer))
                 .addLast(ReadTimeoutHandler(clientChannelTimeout))
                 .addLast(ServerHandler(channelOperator))
-        logger.info("[SharpRpc-server]: 服务器Channel处理器链Pipeline创建完成")
+        //logger.info("[SharpRpc-server]: 服务器Channel处理器链Pipeline创建完成")
     }
 
 }
