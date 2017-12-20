@@ -2,7 +2,6 @@ package cn.booklish.sharp.remoting.netty4.core
 
 import cn.booklish.sharp.remoting.netty4.api.ChannelOperator
 import cn.booklish.sharp.serialize.api.RpcSerializer
-import cn.booklish.sharp.serialize.kryo.KryoSerializer
 import io.netty.channel.ChannelInitializer
 import io.netty.channel.socket.SocketChannel
 import io.netty.handler.timeout.ReadTimeoutHandler
@@ -23,9 +22,7 @@ class ClientChannelInitializer(private val channelOperator: ChannelOperator,
 
     override fun initChannel(socketChannel: SocketChannel) {
         val pipeline = socketChannel.pipeline()
-        pipeline//.addLast(Codec())
-                .addLast(MessageDecoder(rpcSerializer))
-                .addLast(MessageEncoder(rpcSerializer))
+        pipeline.addLast(MessageCodec(rpcSerializer))
                 .addLast(ClientHandler(channelOperator))
         //logger.info("[SharpRpc-client]: 客户端Channel处理器链Pipeline创建完成")
     }
@@ -47,9 +44,7 @@ class ServerChannelInitializer(private val clientChannelTimeout: Int = 40,
 
     override fun initChannel(socketChannel: SocketChannel) {
         val pipeline = socketChannel.pipeline()
-        pipeline//.addLast(Codec())
-                .addLast(MessageDecoder(rpcSerializer))
-                .addLast(MessageEncoder(rpcSerializer))
+        pipeline.addLast(MessageCodec(rpcSerializer))
                 .addLast(ReadTimeoutHandler(clientChannelTimeout))
                 .addLast(ServerHandler(channelOperator))
         //logger.info("[SharpRpc-server]: 服务器Channel处理器链Pipeline创建完成")
