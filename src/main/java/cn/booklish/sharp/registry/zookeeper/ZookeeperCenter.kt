@@ -6,6 +6,7 @@ import cn.booklish.sharp.registry.api.RegistryCenter
 import cn.booklish.sharp.registry.api.RegisterInfo
 import cn.booklish.sharp.serialize.KryoUtil
 import org.apache.commons.lang3.StringUtils
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig
 import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.CuratorFrameworkFactory
 import org.apache.curator.framework.imps.CuratorFrameworkState
@@ -23,13 +24,17 @@ import java.util.*
  */
 class ZookeeperCenter(zkAddress:String = Constants.DEFAULT_ZOOKEEPER_ADDRESS,
                       zkRetryTimes:Int = Constants.DEFAULT_ZOOKEEPER_RETRY_TIMES,
-                      zkSleepBetweenRetry:Int = Constants.DEFAULT_ZOOKEEPER_SLEEP_BETWEEN_RETRY
+                      zkSleepBetweenRetry:Int = Constants.DEFAULT_ZOOKEEPER_SLEEP_BETWEEN_RETRY,
+                      config: GenericObjectPoolConfig
 ) : RegistryCenter {
 
     private val logger: Logger = Logger.getLogger(this.javaClass)
 
-    private val connectionPool = ZkConnectionPoolFactory(zkAddress,zkRetryTimes,zkSleepBetweenRetry)
-
+    private val connectionPool = config.let {
+        it.testOnBorrow = true
+        it.testOnReturn = true
+        ZkConnectionPoolFactory(zkAddress,zkRetryTimes,zkSleepBetweenRetry,it)
+    }
 
     /**
      * 获取指定节点的所有子节点

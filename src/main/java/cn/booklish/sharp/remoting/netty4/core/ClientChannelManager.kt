@@ -5,6 +5,7 @@ import org.apache.commons.pool2.BasePooledObjectFactory
 import org.apache.commons.pool2.PooledObject
 import org.apache.commons.pool2.impl.DefaultPooledObject
 import org.apache.commons.pool2.impl.GenericObjectPool
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig
 import java.net.InetSocketAddress
 import java.util.concurrent.ConcurrentHashMap
 
@@ -19,10 +20,15 @@ object ClientChannelManager{
 
     private val channelPoolMap = ConcurrentHashMap<InetSocketAddress, ChannelPoolFactory>()
 
+    private var config:GenericObjectPoolConfig? = null
+
     /**
      * 使用自定义的连接池大小和eventLoopGroup大小
      */
-    fun init(){
+    fun init(config: GenericObjectPoolConfig){
+        this.config = config
+        this.config!!.testOnBorrow = true
+        this.config!!.testOnReturn = true
     }
 
     /**
@@ -31,7 +37,7 @@ object ClientChannelManager{
     fun getChannelPool(serverAddress:InetSocketAddress): ChannelPoolFactory {
         val channelPool = channelPoolMap[serverAddress]
         if(channelPool==null){
-            channelPoolMap.putIfAbsent(serverAddress, ChannelPoolFactory(serverAddress))
+            channelPoolMap.putIfAbsent(serverAddress, ChannelPoolFactory(serverAddress,config!!))
         }
         return channelPoolMap[serverAddress]!!
     }
@@ -45,21 +51,14 @@ object ClientChannelManager{
  * @Created: 2017/12/20 14:43
  * @Modified:
  */
-class ChannelPoolFactory(address: InetSocketAddress) {
+class ChannelPoolFactory(address: InetSocketAddress,config: GenericObjectPoolConfig) {
 
     private val channelFactory = ChannelFactory(address)
 
-    private val pool = GenericObjectPool<Channel>(channelFactory)
+    private val pool = GenericObjectPool<Channel>(channelFactory,config)
 
     fun getChannel():Channel{
-        while (true){
-            val channel = pool.borrowObject()
-            if(!channelFactory.validateChannel(channel)){
-                pool.invalidateObject(channel)
-                continue
-            }
-            return channel
-        }
+        return pool.borrowObject()
     }
 
     fun releaseChannel(channel: Channel){

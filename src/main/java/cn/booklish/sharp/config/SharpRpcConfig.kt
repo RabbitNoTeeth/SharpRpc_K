@@ -14,6 +14,7 @@ import cn.booklish.sharp.registry.zookeeper.ZookeeperCenter
 import cn.booklish.sharp.remoting.netty4.core.Client
 import cn.booklish.sharp.remoting.netty4.core.Server
 import cn.booklish.sharp.serialize.api.RpcSerializer
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig
 import org.apache.log4j.Logger
 import java.util.*
 
@@ -28,21 +29,16 @@ class SharpRpcConfig(private val serviceBeanFactory: ServiceBeanFactory) {
     private val logger: Logger = Logger.getLogger(this.javaClass)
 
     private val configMap = HashMap<String,Any>()
-
     private var registryCenter: RegistryCenter? = null
-
     private var rpcSerializer: RpcSerializer? = null
-
     private var enableServer = true
-
     private var enableAutoScanner = false
-
     private var autoScanBasePath:String? = null
-
     private var autoScanRegisterAddress:String? = null
-
     private var loadPropertiesState = false
-
+    val zookeeperPoolConfig = GenericObjectPoolConfig()
+    val redisPoolConfig = GenericObjectPoolConfig()
+    val channelPoolConfig = GenericObjectPoolConfig()
 
     /**
      * 关闭服务器功能
@@ -86,11 +82,12 @@ class SharpRpcConfig(private val serviceBeanFactory: ServiceBeanFactory) {
             RegistryCenterType.ZOOKEEPER -> {
                 if(loadPropertiesState){
                     ZookeeperCenter(registerAddress,
-                                    /*configMap["zookeeper.poolSize"]?.toString()?.toInt()?: Constants.DEFAULT_ZOOKEEPER_CONNECTION_POOL_SIZE,*/
                                     configMap["zookeeper.retryTimes"]?.toString()?.toInt()?:Constants.DEFAULT_ZOOKEEPER_RETRY_TIMES,
-                                    configMap["zookeeper.sleepBetweenRetry"]?.toString()?.toInt()?:Constants.DEFAULT_ZOOKEEPER_SLEEP_BETWEEN_RETRY)
+                                    configMap["zookeeper.sleepBetweenRetry"]?.toString()?.toInt()?:Constants.DEFAULT_ZOOKEEPER_SLEEP_BETWEEN_RETRY,
+                                    zookeeperPoolConfig
+                    )
                 }else{
-                    ZookeeperCenter(registerAddress)
+                    ZookeeperCenter(registerAddress,config = zookeeperPoolConfig)
                 }
             }
 
@@ -161,7 +158,8 @@ class SharpRpcConfig(private val serviceBeanFactory: ServiceBeanFactory) {
                     configMap["zookeeper.address"]?:throw SharpConfigException("未配置RegistryCenter注册中心地址")
                     ZookeeperCenter(configMap["zookeeper.address"]?.toString()?:Constants.DEFAULT_ZOOKEEPER_ADDRESS,
                             configMap["zookeeper.retryTimes"]?.toString()?.toInt()?:Constants.DEFAULT_ZOOKEEPER_RETRY_TIMES,
-                            configMap["zookeeper.sleepBetweenRetry"]?.toString()?.toInt()?:Constants.DEFAULT_ZOOKEEPER_SLEEP_BETWEEN_RETRY)
+                            configMap["zookeeper.sleepBetweenRetry"]?.toString()?.toInt()?:Constants.DEFAULT_ZOOKEEPER_SLEEP_BETWEEN_RETRY,
+                            zookeeperPoolConfig)
                 }
                 "redis" -> {
                     null
@@ -176,7 +174,7 @@ class SharpRpcConfig(private val serviceBeanFactory: ServiceBeanFactory) {
         ServiceProxyFactory.init(registryCenter!!)
         logger.info("[Sharp-config]: 2.ServiceProxyFactory客户端服务代理工厂配置完成")
 
-        ClientChannelManager.init()
+        ClientChannelManager.init(channelPoolConfig)
         logger.info("[Sharp-config]: 3.ClientChannelManager客户端channel管理器配置完成")
 
         rpcSerializer?.let { Client.rpcSerializer = it }
@@ -237,7 +235,7 @@ class SharpRpcConfig(private val serviceBeanFactory: ServiceBeanFactory) {
         ServiceProxyFactory.init(registryCenter!!)
         logger.info("[Sharp-config]: 2.ServiceProxyFactory客户端服务代理工厂配置完成")
 
-        ClientChannelManager.init()
+        ClientChannelManager.init(channelPoolConfig)
         logger.info("[Sharp-config]: 3.ClientChannelManager客户端channel管理器配置完成")
 
         rpcSerializer?.let { Client.rpcSerializer = it }
