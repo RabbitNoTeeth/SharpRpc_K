@@ -1,9 +1,11 @@
 package cn.booklish.sharp.remoting.netty4.core
 
-import cn.booklish.sharp.constant.Constants
 import io.netty.channel.Channel
+import org.apache.commons.pool2.BasePooledObjectFactory
+import org.apache.commons.pool2.PooledObject
+import org.apache.commons.pool2.impl.DefaultPooledObject
+import org.apache.commons.pool2.impl.GenericObjectPool
 import java.net.InetSocketAddress
-import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 
@@ -15,8 +17,8 @@ import java.util.concurrent.ConcurrentHashMap
  */
 object ClientChannelManager{
 
-    private val channelPoolMap = ConcurrentHashMap<InetSocketAddress, ClientChannelPool>()
-    var poolSize = Constants.DEFAULT_CLIENT_CHANNEL_POOL_SIZE
+    private val channelPoolMap = ConcurrentHashMap<InetSocketAddress, ChannelPoolFactory>()
+
     /**
      * 使用自定义的连接池大小和eventLoopGroup大小
      */
@@ -24,53 +26,92 @@ object ClientChannelManager{
     }
 
     /**
-     * 获取channel连接
+     * 获取channelPool连接池
      */
-    fun getChannel(serverAddress:InetSocketAddress): Channel? {
+    fun getChannelPool(serverAddress:InetSocketAddress): ChannelPoolFactory {
         val channelPool = channelPoolMap[serverAddress]
         if(channelPool==null){
-            channelPoolMap.putIfAbsent(serverAddress, ClientChannelPool(poolSize))
+            channelPoolMap.putIfAbsent(serverAddress, ChannelPoolFactory(serverAddress))
         }
-        return channelPoolMap[serverAddress]!!.getChannel(serverAddress)
+        return channelPoolMap[serverAddress]!!
+    }
+
+}
+
+
+/**
+ * @Author: liuxindong
+ * @Description:  channel连接池工厂
+ * @Created: 2017/12/20 14:43
+ * @Modified:
+ */
+class ChannelPoolFactory(address: InetSocketAddress) {
+
+    private val channelFactory = ChannelFactory(address)
+
+    private val pool = GenericObjectPool<Channel>(channelFactory)
+
+    fun getChannel():Channel{
+        while (true){
+            val channel = pool.borrowObject()
+            if(!channelFactory.validateChannel(channel)){
+                pool.invalidateObject(channel)
+                continue
+            }
+            return channel
+        }
+    }
+
+    fun releaseChannel(channel: Channel){
+        try {
+            pool.returnObject(channel)
+        }catch (e:Exception){
+            if(channel.isOpen){
+                channel.close()
+            }
+        }
     }
 
 }
 
 /**
  * @Author: liuxindong
- * @Description:  客户端channel连接池
- * @Created: 2017/12/13 17:26
+ * @Description:  channel工厂
+ * @Created: 2017/12/20 15:24
  * @Modified:
  */
-class ClientChannelPool(private val capacity:Int){
+class ChannelFactory(private val address: InetSocketAddress): BasePooledObjectFactory<Channel>() {
 
-    private val channels = arrayOfNulls<Channel>(capacity)
-    private val locks = Array(capacity,{ Any() })
-
-
-    /**
-     * 获取channel连接
-     */
-    fun getChannel(address: InetSocketAddress): Channel? {
-
-        val index = Random().nextInt(capacity)
-        val channel = channels[index]
-        if (channel!=null && channel.isActive) {
-            return channel
-        }
-        synchronized(locks[index]) {
-            val channel2 = channels[index]
-            if (channel2!=null && channel2.isActive) {
-                return channel2
-            }
-            val newChannel = createChannel(address)
-            channels[index] = newChannel!!
-            return newChannel
-        }
-
-    }
-
-    private fun createChannel(address: InetSocketAddress): Channel? {
+    override fun create(): Channel {
         return Client.newChannel(address)
     }
+
+    override fun validateObject(poolObject: PooledObject<Channel>): Boolean {
+        poolObject.`object`?.let {
+            if(it.isOpen && it.isActive){
+                return true
+            }
+        }
+        return false
+    }
+
+    fun validateChannel(channel: Channel): Boolean {
+        if(channel.isOpen && channel.isActive){
+            return true
+        }
+        return false
+    }
+
+    override fun destroyObject(poolObject: PooledObject<Channel>) {
+        poolObject.`object`?.let {
+            if(it.isOpen){
+                it.close()
+            }
+        }
+    }
+
+    override fun wrap(channel: Channel): PooledObject<Channel> {
+        return DefaultPooledObject(channel)
+    }
+
 }

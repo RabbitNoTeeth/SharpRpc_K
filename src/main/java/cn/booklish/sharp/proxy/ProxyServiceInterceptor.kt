@@ -17,16 +17,19 @@ import java.net.InetSocketAddress
 class ProxyServiceInterceptor(private val location: InetSocketAddress, private val serviceName:String): MethodInterceptor {
 
     override fun intercept(obj: Any, method: Method, args: Array<Any>, methodProxy: MethodProxy): Any? {
-        val channel = ClientChannelManager.getChannel(location)
-        var id = 0
-        channel?.let { ch ->
-            id = RpcRequestIdGenerator.getId()
-            RpcResponseManager.add(id)
-            val rpcRequest = RpcRequest(id, serviceName, method.name)
-            rpcRequest.paramTypes = method.parameterTypes
-            rpcRequest.paramValues = args
-            ch.writeAndFlush(rpcRequest).sync()
+        val channelPool = ClientChannelManager.getChannelPool(location)
+
+        val id = RpcRequestIdGenerator.getId()
+        RpcResponseManager.add(id)
+        val rpcRequest = RpcRequest(id, serviceName, method.name,method.parameterTypes,args)
+
+        val channel = channelPool.getChannel()
+        try{
+            channel.writeAndFlush(rpcRequest).sync()
+        }finally {
+            channelPool.releaseChannel(channel)
         }
+
         val result = RpcResponseManager.get(id)?.take()
         RpcResponseManager.remove(id)
         return result

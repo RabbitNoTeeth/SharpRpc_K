@@ -8,13 +8,12 @@ import java.io.Serializable
  * @Created: 2017/12/13 8:56
  * @Modified:
  */
-data class RpcRequest(val id:Int, val serviceName:String, val methodName:String): Serializable{
-
-    var paramTypes:Array<Class<*>> = emptyArray()
-
-    var paramValues:Array<Any> = emptyArray()
-
-}
+data class RpcRequest(val id:Int,
+                      val serviceName:String,
+                      val methodName:String,
+                      val paramTypes:Array<Class<*>> = emptyArray(),
+                      val paramValues:Array<Any> = emptyArray()
+): Serializable
 
 /**
  * @Author: liuxindong

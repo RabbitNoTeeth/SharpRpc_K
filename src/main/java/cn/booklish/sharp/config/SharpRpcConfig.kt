@@ -86,7 +86,7 @@ class SharpRpcConfig(private val serviceBeanFactory: ServiceBeanFactory) {
             RegistryCenterType.ZOOKEEPER -> {
                 if(loadPropertiesState){
                     ZookeeperCenter(registerAddress,
-                                    configMap["zookeeper.poolSize"]?.toString()?.toInt()?: Constants.DEFAULT_ZOOKEEPER_CONNECTION_POOL_SIZE,
+                                    /*configMap["zookeeper.poolSize"]?.toString()?.toInt()?: Constants.DEFAULT_ZOOKEEPER_CONNECTION_POOL_SIZE,*/
                                     configMap["zookeeper.retryTimes"]?.toString()?.toInt()?:Constants.DEFAULT_ZOOKEEPER_RETRY_TIMES,
                                     configMap["zookeeper.sleepBetweenRetry"]?.toString()?.toInt()?:Constants.DEFAULT_ZOOKEEPER_SLEEP_BETWEEN_RETRY)
                 }else{
@@ -161,8 +161,7 @@ class SharpRpcConfig(private val serviceBeanFactory: ServiceBeanFactory) {
                     configMap["zookeeper.address"]?:throw SharpConfigException("未配置RegistryCenter注册中心地址")
                     ZookeeperCenter(configMap["zookeeper.address"]?.toString()?:Constants.DEFAULT_ZOOKEEPER_ADDRESS,
                             configMap["zookeeper.retryTimes"]?.toString()?.toInt()?:Constants.DEFAULT_ZOOKEEPER_RETRY_TIMES,
-                            configMap["zookeeper.sleepBetweenRetry"]?.toString()?.toInt()?:Constants.DEFAULT_ZOOKEEPER_SLEEP_BETWEEN_RETRY,
-                            configMap["zookeeper.poolSize"]?.toString()?.toInt()?:Constants.DEFAULT_ZOOKEEPER_CONNECTION_POOL_SIZE)
+                            configMap["zookeeper.sleepBetweenRetry"]?.toString()?.toInt()?:Constants.DEFAULT_ZOOKEEPER_SLEEP_BETWEEN_RETRY)
                 }
                 "redis" -> {
                     null
@@ -177,7 +176,6 @@ class SharpRpcConfig(private val serviceBeanFactory: ServiceBeanFactory) {
         ServiceProxyFactory.init(registryCenter!!)
         logger.info("[Sharp-config]: 2.ServiceProxyFactory客户端服务代理工厂配置完成")
 
-        configMap["client.channel.poolSize"]?.let { ClientChannelManager.poolSize = it.toString().toInt() }
         ClientChannelManager.init()
         logger.info("[Sharp-config]: 3.ClientChannelManager客户端channel管理器配置完成")
 

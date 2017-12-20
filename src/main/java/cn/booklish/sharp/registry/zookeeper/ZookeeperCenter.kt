@@ -21,15 +21,14 @@ import java.util.*
  * @Created: 2017/12/13 9:05
  * @Modified:
  */
-class ZookeeperCenter(var zkAddress:String = Constants.DEFAULT_ZOOKEEPER_ADDRESS,
-                      var connectionPoolSize:Int = Constants.DEFAULT_ZOOKEEPER_CONNECTION_POOL_SIZE,
-                      var zkRetryTimes:Int = Constants.DEFAULT_ZOOKEEPER_RETRY_TIMES,
-                      var zkSleepBetweenRetry:Int = Constants.DEFAULT_ZOOKEEPER_SLEEP_BETWEEN_RETRY
+class ZookeeperCenter(zkAddress:String = Constants.DEFAULT_ZOOKEEPER_ADDRESS,
+                      zkRetryTimes:Int = Constants.DEFAULT_ZOOKEEPER_RETRY_TIMES,
+                      zkSleepBetweenRetry:Int = Constants.DEFAULT_ZOOKEEPER_SLEEP_BETWEEN_RETRY
 ) : RegistryCenter {
 
     private val logger: Logger = Logger.getLogger(this.javaClass)
 
-    private val pool = ConnectionPool()
+    private val connectionPool = ZkConnectionPoolFactory(zkAddress,zkRetryTimes,zkSleepBetweenRetry)
 
 
     /**
@@ -37,11 +36,14 @@ class ZookeeperCenter(var zkAddress:String = Constants.DEFAULT_ZOOKEEPER_ADDRESS
      */
     override fun getChildrenPath(path: String): List<String>{
 
+        val connection = connectionPool.getConnection()
         try {
-            return pool.getConnection().children.forPath(path)
+            return connection.children.forPath(path)
         } catch (e: Exception) {
             logger.warn("获取zookeeper子节点列表失败")
             throw RuntimeException(e)
+        } finally {
+            connectionPool.releaseConnection(connection)
         }
 
     }
@@ -51,11 +53,14 @@ class ZookeeperCenter(var zkAddress:String = Constants.DEFAULT_ZOOKEEPER_ADDRESS
      */
     override fun getData(path: String): RegisterInfo {
 
+        val connection = connectionPool.getConnection()
         try {
-            return KryoUtil.readObjectFromByteArray(pool.getConnection().data.forPath(path), RegisterInfo::class.java)
+            return KryoUtil.readObjectFromByteArray(connection.data.forPath(path), RegisterInfo::class.java)
         } catch (e: Exception) {
             logger.error("获取zookeeper路径[$path]数据失败")
             throw GetZkPathDataException("获取zookeeper路径[$path]数据失败", e)
+        } finally {
+            connectionPool.releaseConnection(connection)
         }
 
     }
@@ -65,10 +70,11 @@ class ZookeeperCenter(var zkAddress:String = Constants.DEFAULT_ZOOKEEPER_ADDRESS
      */
     override fun createPath(path: String, data: Any) {
 
+        val connection = connectionPool.getConnection()
         try {
             if (!checkPathExists(path)) {
                 checkParentExits(path)
-                pool.getConnection().create().withMode(CreateMode.PERSISTENT).withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE)
+                connection.create().withMode(CreateMode.PERSISTENT).withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE)
                         .forPath(path, KryoUtil.writeObjectToByteArray(data))
             } else {
                 updatePath(path, data)
@@ -76,6 +82,8 @@ class ZookeeperCenter(var zkAddress:String = Constants.DEFAULT_ZOOKEEPER_ADDRESS
         } catch (e: Exception) {
             logger.error("创建zookeeper路径[$path]失败")
             throw CreateZkPathException("创建zookeeper路径[$path]失败", e)
+        } finally {
+            connectionPool.releaseConnection(connection)
         }
 
     }
@@ -109,14 +117,15 @@ class ZookeeperCenter(var zkAddress:String = Constants.DEFAULT_ZOOKEEPER_ADDRESS
      */
     override fun updatePath(path: String, data: Any) {
 
+        val connection = connectionPool.getConnection()
         try {
-
             if (checkPathExists(path))
-                pool.getConnection().setData().forPath(path, KryoUtil.writeObjectToByteArray(data))
-
+                connection.setData().forPath(path, KryoUtil.writeObjectToByteArray(data))
         } catch (e: Exception) {
             logger.error("更新指定的zookeeper路径[$path]失败")
             throw UpdateZkPathException("更新指定的zookeeper路径[$path]失败", e)
+        } finally {
+            connectionPool.releaseConnection(connection)
         }
 
     }
@@ -126,14 +135,15 @@ class ZookeeperCenter(var zkAddress:String = Constants.DEFAULT_ZOOKEEPER_ADDRESS
      */
     override fun deletePath(path: String) {
 
+        val connection = connectionPool.getConnection()
         try {
-
             if (checkPathExists(path))
-                pool.getConnection().delete().withVersion(-1).forPath(path)
-
+                connection.delete().withVersion(-1).forPath(path)
         } catch (e: Exception) {
             logger.error("删除指定的zookeeper路径[$path]失败")
             throw DeleteZkPathException("删除指定的zookeeper路径[$path]失败", e)
+        } finally {
+            connectionPool.releaseConnection(connection)
         }
 
     }
@@ -143,44 +153,14 @@ class ZookeeperCenter(var zkAddress:String = Constants.DEFAULT_ZOOKEEPER_ADDRESS
      */
     private fun checkPathExists(path: String): Boolean {
 
+        val connection = connectionPool.getConnection()
         try {
-            return pool.getConnection().checkExists().forPath(path) != null
+            return connection.checkExists().forPath(path) != null
         } catch (e: Exception) {
             logger.error("检查指定的zookeeper路径[$path]是否存在失败")
             throw CheckZkPathExistsException("检查指定的zookeeper路径[$path]是否存在失败")
-        }
-
-    }
-
-    /**
-     * 内部连接池
-     */
-    private inner class ConnectionPool{
-
-        val pool = arrayOfNulls<CuratorFramework>(connectionPoolSize!!)
-        val locks = Array(connectionPoolSize!!,{ Any() })
-
-        fun getConnection(): CuratorFramework{
-            val index = Random().nextInt(connectionPoolSize!!)
-            val connection = pool[index]
-            if(connection!=null && connection.state == CuratorFrameworkState.STARTED){
-                return connection
-            }
-            synchronized(locks[index]) {
-                val connection2 = pool[index]
-                if (connection2!=null && connection2.state == CuratorFrameworkState.STARTED) {
-                    return connection2
-                }
-                val newConnection = createConnection()
-                pool[index] = newConnection
-                return newConnection
-            }
-        }
-
-        private fun createConnection(): CuratorFramework {
-            val connection = CuratorFrameworkFactory.newClient(zkAddress, RetryNTimes(zkRetryTimes!!, zkSleepBetweenRetry!!))
-            connection.start()
-            return connection
+        } finally {
+            connectionPool.releaseConnection(connection)
         }
 
     }
