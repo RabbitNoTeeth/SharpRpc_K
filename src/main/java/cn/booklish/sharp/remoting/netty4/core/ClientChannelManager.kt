@@ -23,7 +23,7 @@ object ClientChannelManager{
     private var config:GenericObjectPoolConfig? = null
 
     /**
-     * 使用自定义的连接池大小和eventLoopGroup大小
+     * 初始化channel连接池配置
      */
     fun init(config: GenericObjectPoolConfig){
         this.config = config
