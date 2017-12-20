@@ -13,7 +13,12 @@ import org.apache.log4j.Logger
 import java.net.InetSocketAddress
 import java.util.concurrent.Semaphore
 
-
+/**
+ * @Author: liuxindong
+ * @Description:  客户端引导
+ * @Created: 2017/12/20 9:44
+ * @Modified:
+ */
 object Client {
 
     private val logger: Logger = Logger.getLogger(this.javaClass)

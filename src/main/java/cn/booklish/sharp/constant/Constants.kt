@@ -2,7 +2,12 @@ package cn.booklish.sharp.constant
 
 import kotlin.math.min
 
-
+/**
+ * @Author: liuxindong
+ * @Description:  Sharp配置默认值常量
+ * @Created: 2017/12/20 9:39
+ * @Modified:
+ */
 object Constants {
 
     /**

@@ -6,7 +6,12 @@ import cn.booklish.sharp.serialize.GsonUtil
 import io.netty.channel.Channel
 import org.apache.log4j.Logger
 
-
+/**
+ * @Author: liuxindong
+ * @Description:  客户端channel处理类
+ * @Created: 2017/12/20 9:43
+ * @Modified:
+ */
 class ClientChannelOperator :ChannelOperator {
 
     private val logger: Logger = Logger.getLogger(this.javaClass)
@@ -25,10 +30,10 @@ class ClientChannelOperator :ChannelOperator {
         val callback = ChannelAttributeUtils.getResponseCallback(channel, response.id)
         callback?.let {
             if(response.success){
-                it.receiveMessage(response.result)
+                it.receiveMessage(GsonUtil.objectToJson(response.result!!))
             }else{
                 logger.warn("[SharpRpc-client]: 请求id=" + response.id + "在服务器计算时出现异常,请检查客户端调用参数或者服务器日志")
-                it.receiveMessage(response.e)
+                it.receiveMessage(GsonUtil.objectToJson(response.e!!))
             }
         }
     }

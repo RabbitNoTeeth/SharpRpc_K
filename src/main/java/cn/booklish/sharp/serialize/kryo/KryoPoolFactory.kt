@@ -8,7 +8,12 @@ import com.esotericsoftware.kryo.Kryo
 import com.esotericsoftware.kryo.pool.KryoFactory
 
 
-
+/**
+ * @Author: liuxindong
+ * @Description:  kryo池化工厂
+ * @Created: 2017/12/20 9:46
+ * @Modified:
+ */
 object KryoPoolFactory {
 
     private val pool = KryoPool.Builder(KryoFactory {

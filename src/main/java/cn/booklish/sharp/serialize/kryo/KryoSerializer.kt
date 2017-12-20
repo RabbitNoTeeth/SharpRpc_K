@@ -7,6 +7,12 @@ import com.esotericsoftware.kryo.io.Input
 import java.io.ByteArrayOutputStream
 
 
+/**
+ * @Author: liuxindong
+ * @Description:  Kryo序列化方式实现类
+ * @Created: 2017/12/20 9:46
+ * @Modified:
+ */
 class KryoSerializer:RpcSerializer {
 
     private val pool: KryoPool =  KryoPoolFactory.getPool()

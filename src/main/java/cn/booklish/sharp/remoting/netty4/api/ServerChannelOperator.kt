@@ -8,7 +8,12 @@ import io.netty.handler.timeout.ReadTimeoutException
 import io.netty.util.ReferenceCountUtil
 import org.apache.log4j.Logger
 
-
+/**
+ * @Author: liuxindong
+ * @Description:  服务端channel处理类
+ * @Created: 2017/12/20 9:44
+ * @Modified:
+ */
 class ServerChannelOperator :ChannelOperator {
 
     private val logger: Logger = Logger.getLogger(this.javaClass)
