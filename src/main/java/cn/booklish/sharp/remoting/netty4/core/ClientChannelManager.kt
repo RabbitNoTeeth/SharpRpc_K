@@ -1,8 +1,6 @@
 package cn.booklish.sharp.remoting.netty4.core
 
 import cn.booklish.sharp.constant.Constants
-import cn.booklish.sharp.proxy.ChannelAttributeUtils
-import cn.booklish.sharp.proxy.ResponseCallbackBean
 import io.netty.channel.Channel
 import java.net.InetSocketAddress
 import java.util.*
@@ -73,12 +71,6 @@ class ClientChannelPool(private val capacity:Int){
     }
 
     private fun createChannel(address: InetSocketAddress): Channel? {
-        return Client.newChannel(address)?.let {
-            //为刚刚创建的channel，初始化channel属性
-            val attribute = it.attr(ChannelAttributeUtils.key)
-            val dataMap = ConcurrentHashMap<Int, ResponseCallbackBean>()
-            attribute.set(dataMap)
-            it
-        }
+        return Client.newChannel(address)
     }
 }
