@@ -1,5 +1,6 @@
 package cn.booklish.sharp.remoting.netty4.core
 
+import cn.booklish.sharp.constant.Constants
 import io.netty.channel.Channel
 import org.apache.commons.pool2.BasePooledObjectFactory
 import org.apache.commons.pool2.PooledObject
@@ -20,16 +21,13 @@ object ClientChannelManager{
 
     private val channelPoolMap = ConcurrentHashMap<InetSocketAddress, ChannelPoolFactory>()
 
-    private var config:GenericObjectPoolConfig? = null
+    private var config: ChannelPoolConfig = ChannelPoolConfig()
 
     /**
      * 初始化channel连接池配置
      */
-    fun init(config: GenericObjectPoolConfig){
+    fun init(config: ChannelPoolConfig = ChannelPoolConfig()){
         this.config = config
-        this.config!!.testOnBorrow = true
-        this.config!!.testOnReturn = true
-        this.config!!.blockWhenExhausted = true
     }
 
     /**
@@ -38,7 +36,7 @@ object ClientChannelManager{
     fun getChannelPool(serverAddress:InetSocketAddress): ChannelPoolFactory {
         val channelPool = channelPoolMap[serverAddress]
         if(channelPool==null){
-            channelPoolMap.putIfAbsent(serverAddress, ChannelPoolFactory(serverAddress,config!!))
+            channelPoolMap.putIfAbsent(serverAddress, ChannelPoolFactory(serverAddress,config.poolConfig))
         }
         return channelPoolMap[serverAddress]!!
     }
@@ -95,13 +93,6 @@ class ChannelFactory(private val address: InetSocketAddress): BasePooledObjectFa
         return false
     }
 
-    fun validateChannel(channel: Channel): Boolean {
-        if(channel.isOpen && channel.isActive){
-            return true
-        }
-        return false
-    }
-
     override fun destroyObject(poolObject: PooledObject<Channel>) {
         poolObject.`object`?.let {
             if(it.isOpen){
@@ -114,4 +105,16 @@ class ChannelFactory(private val address: InetSocketAddress): BasePooledObjectFa
         return DefaultPooledObject(channel)
     }
 
+}
+
+class ChannelPoolConfig{
+
+    var timeout = Constants.DEFAULT_CLIENT_CHANNEL_TIMEOUT
+
+    val poolConfig = GenericObjectPoolConfig()
+
+    init {
+        poolConfig.testOnBorrow = true
+        poolConfig.testOnReturn = true
+    }
 }

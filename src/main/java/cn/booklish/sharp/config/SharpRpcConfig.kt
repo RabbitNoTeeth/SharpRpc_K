@@ -10,7 +10,11 @@ import cn.booklish.sharp.registry.api.RegistryCenter
 import cn.booklish.sharp.registry.api.RegisterTaskManager
 import cn.booklish.sharp.registry.api.RegistryCenterType
 import cn.booklish.sharp.registry.api.RpcServiceAutoScanner
-import cn.booklish.sharp.registry.zookeeper.ZookeeperCenter
+import cn.booklish.sharp.registry.support.redis.RedisConnectionConfig
+import cn.booklish.sharp.registry.support.redis.RedisRegistryCenter
+import cn.booklish.sharp.registry.support.zookeeper.ZkConnectionConfig
+import cn.booklish.sharp.registry.support.zookeeper.ZookeeperRegistryCenter
+import cn.booklish.sharp.remoting.netty4.core.ChannelPoolConfig
 import cn.booklish.sharp.remoting.netty4.core.Client
 import cn.booklish.sharp.remoting.netty4.core.Server
 import cn.booklish.sharp.serialize.api.RpcSerializer
@@ -36,9 +40,9 @@ class SharpRpcConfig(private val serviceBeanFactory: ServiceBeanFactory) {
     private var autoScanBasePath:String? = null
     private var autoScanRegisterAddress:String? = null
     private var loadPropertiesState = false
-    val zookeeperPoolConfig = GenericObjectPoolConfig()
-    val redisPoolConfig = GenericObjectPoolConfig()
-    val channelPoolConfig = GenericObjectPoolConfig()
+    val zkConnectionConfig = ZkConnectionConfig()
+    val redisConnectionConfig = RedisConnectionConfig()
+    val channelPoolConfig = ChannelPoolConfig()
 
     /**
      * 关闭服务器功能
@@ -81,17 +85,27 @@ class SharpRpcConfig(private val serviceBeanFactory: ServiceBeanFactory) {
 
             RegistryCenterType.ZOOKEEPER -> {
                 if(loadPropertiesState){
-                    ZookeeperCenter(registerAddress,
-                                    configMap["zookeeper.retryTimes"]?.toString()?.toInt()?:Constants.DEFAULT_ZOOKEEPER_RETRY_TIMES,
-                                    configMap["zookeeper.sleepBetweenRetry"]?.toString()?.toInt()?:Constants.DEFAULT_ZOOKEEPER_SLEEP_BETWEEN_RETRY,
-                                    zookeeperPoolConfig
-                    )
-                }else{
-                    ZookeeperCenter(registerAddress,config = zookeeperPoolConfig)
+                    configMap["zookeeper.retryTimes"]?.let { this.zkConnectionConfig.retryTimes = it.toString().toInt() }
+                    configMap["zookeeper.sleepBetweenRetry"]?.let { this.zkConnectionConfig.sleepBetweenRetry = it.toString().toInt() }
+                    configMap["zookeeper.session.timeout"]?.let { this.zkConnectionConfig.sessionTimeout = it.toString().toInt() }
+                    configMap["zookeeper.connection.timeout"]?.let { this.zkConnectionConfig.connectionTimeOut = it.toString().toInt() }
+                    configMap["zookeeper.pool.maxTotal"]?.let { this.zkConnectionConfig.poolConfig.maxTotal = it.toString().toInt() }
+                    configMap["zookeeper.pool.maxIdle"]?.let { this.zkConnectionConfig.poolConfig.maxIdle = it.toString().toInt() }
+                    configMap["zookeeper.pool.minIdle"]?.let { this.zkConnectionConfig.poolConfig.minIdle = it.toString().toInt() }
                 }
+                ZookeeperRegistryCenter(this.zkConnectionConfig)
             }
 
-            RegistryCenterType.REDIS -> null
+            RegistryCenterType.REDIS -> {
+                if(loadPropertiesState){
+                    configMap["redis.connection.timeout"]?.let { this.redisConnectionConfig.connectionTimeOut = it.toString().toInt() }
+                    configMap["redis.pool.maxTotal"]?.let { this.redisConnectionConfig.poolConfig.maxTotal = it.toString().toInt() }
+                    configMap["redis.pool.maxIdle"]?.let { this.redisConnectionConfig.poolConfig.maxIdle = it.toString().toInt() }
+                    configMap["redis.pool.minIdle"]?.let { this.redisConnectionConfig.poolConfig.minIdle = it.toString().toInt() }
+                }
+                RedisRegistryCenter(this.redisConnectionConfig)
+            }
+
         }
         return this
 
@@ -156,25 +170,40 @@ class SharpRpcConfig(private val serviceBeanFactory: ServiceBeanFactory) {
             registryCenter = when(registryCenterType.toString()){
                 "zookeeper" -> {
                     configMap["zookeeper.address"]?:throw SharpConfigException("未配置RegistryCenter注册中心地址")
-                    ZookeeperCenter(configMap["zookeeper.address"]?.toString()?:Constants.DEFAULT_ZOOKEEPER_ADDRESS,
-                            configMap["zookeeper.retryTimes"]?.toString()?.toInt()?:Constants.DEFAULT_ZOOKEEPER_RETRY_TIMES,
-                            configMap["zookeeper.sleepBetweenRetry"]?.toString()?.toInt()?:Constants.DEFAULT_ZOOKEEPER_SLEEP_BETWEEN_RETRY,
-                            zookeeperPoolConfig)
+                    this.zkConnectionConfig.address = configMap["zookeeper.address"].toString()
+                    configMap["zookeeper.retryTimes"]?.let { this.zkConnectionConfig.retryTimes = it.toString().toInt() }
+                    configMap["zookeeper.sleepBetweenRetry"]?.let { this.zkConnectionConfig.sleepBetweenRetry = it.toString().toInt() }
+                    configMap["zookeeper.session.timeout"]?.let { this.zkConnectionConfig.sessionTimeout = it.toString().toInt() }
+                    configMap["zookeeper.connection.timeout"]?.let { this.zkConnectionConfig.connectionTimeOut = it.toString().toInt() }
+                    configMap["zookeeper.pool.maxTotal"]?.let { this.zkConnectionConfig.poolConfig.maxTotal = it.toString().toInt() }
+                    configMap["zookeeper.pool.maxIdle"]?.let { this.zkConnectionConfig.poolConfig.maxIdle = it.toString().toInt() }
+                    configMap["zookeeper.pool.minIdle"]?.let { this.zkConnectionConfig.poolConfig.minIdle = it.toString().toInt() }
+                    ZookeeperRegistryCenter(this.zkConnectionConfig)
                 }
                 "redis" -> {
-                    null
+                    configMap["redis.address"]?:throw SharpConfigException("未配置RegistryCenter注册中心地址")
+                    this.redisConnectionConfig.address = configMap["redis.address"].toString()
+                    configMap["redis.connection.timeout"]?.let { this.redisConnectionConfig.connectionTimeOut = it.toString().toInt() }
+                    configMap["redis.pool.maxTotal"]?.let { this.redisConnectionConfig.poolConfig.maxTotal = it.toString().toInt() }
+                    configMap["redis.pool.maxIdle"]?.let { this.redisConnectionConfig.poolConfig.maxIdle = it.toString().toInt() }
+                    configMap["redis.pool.minIdle"]?.let { this.redisConnectionConfig.poolConfig.minIdle = it.toString().toInt() }
+                    RedisRegistryCenter(this.redisConnectionConfig)
                 }
-                else -> throw SharpConfigException("未配置RegistryCenter注册中心")
+                else -> throw SharpConfigException("不支持的RegistryCenter注册中心类型")
             }
         }
         logger.info("[Sharp-config]: 1.RegistryCenter注册中心配置完成")
 
         //--------------------------------配置客户端--------------------------------
 
-        ServiceProxyFactory.init(registryCenter!!)
+        ServiceProxyFactory.init(this.registryCenter!!)
         logger.info("[Sharp-config]: 2.ServiceProxyFactory客户端服务代理工厂配置完成")
 
-        ClientChannelManager.init(channelPoolConfig)
+        configMap["client.channel.timeout"]?.let { this.channelPoolConfig.timeout = it.toString().toInt() }
+        configMap["client.channel.pool.maxTotal"]?.let { this.channelPoolConfig.poolConfig.maxTotal = it.toString().toInt() }
+        configMap["client.channel.pool.maxIdle"]?.let { this.channelPoolConfig.poolConfig.maxIdle = it.toString().toInt() }
+        configMap["client.channel.pool.minIdle"]?.let { this.channelPoolConfig.poolConfig.minIdle = it.toString().toInt() }
+        ClientChannelManager.init(this.channelPoolConfig)
         logger.info("[Sharp-config]: 3.ClientChannelManager客户端channel管理器配置完成")
 
         rpcSerializer?.let { Client.rpcSerializer = it }
@@ -205,7 +234,7 @@ class SharpRpcConfig(private val serviceBeanFactory: ServiceBeanFactory) {
             logger.info("[Sharp-config]: 5.3 RpcRequestManager服务请求管理器启动成功")
 
             configMap["server.listen.port"]?.let { Server.port = it.toString().toInt() }
-            configMap["client.channel.timeout"]?.let { Server.clientChannelTimeout = it.toString().toInt() }
+            Server.clientChannelTimeout = channelPoolConfig.timeout
             rpcSerializer?.let { Server.rpcSerializer = it }
             Server.init().start()
             logger.info("[Sharp-config]: 5.4 RpcServerBootStrap引导启动成功,服务器启动完成")

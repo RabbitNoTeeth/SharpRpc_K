@@ -7,52 +7,59 @@
 3.优化配置文件的加载逻辑,简化配置流程
 
 ## 配置使用
-***1. 普通 java 项目***
+***1.  java 中***
 
-*****配置 SharpRpc*****
 <pre><code>
-//加载配置文件(配置文件需要在classpath根路径)
-SharpRpcConfig config = new SharpRpcConfig("sharp.properties",serviceBeanFactory的实现);
-//自动配置
-config.autoConfigure();
+
+    //创建配置类,传入服务端实现的服务类工厂
+    SharpRpcConfig config = new SharpRpcConfig(clazz -> new TestImpl());
+
+    config.loadProperties("sharp.properties");
+    //如果不使用配置文件,那么需要手动设置注册中心(如果读取了配置文件,那么手动设置覆盖配置文件)
+    //config.setRegistyrCenter(RegistryCenterType.REDIS,"127.0.0.1:6379");
+
+    //****可选操作:可以关闭服务端功能(默认启用),只使用客户端功能来获取服务代理
+    //config.disableServer();
+    //****可选操作:启用服务自动扫描器(默认关闭),启动后需要设置扫描的基础路径和服务的注册地址
+    //config.enableAutoScanner().setAutoScanBasePath("...").setAutoScanRegisterAddress("...");
+
+    //注册中心配置完成后,调用该方法启动sharp
+    config.configure();
+
+    //服务端注册服务
+    RegisterTaskManager.INSTANCE.submit(new RegisterInfo("/test2/TestImpl","cn.booklish.sharp.test.service.TestImpl","127.0.0.1:12200"));
+
+    //客户端获取服务
+    Test testService = (Test) ServiceProxyFactory.INSTANCE.getService("/test2/TestImpl", Test.class);
+
 </code></pre>
 
-*****使用客户端*****
-<pre><code>
-Test service = (Test) SharpClient.INSTANCE.getService("rpc服务的注册地址", Test.class);
-</code></pre>
 
-***2. spring 项目***
+***2. Kotlin中***
 
-*****配置 SharpRpc*****
 <pre><code>
-@Configuration
-public class SharpRpcAutoConfig {
+
+    //创建配置类,传入服务端实现的服务类工厂
+    val config = SharpRpcConfig(ServiceBeanFactory { TestImpl() })
     
-    @Bean
-    public SharpRpcConfig sharpRpcConfig(){
-        SharpRpcConfig config = new SharpRpcConfig("sharp.properties",serviceBeanFactory的实现);
-        config.autoConfigure();
-        return config;
-    }
-}
+    config.loadProperties("sharp.properties")
+    //如果不使用配置文件,那么需要手动设置注册中心(如果读取了配置文件,那么手动设置覆盖配置文件)
+    //config.setRegistyrCenter(RegistryCenterType.REDIS,"127.0.0.1:6379")
+    
+    //****可选操作:可以关闭服务端功能(默认启用),只使用客户端功能来获取服务代理
+    //config.disableServer()
+    //****可选操作:启用服务自动扫描器(默认关闭),启动后需要设置扫描的基础路径和服务的注册地址
+    //config.enableAutoScanner().setAutoScanBasePath("...").setAutoScanRegisterAddress("...")
+    
+    //注册中心配置完成后,调用该方法启动sharp
+    config.configure()
+    
+    //服务端注册服务
+    RegisterTaskManager.submit(RegisterInfo("/test2/TestImpl","cn.booklish.sharp.test.service.TestImpl","127.0.0.1:12200"))
+
+    //客户端获取服务
+    val testService = ServiceProxyFactory.getService("/test2/TestImpl", Test::class.java) as Test
+
 </code></pre>
 
-*****使用客户端*****
-<pre><code>
-Test service = (Test) SharpClient.INSTANCE.getService("rpc服务的注册地址", Test.class);
-</code></pre>
-
-***3. Kotlin项目***
-
-*****配置 SharpRpc*****
-<pre><code>
-val sharpRpcConfig = SharpRpcConfig("sharp.properties",serviceBeanFactory的实现)
-sharpRpcConfig.autoConfigure()
-</code></pre>
-
-*****使用客户端*****
-<pre><code>
-val service = SharpClient.getService("/test/TestImpl", Test::class.java) as Test
-</code></pre>
 

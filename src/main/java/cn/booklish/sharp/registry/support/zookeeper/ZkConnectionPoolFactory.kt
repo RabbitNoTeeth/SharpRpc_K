@@ -1,7 +1,6 @@
-package cn.booklish.sharp.registry.zookeeper
+package cn.booklish.sharp.registry.support.zookeeper
 
 import org.apache.commons.pool2.impl.GenericObjectPool
-import org.apache.commons.pool2.impl.GenericObjectPoolConfig
 import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.imps.CuratorFrameworkState
 
@@ -11,11 +10,11 @@ import org.apache.curator.framework.imps.CuratorFrameworkState
  * @Created: 2017/12/20 14:43
  * @Modified:
  */
-class ZkConnectionPoolFactory(zkAddress:String,zkRetryTimes:Int,zkSleepBetweenRetry:Int,config:GenericObjectPoolConfig) {
+class ZkConnectionPoolFactory(zkConnectionConfig: ZkConnectionConfig) {
 
-    private val connectionFactory = ZkConnectionFactory(zkAddress,zkRetryTimes,zkSleepBetweenRetry)
+    private val connectionFactory = ZkConnectionFactory(zkConnectionConfig)
 
-    private val pool = GenericObjectPool<CuratorFramework>(connectionFactory,config)
+    private val pool = GenericObjectPool<CuratorFramework>(connectionFactory,zkConnectionConfig.poolConfig)
 
     fun getConnection():CuratorFramework{
         return pool.borrowObject()

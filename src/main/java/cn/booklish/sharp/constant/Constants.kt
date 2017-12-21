@@ -10,15 +10,12 @@ import kotlin.math.min
  */
 object Constants {
 
+    /*--------------------------默认zookeeper配置--------------------------*/
+
     /**
      * 默认zookeeper连接地址
      */
     val DEFAULT_ZOOKEEPER_ADDRESS = "127.0.0.1:2181"
-
-    /**
-     * 默认zookeeper连接池大小
-     */
-    val DEFAULT_ZOOKEEPER_CONNECTION_POOL_SIZE = 15
 
     /**
      * 默认zookeeper重连次数
@@ -29,6 +26,28 @@ object Constants {
      * 默认zookeeper重连间隔时长
      */
     val DEFAULT_ZOOKEEPER_SLEEP_BETWEEN_RETRY = 3000
+
+    /**
+     * 默认zookeeper会话超时时长
+     */
+    val DEFAULT_ZOOKEEPER_SESSION_TIMEOUT = 60000
+
+    /**
+     * 默认zookeeper连接超时时长
+     */
+    val DEFAULT_ZOOKEEPER_CONNECTION_TIMEOUT = 15000
+
+    /*--------------------------默认redis配置--------------------------*/
+
+    /**
+     * 默认redis主机地址
+     */
+    val DEFAULT_REDIS_ADDRESS = "127.0.0.1:6379"
+
+    /**
+     * 默认redis连接超时时长
+     */
+    val DEFAULT_REDIS_CONNECTION_TIMEOUT = 2000
 
     /**
      * 默认Rpc请求异步处理
@@ -53,7 +72,7 @@ object Constants {
     /**
      * 默认客户端rpc请求连接过期时间
      */
-    val DEFAULT_CLIENT_CHANNEL_TIMEOUT = 45
+    val DEFAULT_CLIENT_CHANNEL_TIMEOUT = 60
 
     /**
      * 默认服务端server监听端口

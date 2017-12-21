@@ -9,7 +9,7 @@ package cn.booklish.sharp.registry.api
  */
 interface RegistryCenter {
 
-    fun getChildrenPath(path: String): List<String>
+    fun getChildrenPath(path: String): Collection<String>
 
     fun getData(path: String): RegisterInfo
 
@@ -18,5 +18,7 @@ interface RegistryCenter {
     fun updatePath(path: String, data: Any)
 
     fun deletePath(path: String)
+
+    fun checkPathExists(path: String): Boolean
 
 }

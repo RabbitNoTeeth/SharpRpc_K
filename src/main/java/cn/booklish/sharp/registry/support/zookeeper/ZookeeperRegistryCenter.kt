@@ -1,20 +1,13 @@
-package cn.booklish.sharp.registry.zookeeper
+package cn.booklish.sharp.registry.support.zookeeper
 
-import cn.booklish.sharp.constant.Constants
-import cn.booklish.sharp.exception.*
 import cn.booklish.sharp.registry.api.RegistryCenter
 import cn.booklish.sharp.registry.api.RegisterInfo
+import cn.booklish.sharp.registry.exception.*
 import cn.booklish.sharp.serialize.KryoUtil
 import org.apache.commons.lang3.StringUtils
-import org.apache.commons.pool2.impl.GenericObjectPoolConfig
-import org.apache.curator.framework.CuratorFramework
-import org.apache.curator.framework.CuratorFrameworkFactory
-import org.apache.curator.framework.imps.CuratorFrameworkState
-import org.apache.curator.retry.RetryNTimes
 import org.apache.log4j.Logger
 import org.apache.zookeeper.CreateMode
 import org.apache.zookeeper.ZooDefs
-import java.util.*
 
 /**
  * @Author: liuxindong
@@ -22,20 +15,11 @@ import java.util.*
  * @Created: 2017/12/13 9:05
  * @Modified:
  */
-class ZookeeperCenter(zkAddress:String = Constants.DEFAULT_ZOOKEEPER_ADDRESS,
-                      zkRetryTimes:Int = Constants.DEFAULT_ZOOKEEPER_RETRY_TIMES,
-                      zkSleepBetweenRetry:Int = Constants.DEFAULT_ZOOKEEPER_SLEEP_BETWEEN_RETRY,
-                      config: GenericObjectPoolConfig
-) : RegistryCenter {
+class ZookeeperRegistryCenter(zkConnectionConfig:ZkConnectionConfig) : RegistryCenter {
 
     private val logger: Logger = Logger.getLogger(this.javaClass)
 
-    private val connectionPool = config.let {
-        it.testOnBorrow = true
-        it.testOnReturn = true
-        it.blockWhenExhausted = true
-        ZkConnectionPoolFactory(zkAddress,zkRetryTimes,zkSleepBetweenRetry,it)
-    }
+    private val connectionPool = ZkConnectionPoolFactory(zkConnectionConfig)
 
     /**
      * 获取指定节点的所有子节点
@@ -46,8 +30,7 @@ class ZookeeperCenter(zkAddress:String = Constants.DEFAULT_ZOOKEEPER_ADDRESS,
         try {
             return connection.children.forPath(path)
         } catch (e: Exception) {
-            logger.warn("获取zookeeper子节点列表失败")
-            throw RuntimeException(e)
+            throw GetChildrenPathException("zookeeper-获取服务子节点列表失败",e)
         } finally {
             connectionPool.releaseConnection(connection)
         }
@@ -63,8 +46,7 @@ class ZookeeperCenter(zkAddress:String = Constants.DEFAULT_ZOOKEEPER_ADDRESS,
         try {
             return KryoUtil.readObjectFromByteArray(connection.data.forPath(path), RegisterInfo::class.java)
         } catch (e: Exception) {
-            logger.error("获取zookeeper路径[$path]数据失败")
-            throw GetZkPathDataException("获取zookeeper路径[$path]数据失败", e)
+            throw GetPathDataException("zookeeper-获取服务[$path]的数据失败", e)
         } finally {
             connectionPool.releaseConnection(connection)
         }
@@ -86,8 +68,7 @@ class ZookeeperCenter(zkAddress:String = Constants.DEFAULT_ZOOKEEPER_ADDRESS,
                 updatePath(path, data)
             }
         } catch (e: Exception) {
-            logger.error("创建zookeeper路径[$path]失败")
-            throw CreateZkPathException("创建zookeeper路径[$path]失败", e)
+            throw CreatePathException("zookeeper-创建服务[$path]失败", e)
         } finally {
             connectionPool.releaseConnection(connection)
         }
@@ -95,17 +76,10 @@ class ZookeeperCenter(zkAddress:String = Constants.DEFAULT_ZOOKEEPER_ADDRESS,
     }
 
     private fun checkParentExits(path: String) {
-
-        try {
-            checkAndCreateParent(path.substringBeforeLast("/"))
-        } catch (e: Exception) {
-            throw RuntimeException(e)
-        }
-
+        checkAndCreateParent(path.substringBeforeLast("/"))
     }
 
     private fun checkAndCreateParent(path: String) {
-
         if (StringUtils.isNotBlank(path)) {
             if (!checkPathExists(path)) {
                 val parent = path.substringBeforeLast("/")
@@ -115,7 +89,6 @@ class ZookeeperCenter(zkAddress:String = Constants.DEFAULT_ZOOKEEPER_ADDRESS,
                 createPath(path, "")
             }
         }
-
     }
 
     /**
@@ -128,8 +101,7 @@ class ZookeeperCenter(zkAddress:String = Constants.DEFAULT_ZOOKEEPER_ADDRESS,
             if (checkPathExists(path))
                 connection.setData().forPath(path, KryoUtil.writeObjectToByteArray(data))
         } catch (e: Exception) {
-            logger.error("更新指定的zookeeper路径[$path]失败")
-            throw UpdateZkPathException("更新指定的zookeeper路径[$path]失败", e)
+            throw UpdatePathException("zookeeper-更新服务[$path]数据失败", e)
         } finally {
             connectionPool.releaseConnection(connection)
         }
@@ -146,8 +118,7 @@ class ZookeeperCenter(zkAddress:String = Constants.DEFAULT_ZOOKEEPER_ADDRESS,
             if (checkPathExists(path))
                 connection.delete().withVersion(-1).forPath(path)
         } catch (e: Exception) {
-            logger.error("删除指定的zookeeper路径[$path]失败")
-            throw DeleteZkPathException("删除指定的zookeeper路径[$path]失败", e)
+            throw DeletePathException("zookeeper-删除服务[$path]失败", e)
         } finally {
             connectionPool.releaseConnection(connection)
         }
@@ -157,14 +128,13 @@ class ZookeeperCenter(zkAddress:String = Constants.DEFAULT_ZOOKEEPER_ADDRESS,
     /**
      * 检查节点是否存在
      */
-    private fun checkPathExists(path: String): Boolean {
+    override fun checkPathExists(path: String): Boolean {
 
         val connection = connectionPool.getConnection()
         try {
             return connection.checkExists().forPath(path) != null
         } catch (e: Exception) {
-            logger.error("检查指定的zookeeper路径[$path]是否存在失败")
-            throw CheckZkPathExistsException("检查指定的zookeeper路径[$path]是否存在失败")
+            throw CheckPathExistsException("zookeeper-检查服务[$path]是否存在失败")
         } finally {
             connectionPool.releaseConnection(connection)
         }

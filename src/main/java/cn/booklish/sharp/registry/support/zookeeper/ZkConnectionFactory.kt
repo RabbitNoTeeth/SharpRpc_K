@@ -1,4 +1,4 @@
-package cn.booklish.sharp.registry.zookeeper
+package cn.booklish.sharp.registry.support.zookeeper
 
 import org.apache.commons.pool2.BasePooledObjectFactory
 import org.apache.commons.pool2.PooledObject
@@ -14,13 +14,12 @@ import org.apache.curator.retry.RetryNTimes
  * @Created: 2017/12/20 14:35
  * @Modified:
  */
-class ZkConnectionFactory(private val zkAddress:String,
-                          private val zkRetryTimes:Int,
-                          private val zkSleepBetweenRetry:Int
-): BasePooledObjectFactory<CuratorFramework>() {
+class ZkConnectionFactory(private val zkConnectionConfig: ZkConnectionConfig): BasePooledObjectFactory<CuratorFramework>() {
 
     override fun create(): CuratorFramework {
-        val connection = CuratorFrameworkFactory.newClient(zkAddress, RetryNTimes(zkRetryTimes, zkSleepBetweenRetry))
+        val connection = CuratorFrameworkFactory.newClient(zkConnectionConfig.address,
+                zkConnectionConfig.sessionTimeout,zkConnectionConfig.connectionTimeOut,
+                RetryNTimes(zkConnectionConfig.retryTimes, zkConnectionConfig.sleepBetweenRetry))
         connection.start()
         return connection
     }
@@ -32,17 +31,7 @@ class ZkConnectionFactory(private val zkAddress:String,
     }
 
     override fun validateObject(poolObject: PooledObject<CuratorFramework>): Boolean {
-        if(poolObject.`object`?.state==CuratorFrameworkState.STARTED){
-            return true
-        }
-        return false
-    }
-
-    fun validateConnection(curatorFramework: CuratorFramework): Boolean {
-        if(curatorFramework.state==CuratorFrameworkState.STARTED){
-            return true
-        }
-        return false
+        return poolObject.`object`?.state==CuratorFrameworkState.STARTED
     }
 
     override fun wrap(curatorFramework: CuratorFramework): PooledObject<CuratorFramework> {

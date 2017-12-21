@@ -1,67 +1,78 @@
-package cn.booklish.sharp.exception
+package cn.booklish.sharp.registry.exception
 
 /**
  * @Author: liuxindong
- * @Description: 检查zk节点是否存在失败的异常基类
+ * @Description: 检查服务是否存在失败的异常基类
  * @Created: 2017/12/13 8:53
  * @Modified:
  */
-class CheckZkPathExistsException:RuntimeException{
+class CheckPathExistsException:RuntimeException{
     constructor(message: String):super(message)
     constructor(message: String,cause: Throwable):super(message,cause)
 }
 
 /**
  * @Author: liuxindong
- * @Description:  创建zk节点失败的异常基类
+ * @Description:  注册服务失败的异常基类
  * @Created: 2017/12/13 8:53
  * @Modified:
  */
-class CreateZkPathException:RuntimeException{
+class CreatePathException:RuntimeException{
     constructor(message: String):super(message)
     constructor(message: String,cause: Throwable):super(message,cause)
 }
 
 /**
  * @Author: liuxindong
- * @Description:  删除zk节点失败的异常基类
+ * @Description:  删除服务失败的异常基类
  * @Created: 2017/12/13 8:54
  * @Modified:
  */
-class DeleteZkPathException:RuntimeException{
+class DeletePathException:RuntimeException{
     constructor(message: String):super(message)
     constructor(message: String,cause: Throwable):super(message,cause)
 }
 
 /**
  * @Author: liuxindong
- * @Description:  获取zk节点数据失败的异常基类
+ * @Description:  获取服务数据失败的异常基类
  * @Created: 2017/12/13 8:54
  * @Modified:
  */
-class GetZkPathDataException:RuntimeException{
+class GetPathDataException:RuntimeException{
     constructor(message: String):super(message)
     constructor(message: String,cause: Throwable):super(message,cause)
 }
 
 /**
  * @Author: liuxindong
- * @Description:  zk节点不存在的异常基类
+ * @Description:  服务不存在的异常基类
  * @Created: 2017/12/13 8:54
  * @Modified:
  */
-class NoSuchZkPathException:RuntimeException{
+class NoSuchPathException:RuntimeException{
     constructor(message: String):super(message)
     constructor(message: String,cause: Throwable):super(message,cause)
 }
 
 /**
  * @Author: liuxindong
- * @Description:  更新zk节点数据失败的异常基类
+ * @Description:  更新服务数据失败的异常基类
  * @Created: 2017/12/13 8:54
  * @Modified:
  */
-class UpdateZkPathException:RuntimeException{
+class UpdatePathException:RuntimeException{
+    constructor(message: String):super(message)
+    constructor(message: String,cause: Throwable):super(message,cause)
+}
+
+/**
+ * @Author: liuxindong
+ * @Description:  获取子服务失败的异常基类
+ * @Created: 2017/12/13 8:54
+ * @Modified:
+ */
+class GetChildrenPathException:RuntimeException{
     constructor(message: String):super(message)
     constructor(message: String,cause: Throwable):super(message,cause)
 }
