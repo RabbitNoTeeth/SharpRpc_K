@@ -1,6 +1,6 @@
 package cn.booklish.sharp.remoting.netty4.core
 
-import cn.booklish.sharp.constant.Constants
+import cn.booklish.sharp.constant.SharpConstants
 import io.netty.channel.Channel
 import org.apache.commons.pool2.BasePooledObjectFactory
 import org.apache.commons.pool2.PooledObject
@@ -109,7 +109,7 @@ class ChannelFactory(private val address: InetSocketAddress): BasePooledObjectFa
 
 class ChannelPoolConfig{
 
-    var timeout = Constants.DEFAULT_CLIENT_CHANNEL_TIMEOUT
+    var timeout = SharpConstants.DEFAULT_CLIENT_CHANNEL_TIMEOUT
 
     val poolConfig = GenericObjectPoolConfig()
 

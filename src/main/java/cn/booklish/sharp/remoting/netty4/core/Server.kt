@@ -1,6 +1,6 @@
 package cn.booklish.sharp.remoting.netty4.core
 
-import cn.booklish.sharp.constant.Constants
+import cn.booklish.sharp.constant.SharpConstants
 import cn.booklish.sharp.remoting.netty4.api.ChannelOperator
 import cn.booklish.sharp.remoting.netty4.api.ServerChannelOperator
 import cn.booklish.sharp.serialize.api.RpcSerializer
@@ -25,8 +25,8 @@ object Server {
     private lateinit var channel: Channel
     private val executor = Executors.newSingleThreadExecutor()
     private val bootstrap = ServerBootstrap()
-    var port = Constants.DEFAULT_SERVER_LISTEN_PORT
-    var clientChannelTimeout = Constants.DEFAULT_CLIENT_CHANNEL_TIMEOUT
+    var port = SharpConstants.DEFAULT_SERVER_LISTEN_PORT
+    var clientChannelTimeout = SharpConstants.DEFAULT_CLIENT_CHANNEL_TIMEOUT
     var rpcSerializer: RpcSerializer = KryoSerializer()
     var channelOperator: ChannelOperator = ServerChannelOperator()
 

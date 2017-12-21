@@ -1,6 +1,6 @@
 package cn.booklish.sharp.registry.support.zookeeper
 
-import cn.booklish.sharp.constant.Constants
+import cn.booklish.sharp.constant.SharpConstants
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig
 
 /**
@@ -11,15 +11,15 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig
  */
 class ZkConnectionConfig {
 
-    var address = Constants.DEFAULT_ZOOKEEPER_ADDRESS
+    var address = SharpConstants.DEFAULT_ZOOKEEPER_ADDRESS
 
-    var retryTimes = Constants.DEFAULT_ZOOKEEPER_RETRY_TIMES
+    var retryTimes = SharpConstants.DEFAULT_ZOOKEEPER_RETRY_TIMES
 
-    var sleepBetweenRetry = Constants.DEFAULT_ZOOKEEPER_SLEEP_BETWEEN_RETRY
+    var sleepBetweenRetry = SharpConstants.DEFAULT_ZOOKEEPER_SLEEP_BETWEEN_RETRY
 
-    var sessionTimeout = Constants.DEFAULT_ZOOKEEPER_SESSION_TIMEOUT
+    var sessionTimeout = SharpConstants.DEFAULT_ZOOKEEPER_SESSION_TIMEOUT
 
-    var connectionTimeOut = Constants.DEFAULT_ZOOKEEPER_CONNECTION_TIMEOUT
+    var connectionTimeOut = SharpConstants.DEFAULT_ZOOKEEPER_CONNECTION_TIMEOUT
 
     val poolConfig = GenericObjectPoolConfig()
 

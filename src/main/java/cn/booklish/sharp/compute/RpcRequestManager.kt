@@ -1,6 +1,6 @@
 package cn.booklish.sharp.compute
 
-import cn.booklish.sharp.constant.Constants
+import cn.booklish.sharp.constant.SharpConstants
 import cn.booklish.sharp.model.RpcRequest
 import cn.booklish.sharp.model.RpcResponse
 import java.util.concurrent.Callable
@@ -19,9 +19,9 @@ object RpcRequestManager{
 
     private lateinit var serviceBeanFactory: ServiceBeanFactory
 
-    var async = Constants.DEFAULT_RPC_REQUEST_COMPUTE_MANAGER_ASYNC
+    var async = SharpConstants.DEFAULT_RPC_REQUEST_COMPUTE_MANAGER_ASYNC
 
-    var threadPoolSize = Constants.DEFAULT_RPC_REQUEST_COMPUTE_MANAGER_THREAD_POOL_SIZE
+    var threadPoolSize = SharpConstants.DEFAULT_RPC_REQUEST_COMPUTE_MANAGER_THREAD_POOL_SIZE
 
     /**
      * 启动管理器

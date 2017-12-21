@@ -1,5 +1,6 @@
 package cn.booklish.sharp.proxy
 
+import cn.booklish.sharp.constant.SharpConstants
 import cn.booklish.sharp.registry.api.RegistryCenter
 import net.sf.cglib.proxy.Enhancer
 import org.apache.log4j.Logger
@@ -40,7 +41,7 @@ object ServiceProxyFactory {
      * 获取服务地址并创建服务代理的回调
      */
     private fun getServiceLocation(path: String): ProxyServiceInterceptor? {
-        return registryCenter.getData(path).let {
+        return registryCenter.getData(SharpConstants.DEFAULT_REGISTER_PATH_PREFIX + path).let {
             val address = it.serviceAddress.split(":".toRegex())
             ProxyServiceInterceptor(
                     InetSocketAddress(address[0], address[1].toInt()), it.serviceTypeName)

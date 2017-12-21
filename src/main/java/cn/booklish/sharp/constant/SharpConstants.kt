@@ -8,7 +8,7 @@ import kotlin.math.min
  * @Created: 2017/12/20 9:39
  * @Modified:
  */
-object Constants {
+object SharpConstants {
 
     /*--------------------------默认zookeeper配置--------------------------*/
 
@@ -49,6 +49,18 @@ object Constants {
      */
     val DEFAULT_REDIS_CONNECTION_TIMEOUT = 2000
 
+    /*--------------------------默认server服务端配置--------------------------*/
+
+    /**
+     * 默认服务端server监听端口
+     */
+    val DEFAULT_SERVER_LISTEN_PORT = 12200
+
+    /**
+     * 默认服务注册地址前缀
+     */
+    val DEFAULT_REGISTER_PATH_PREFIX = "sharp-rpc:"
+
     /**
      * 默认Rpc请求异步处理
      */
@@ -64,18 +76,12 @@ object Constants {
      */
     val DEFAULT_REGISTER_TASK_MANAGER_THREAD_POOL_SIZE = min(Runtime.getRuntime().availableProcessors()+1,32)
 
-    /**
-     * 默认客户端channel连接池大小
-     */
-    val DEFAULT_CLIENT_CHANNEL_POOL_SIZE = 15
+    /*--------------------------默认client客户端配置--------------------------*/
 
     /**
      * 默认客户端rpc请求连接过期时间
      */
     val DEFAULT_CLIENT_CHANNEL_TIMEOUT = 60
 
-    /**
-     * 默认服务端server监听端口
-     */
-    val DEFAULT_SERVER_LISTEN_PORT = 12200
+
 }

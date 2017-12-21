@@ -1,6 +1,6 @@
 package cn.booklish.sharp.registry.api
 
-import cn.booklish.sharp.constant.Constants
+import cn.booklish.sharp.constant.SharpConstants
 import java.io.Serializable
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -19,7 +19,7 @@ object RegisterTaskManager{
 
     private lateinit var exec: ExecutorService
 
-    var threadPoolSize = Constants.DEFAULT_REGISTER_TASK_MANAGER_THREAD_POOL_SIZE
+    var threadPoolSize = SharpConstants.DEFAULT_REGISTER_TASK_MANAGER_THREAD_POOL_SIZE
 
     fun start(registryCenter: RegistryCenter){
         exec = Executors.newFixedThreadPool(this.threadPoolSize)
@@ -62,7 +62,7 @@ class RegisterTaskConsumer(private val queue: LinkedBlockingQueue<RegisterInfo>,
         while (true) {
             try {
                 val info = queue.take()
-                registryCenter.createPath(info.path, info)
+                registryCenter.createPath(SharpConstants.DEFAULT_REGISTER_PATH_PREFIX + info.path, info)
             } catch (e: InterruptedException) {
                 break
             }

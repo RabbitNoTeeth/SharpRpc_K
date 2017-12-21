@@ -1,6 +1,6 @@
 package cn.booklish.sharp.registry.support.redis
 
-import cn.booklish.sharp.constant.Constants
+import cn.booklish.sharp.constant.SharpConstants
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig
 
 /**
@@ -11,9 +11,9 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig
  */
 class RedisConnectionConfig {
 
-    var address = Constants.DEFAULT_REDIS_ADDRESS
+    var address = SharpConstants.DEFAULT_REDIS_ADDRESS
 
-    var connectionTimeOut = Constants.DEFAULT_REDIS_CONNECTION_TIMEOUT
+    var connectionTimeOut = SharpConstants.DEFAULT_REDIS_CONNECTION_TIMEOUT
 
     val poolConfig = GenericObjectPoolConfig()
 

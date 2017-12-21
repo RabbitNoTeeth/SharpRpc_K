@@ -3,7 +3,6 @@ package cn.booklish.sharp.config
 import cn.booklish.sharp.remoting.netty4.core.ClientChannelManager
 import cn.booklish.sharp.compute.RpcRequestManager
 import cn.booklish.sharp.compute.ServiceBeanFactory
-import cn.booklish.sharp.constant.Constants
 import cn.booklish.sharp.exception.SharpConfigException
 import cn.booklish.sharp.proxy.ServiceProxyFactory
 import cn.booklish.sharp.registry.api.RegistryCenter
@@ -18,7 +17,6 @@ import cn.booklish.sharp.remoting.netty4.core.ChannelPoolConfig
 import cn.booklish.sharp.remoting.netty4.core.Client
 import cn.booklish.sharp.remoting.netty4.core.Server
 import cn.booklish.sharp.serialize.api.RpcSerializer
-import org.apache.commons.pool2.impl.GenericObjectPoolConfig
 import org.apache.log4j.Logger
 import java.util.*
 
