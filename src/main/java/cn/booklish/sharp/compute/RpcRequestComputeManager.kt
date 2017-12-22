@@ -1,8 +1,8 @@
 package cn.booklish.sharp.compute
 
-import cn.booklish.sharp.constant.SharpConstants
 import cn.booklish.sharp.model.RpcRequest
 import cn.booklish.sharp.model.RpcResponse
+import cn.booklish.sharp.remoting.netty4.core.ServerConfig
 import java.util.concurrent.Callable
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -13,29 +13,28 @@ import java.util.concurrent.Executors
  * @Created: 2017/12/13 8:58
  * @Modified:
  */
-object RpcRequestManager{
+object RpcRequestComputeManager {
 
     private lateinit var exec: ExecutorService
 
     private lateinit var serviceBeanFactory: ServiceBeanFactory
 
-    var async = SharpConstants.DEFAULT_RPC_REQUEST_COMPUTE_MANAGER_ASYNC
-
-    var threadPoolSize = SharpConstants.DEFAULT_RPC_REQUEST_COMPUTE_MANAGER_THREAD_POOL_SIZE
+    private lateinit var serverConfig: ServerConfig
 
     /**
      * 启动管理器
      */
-    fun start(serviceBeanFactory: ServiceBeanFactory){
-        exec = Executors.newFixedThreadPool(RpcRequestManager.threadPoolSize)
-        RpcRequestManager.serviceBeanFactory = serviceBeanFactory
+    fun start(serverConfig: ServerConfig,serviceBeanFactory: ServiceBeanFactory){
+        this.serviceBeanFactory = serviceBeanFactory
+        this.serverConfig = serverConfig
+        this.exec = Executors.newFixedThreadPool(serverConfig.computeThreadPoolSize)
     }
 
     /**
      * 提交Rpc注册任务
      */
     fun submit(rpcRequest: RpcRequest): RpcResponse {
-        if(async){
+        if(serverConfig.asyncComputeRpcRequest){
             return submitAsync(rpcRequest)
         }
         return submitSync(rpcRequest)
@@ -52,22 +51,9 @@ object RpcRequestManager{
      * 异步计算Rpc请求
      */
     private fun submitAsync(rpcRequest: RpcRequest): RpcResponse{
-        val call = exec.submit(RpcAsyncComputeCallable(rpcRequest, serviceBeanFactory))
-        return call.get()
+        return exec.submit(Callable<RpcResponse> { RpcRequestHandler.computeRpcRequest(rpcRequest, serviceBeanFactory) }).get()
     }
 
-}
-
-/**
- * @Author: liuxindong
- * @Description:  进行异步计算Rpc请求的callable
- * @Created: 2017/12/13 8:59
- * @Modified:
- */
-class RpcAsyncComputeCallable(private val rpcRequest: RpcRequest, private val serviceBeanFactory: ServiceBeanFactory): Callable<RpcResponse>{
-    override fun call(): RpcResponse {
-        return RpcRequestHandler.computeRpcRequest(rpcRequest, serviceBeanFactory)
-    }
 }
 
 /**

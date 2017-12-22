@@ -10,6 +10,7 @@ import kotlin.math.min
  */
 object SharpConstants {
 
+
     /*--------------------------默认zookeeper配置--------------------------*/
 
     /**
@@ -57,9 +58,14 @@ object SharpConstants {
     val DEFAULT_SERVER_LISTEN_PORT = 12200
 
     /**
-     * 默认服务注册地址前缀
+     * 默认启用服务端
      */
-    val DEFAULT_REGISTER_PATH_PREFIX = "sharp-rpc:"
+    val DEFAULT_SERVER_ENABLE = true
+
+    /**
+     * 默认不启用服务自动扫描器
+     */
+    val DEFAULT__AUTO_SCAN_ENABLE = false
 
     /**
      * 默认Rpc请求异步处理

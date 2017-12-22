@@ -1,8 +1,7 @@
 package cn.booklish.sharp.proxy
 
-import cn.booklish.sharp.remoting.netty4.core.ClientChannelManager
+import cn.booklish.sharp.remoting.netty4.core.ClientChannelPool
 import cn.booklish.sharp.model.RpcRequest
-import cn.booklish.sharp.serialize.GsonUtil
 import net.sf.cglib.proxy.MethodInterceptor
 import net.sf.cglib.proxy.MethodProxy
 import java.lang.reflect.Method
@@ -17,7 +16,7 @@ import java.net.InetSocketAddress
 class ProxyServiceInterceptor(private val location: InetSocketAddress, private val serviceName:String): MethodInterceptor {
 
     override fun intercept(obj: Any, method: Method, args: Array<Any>, methodProxy: MethodProxy): Any? {
-        val channelPool = ClientChannelManager.getChannelPool(location)
+        val channelPool = ClientChannelPool.getChannelPool(location)
 
         val id = RpcRequestIdGenerator.getId()
         RpcResponseManager.add(id)

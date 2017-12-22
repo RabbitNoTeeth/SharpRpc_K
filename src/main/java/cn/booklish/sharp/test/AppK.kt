@@ -37,6 +37,8 @@ fun main(args: Array<String>) {
     //客户端获取服务
     val testService = ServiceProxyFactory.getService("/test2/TestImpl", Test::class.java) as Test
 
+    Thread.sleep(2000)
+
     //客户端运行服务
     println(testService.run())
 

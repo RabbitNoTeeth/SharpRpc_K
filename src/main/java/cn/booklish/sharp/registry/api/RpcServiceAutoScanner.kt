@@ -1,6 +1,7 @@
 package cn.booklish.sharp.registry.api
 
 import cn.booklish.sharp.annotation.RpcService
+import cn.booklish.sharp.remoting.netty4.core.ServerConfig
 import org.apache.log4j.Logger
 import java.io.File
 import java.io.IOException
@@ -14,20 +15,20 @@ import java.util.*
  * @Created: 2017/12/13 9:02
  * @Modified:
  */
-class RpcServiceAutoScanner(private val autoScanPath:String, private val registerAddress:String) {
+object RpcServiceAutoScanner{
 
     private val logger: Logger = Logger.getLogger(this.javaClass)
 
     /**
      * 扫描需要注册的Rpc服务类,并且将注册信息提交到注册管理器
      */
-    fun scan() {
-        val serviceClasses = loadAllClassesByPackage(autoScanPath)
+    fun scan(serverConfig: ServerConfig) {
+        val serviceClasses = loadAllClassesByPackage(serverConfig.autoScanBasePath!!)
         serviceClasses.forEach { clazz ->
             val annotation = clazz.getAnnotation(RpcService::class.java)
             if (annotation != null) {
                 val path = (annotation as RpcService).path
-                val registerInfo = RegisterInfo(path, clazz.typeName, registerAddress)
+                val registerInfo = RegisterInfo(path, clazz.typeName, serverConfig.autoRegisterPath!!)
                 RegisterTaskManager.submit(registerInfo)
             }
         }

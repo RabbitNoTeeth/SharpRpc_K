@@ -17,16 +17,16 @@ import java.util.concurrent.ConcurrentHashMap
  * @Created: 2017/12/13 8:47
  * @Modified:
  */
-object ClientChannelManager{
+object ClientChannelPool {
 
     private val channelPoolMap = ConcurrentHashMap<InetSocketAddress, ChannelPoolFactory>()
 
-    private var config: ChannelPoolConfig = ChannelPoolConfig()
+    private var config: ClientConfig = ClientConfig()
 
     /**
      * 初始化channel连接池配置
      */
-    fun init(config: ChannelPoolConfig = ChannelPoolConfig()){
+    fun init(config: ClientConfig = ClientConfig()){
         this.config = config
     }
 
@@ -36,7 +36,7 @@ object ClientChannelManager{
     fun getChannelPool(serverAddress:InetSocketAddress): ChannelPoolFactory {
         val channelPool = channelPoolMap[serverAddress]
         if(channelPool==null){
-            channelPoolMap.putIfAbsent(serverAddress, ChannelPoolFactory(serverAddress,config.poolConfig))
+            channelPoolMap.putIfAbsent(serverAddress, ChannelPoolFactory(serverAddress,config.channelPoolConfig))
         }
         return channelPoolMap[serverAddress]!!
     }
@@ -107,14 +107,3 @@ class ChannelFactory(private val address: InetSocketAddress): BasePooledObjectFa
 
 }
 
-class ChannelPoolConfig{
-
-    var timeout = SharpConstants.DEFAULT_CLIENT_CHANNEL_TIMEOUT
-
-    val poolConfig = GenericObjectPoolConfig()
-
-    init {
-        poolConfig.testOnBorrow = true
-        poolConfig.testOnReturn = true
-    }
-}

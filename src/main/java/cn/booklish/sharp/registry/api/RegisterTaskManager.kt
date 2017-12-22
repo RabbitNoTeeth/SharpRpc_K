@@ -1,6 +1,6 @@
 package cn.booklish.sharp.registry.api
 
-import cn.booklish.sharp.constant.SharpConstants
+import cn.booklish.sharp.remoting.netty4.core.ServerConfig
 import java.io.Serializable
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -19,55 +19,32 @@ object RegisterTaskManager{
 
     private lateinit var exec: ExecutorService
 
-    var threadPoolSize = SharpConstants.DEFAULT_REGISTER_TASK_MANAGER_THREAD_POOL_SIZE
-
-    fun start(registryCenter: RegistryCenter){
-        exec = Executors.newFixedThreadPool(this.threadPoolSize)
-        exec.execute(RegisterTaskConsumer(queue, registryCenter))
+    fun start(serverConfig: ServerConfig){
+        exec = Executors.newFixedThreadPool(serverConfig.registerThreadPoolSize)
+        exec.execute({
+            while (true) {
+                try {
+                    val info = queue.take()
+                    serverConfig.registryCenter!!.createPath(info.path, info)
+                } catch (e: InterruptedException) {
+                    Thread.currentThread().interrupt()
+                }
+            }
+        })
     }
 
     fun submit(registerInfo: RegisterInfo){
-        exec.execute(RegisterTaskProducer(queue, registerInfo))
+        exec.execute({
+            try {
+                queue.put(registerInfo)
+            } catch (e: InterruptedException) {
+                Thread.currentThread().interrupt()
+            }
+        })
     }
 
     fun stop(){
         exec.shutdown()
-    }
-}
-
-/**
- * @Author: liuxindong
- * @Description:  Rpc服务注册任务生产者
- * @Created: 2017/12/13 9:02
- * @Modified:
- */
-class RegisterTaskProducer(private val queue: LinkedBlockingQueue<RegisterInfo>, private val registerInfo: RegisterInfo):Runnable{
-    override fun run() {
-        try {
-            queue.put(registerInfo)
-        } catch (e: InterruptedException) {
-            Thread.currentThread().interrupt()
-        }
-    }
-}
-
-/**
- * @Author: liuxindong
- * @Description:  Rpc服务注册任务消费者
- * @Created: 2017/12/13 9:02
- * @Modified:
- */
-class RegisterTaskConsumer(private val queue: LinkedBlockingQueue<RegisterInfo>,private val registryCenter: RegistryCenter):Runnable{
-    override fun run() {
-        while (true) {
-            try {
-                val info = queue.take()
-                registryCenter.createPath(SharpConstants.DEFAULT_REGISTER_PATH_PREFIX + info.path, info)
-            } catch (e: InterruptedException) {
-                break
-            }
-        }
-        Thread.currentThread().interrupt()
     }
 }
 

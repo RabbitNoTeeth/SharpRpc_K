@@ -2,7 +2,7 @@ package cn.booklish.sharp.remoting.netty4.api
 
 import cn.booklish.sharp.model.RpcRequest
 import cn.booklish.sharp.serialize.GsonUtil
-import cn.booklish.sharp.compute.RpcRequestManager
+import cn.booklish.sharp.compute.RpcRequestComputeManager
 import io.netty.channel.Channel
 import io.netty.handler.timeout.ReadTimeoutException
 import io.netty.util.ReferenceCountUtil
@@ -35,7 +35,7 @@ class ServerChannelOperator :ChannelOperator {
         logger.info("[SharpRpc-server]: 接收到来自客户端连接" + channel.id() + "的Rpc请求,开始处理")
         try{
             val rpcRequest = GsonUtil.jsonToObject(message.toString(),RpcRequest::class.java)
-            val computeResult = RpcRequestManager.submit(rpcRequest)
+            val computeResult = RpcRequestComputeManager.submit(rpcRequest)
             logger.info("[SharpRpc-server]: 来自客户端连接" + channel.id() + "的Rpc请求处理完成,返回结果给客户端")
             channel.writeAndFlush(computeResult)
         }finally {
