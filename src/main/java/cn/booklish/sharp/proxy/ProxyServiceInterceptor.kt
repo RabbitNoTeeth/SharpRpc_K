@@ -16,6 +16,7 @@ import java.net.InetSocketAddress
 class ProxyServiceInterceptor(private val location: InetSocketAddress, private val serviceName:String): MethodInterceptor {
 
     override fun intercept(obj: Any, method: Method, args: Array<Any>, methodProxy: MethodProxy): Any? {
+
         val channelPool = ClientChannelPool.getChannelPool(location)
 
         val id = RpcRequestIdGenerator.getId()

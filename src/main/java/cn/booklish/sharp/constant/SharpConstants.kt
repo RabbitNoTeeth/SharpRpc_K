@@ -87,7 +87,7 @@ object SharpConstants {
     /**
      * 默认客户端rpc请求连接过期时间
      */
-    val DEFAULT_CLIENT_CHANNEL_TIMEOUT = 60
+    val DEFAULT_CLIENT_CHANNEL_TIMEOUT = 3600
 
 
 }
