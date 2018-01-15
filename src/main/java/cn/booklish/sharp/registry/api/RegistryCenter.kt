@@ -9,16 +9,19 @@ package cn.booklish.sharp.registry.api
  */
 interface RegistryCenter {
 
-    fun getChildrenPath(path: String): Collection<String>
+    /**
+     * 注册服务
+     */
+    fun register(serviceName: String, address: String)
 
-    fun getData(path: String): RegisterInfo
+    /**
+     * 注销服务
+     */
+    fun unregister(serviceName: String, address: String)
 
-    fun createPath(path: String, data: Any)
-
-    fun updatePath(path: String, data: Any)
-
-    fun deletePath(path: String)
-
-    fun checkPathExists(path: String): Boolean
+    /**
+     * 获取服务提供者
+     */
+    fun getProviders(serviceName: String): Set<String>
 
 }

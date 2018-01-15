@@ -7,11 +7,7 @@ import cn.booklish.sharp.proxy.ServiceProxyFactory
 import cn.booklish.sharp.registry.api.RegistryCenter
 import cn.booklish.sharp.registry.api.RegisterTaskManager
 import cn.booklish.sharp.registry.api.RegistryCenterType
-import cn.booklish.sharp.registry.api.RpcServiceAutoScanner
-import cn.booklish.sharp.registry.support.redis.RedisConnectionConfig
 import cn.booklish.sharp.registry.support.redis.RedisRegistryCenter
-import cn.booklish.sharp.registry.support.zookeeper.ZkConnectionConfig
-import cn.booklish.sharp.registry.support.zookeeper.ZookeeperRegistryCenter
 import cn.booklish.sharp.remoting.netty4.core.*
 import cn.booklish.sharp.serialize.api.RpcSerializer
 import org.apache.log4j.Logger

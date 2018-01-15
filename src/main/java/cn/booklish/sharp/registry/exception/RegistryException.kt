@@ -1,12 +1,7 @@
 package cn.booklish.sharp.registry.exception
 
-/**
- * @Author: liuxindong
- * @Description: 检查服务是否存在失败的异常基类
- * @Created: 2017/12/13 8:53
- * @Modified:
- */
-class CheckPathExistsException:RuntimeException{
+
+class registryManagerInitException:RuntimeException{
     constructor(message: String):super(message)
     constructor(message: String,cause: Throwable):super(message,cause)
 }
