@@ -4,10 +4,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.LinkedBlockingQueue
 
 /**
- * @Author: liuxindong
- * @Description:  Rpc响应管理器
- * @Created: 2017/12/20 10:45
- * @Modified:
+ * Rpc响应管理器
  */
 object RpcResponseManager {
 

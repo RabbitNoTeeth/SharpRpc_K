@@ -1,64 +1,89 @@
 # SharpRpc_K
 基于Netty4的分布式rpc框架,支持redis和zookeeper,SharpRpc的Kotlin重构版本,后面该框架的更新将主要在该版本上更新
 
-## 重构说明
-1.所有代码全部使用Kotlin重构,更加精简<br>
-2.利用Kotlin语言层对单例模式和工厂模式等的支持,重构框架内的各种管理器<br>
-3.优化配置文件的加载逻辑,简化配置流程
 
 ## 配置使用
-***1.  java 中***
+**1.  java 中**
 
+服务提供者
 <pre><code>
 
-    //创建配置类,传入服务端实现的服务类工厂
-    SharpRpcConfig config = new SharpRpcConfig(clazz -> new TestImpl());
+    //创建配置类
+    SharpRpcConfig sharpRpcConfig = new SharpRpcConfig();
+    
+    //设置注册中心
+    sharpRpcConfig.getRegistry().type(RegistryCenterType.REDIS).host("47.94.206.26").port(6380);
 
-    config.loadProperties("sharp.properties");
-    //如果不使用配置文件,那么需要手动设置注册中心(如果读取了配置文件,那么手动设置覆盖配置文件)
-    //config.setRegistyrCenter(RegistryCenterType.REDIS,"127.0.0.1:6379");
+    //设置协议
+    sharpRpcConfig.getProtocol().name(ProtocolName.SHARP).host("192.168.2.246").port(12200);
 
-    //****可选操作:可以关闭服务端功能(默认启用),只使用客户端功能来获取服务代理
-    //config.disableServer();
-    //****可选操作:启用服务自动扫描器(默认关闭),启动后需要设置扫描的基础路径和服务的注册地址
-    //config.enableAutoScanner().setAutoScanBasePath("...").setAutoScanRegisterAddress("...");
+    //注册服务
+    sharpRpcConfig.register(Test.class,new TestImpl());
 
-    //注册中心配置完成后,调用该方法启动sharp
-    config.configure();
+    //获取服务类
+    Test testService = sharpRpcConfig.getService(Test.class);
 
-    //服务端注册服务
-    RegisterTaskManager.INSTANCE.submit(new RegisterInfo("/test2/TestImpl","cn.booklish.sharp.test.service.TestImpl","127.0.0.1:12200"));
-
-    //客户端获取服务
-    Test testService = (Test) ServiceProxyFactory.INSTANCE.getService("/test2/TestImpl", Test.class);
+    //使用服务类
+    System.out.println(testService.run(1));
 
 </code></pre>
 
-
-***2. Kotlin中***
-
+服务消费者
 <pre><code>
 
-    //创建配置类,传入服务端实现的服务类工厂
-    val config = SharpRpcConfig(ServiceBeanFactory { TestImpl() })
+    //创建配置类
+    SharpRpcConfig sharpRpcConfig = new SharpRpcConfig();
     
-    config.loadProperties("sharp.properties")
-    //如果不使用配置文件,那么需要手动设置注册中心(如果读取了配置文件,那么手动设置覆盖配置文件)
-    //config.setRegistyrCenter(RegistryCenterType.REDIS,"127.0.0.1:6379")
-    
-    //****可选操作:可以关闭服务端功能(默认启用),只使用客户端功能来获取服务代理
-    //config.disableServer()
-    //****可选操作:启用服务自动扫描器(默认关闭),启动后需要设置扫描的基础路径和服务的注册地址
-    //config.enableAutoScanner().setAutoScanBasePath("...").setAutoScanRegisterAddress("...")
-    
-    //注册中心配置完成后,调用该方法启动sharp
-    config.configure()
-    
-    //服务端注册服务
-    RegisterTaskManager.submit(RegisterInfo("/test2/TestImpl","cn.booklish.sharp.test.service.TestImpl","127.0.0.1:12200"))
+    //设置注册中心
+    sharpRpcConfig.getRegistry().type(RegistryCenterType.REDIS).host("47.94.206.26").port(6380);
 
-    //客户端获取服务
-    val testService = ServiceProxyFactory.getService("/test2/TestImpl", Test::class.java) as Test
+    //设置协议
+    sharpRpcConfig.getProtocol().name(ProtocolName.SHARP).host("192.168.2.246").port(12200);
+
+    //获取服务类
+    Test testService = sharpRpcConfig.getService(Test.class);
+
+    //使用服务类
+    System.out.println(testService.run(1));
+
+</code></pre>
+
+**2. Kotlin中**
+
+服务提供者
+<pre><code>
+
+    //创建配置类
+    val sharpConfig = SharpRpcConfig()
+    
+    //设置注册中心
+    sharpConfig.registry.type(RegistryCenterType.REDIS).host("47.94.206.26").port(6380)
+    
+    //设置协议
+    sharpConfig.protocol.name(ProtocolName.SHARP).host("192.168.2.246").port(12200)
+
+    //注册服务
+    sharpConfig.register(Test::class.java,TestImpl())
+
+</code></pre>
+
+服务消费者
+<pre><code>
+
+    //创建配置类
+    val sharpConfig = SharpRpcConfig()
+    
+    //设置注册中心
+    sharpConfig.registry.type(RegistryCenterType.REDIS).host("47.94.206.26").port(6380)
+    
+    //设置协议
+    sharpConfig.protocol.name(ProtocolName.SHARP).host("192.168.2.246").port(12200)
+
+    //获取服务类
+    val service:Test = sharpConfig.getService(Test::class.java)
+
+    //使用服务类
+    println(service.run(1))
 
 </code></pre>
 

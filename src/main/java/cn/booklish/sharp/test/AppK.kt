@@ -22,13 +22,6 @@ fun main(args: Array<String>) {
 
     val service:Test = sharpConfig.getService(Test::class.java)
 
-    var x = 0
-    val start = System.nanoTime()
-    while(x<50){
-        println(service.run(x))
-        x++
-    }
-    val end = System.nanoTime()
-    println("执行时间: ${end-start}ms")
+    println(service.run(1))
 
 }
