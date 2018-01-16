@@ -6,9 +6,7 @@ import redis.clients.jedis.Jedis
 /**
  * redis服务注册中心
  */
-class RedisRegistryCenter (address:String,port:Int):RegistryCenter {
-
-    val jedis:Jedis = Jedis(address,port)
+class RedisRegistryCenter (private val jedis:Jedis):RegistryCenter {
 
     override fun register(serviceName: String, address: String) {
         jedis.sadd(serviceName, address)

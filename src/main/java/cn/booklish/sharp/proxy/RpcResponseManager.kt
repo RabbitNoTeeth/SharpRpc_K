@@ -11,17 +11,17 @@ import java.util.concurrent.LinkedBlockingQueue
  */
 object RpcResponseManager {
 
-    private val map:ConcurrentHashMap<Int,LinkedBlockingQueue<Any?>> = ConcurrentHashMap()
+    private val map:ConcurrentHashMap<Int,LinkedBlockingQueue<Any>> = ConcurrentHashMap()
 
     fun add(id:Int){
         map[id] = LinkedBlockingQueue()
     }
 
-    fun update(id:Int,result:Any?){
+    fun update(id:Int,result:Any){
         map[id]?.put(result)
     }
 
-    fun get(id:Int): LinkedBlockingQueue<Any?>? {
+    fun get(id:Int): LinkedBlockingQueue<Any>? {
         return map[id]
     }
 

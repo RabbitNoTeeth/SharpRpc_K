@@ -1,49 +1,67 @@
 package cn.booklish.sharp.proxy
 
-import cn.booklish.sharp.remoting.netty4.core.ClientConfig
+import cn.booklish.sharp.protocol.api.ProtocolName
+import cn.booklish.sharp.protocol.config.ProtocolConfig
+import cn.booklish.sharp.remoting.netty4.config.ClientConfig
 import net.sf.cglib.proxy.Enhancer
 import org.apache.log4j.Logger
-import java.net.InetSocketAddress
+import java.lang.IllegalStateException
+import java.util.*
 
 /**
- * @Author: liuxindong
- * @Description:  Rpc客户端,用于获取Rpc服务代理类
- * @Created: 2017/12/13 8:50
- * @Modified:
+ * Rpc客户端,用于获取Rpc服务代理类
  */
 object ServiceProxyFactory {
 
     private val logger:Logger = Logger.getLogger(this.javaClass)
 
-    private lateinit var clientConfig: ClientConfig
+    private val random = Random()
 
-    fun init(clientConfig: ClientConfig){
+    private lateinit var clientConfig: ClientConfig
+    private lateinit var protocolConfig: ProtocolConfig
+
+    fun init(clientConfig: ClientConfig,protocolConfig: ProtocolConfig){
         this.clientConfig = clientConfig
+        this.protocolConfig = protocolConfig
     }
 
     /**
      * 获得service服务代理
      */
-    fun getService(path: String, serviceInterface: Class<*>): Any? {
+    fun getService(serviceClass: Class<*>,version: String): Any? {
 
-        val proxy = getServiceLocation(path) ?: return null
-        val enhancer = Enhancer()
-        enhancer.setSuperclass(serviceInterface)
-        // 回调方法
-        enhancer.setCallback(proxy)
-        // 创建代理对象
-        return enhancer.create()
+        val serverAddress = getServiceProvider(serviceClass.typeName,version)
+
+        return when(protocolConfig.name){
+            ProtocolName.RMI -> {
+                null
+            }
+            ProtocolName.SHARP -> {
+                val proxy = ProxyServiceInterceptor(serviceClass.typeName,serverAddress)
+                val enhancer = Enhancer()
+                enhancer.setSuperclass(serviceClass)
+                // 回调方法
+                enhancer.setCallback(proxy)
+                // 创建代理对象
+                enhancer.create()
+            }
+        }
 
     }
 
+
     /**
-     * 获取服务地址并创建服务代理的回调
+     * 获取服务提供者地址
      */
-    private fun getServiceLocation(path: String): ProxyServiceInterceptor? {
-        return clientConfig.registryCenter!!.getData(path).let {
-            val address = it.serviceAddress.split(":".toRegex())
-            ProxyServiceInterceptor(
-                    InetSocketAddress(address[0], address[1].toInt()), it.serviceTypeName)
+    private fun getServiceProvider(serviceName: String,version: String): String{
+        val registryCenter = clientConfig.registryCenter?: throw IllegalStateException("无效的注册中心")
+        val key = protocolConfig.name.value + ":" + serviceName + "?version=" + version
+        registryCenter.getProviders(key).let {
+            if(it.isEmpty()){
+                throw IllegalArgumentException("未找到服务[$serviceName]提供者,无法创建服务代理")
+            }
+            val x = random.nextInt(it.size)
+            return it.toList()[x]
         }
     }
 

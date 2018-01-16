@@ -7,10 +7,7 @@ import io.netty.channel.Channel
 import org.apache.log4j.Logger
 
 /**
- * @Author: liuxindong
- * @Description:  客户端channel处理类
- * @Created: 2017/12/20 9:43
- * @Modified:
+ * 客户端channel处理类
  */
 class ClientChannelOperator :ChannelOperator {
 

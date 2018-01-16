@@ -8,28 +8,18 @@ import java.lang.reflect.Method
 import java.net.InetSocketAddress
 
 /**
- * @Author: liuxindong
- * @Description:  客户端Rpc服务代理类的方法拦截器,实现了cglib的MethodInterceptor
- * @Created: 2017/12/13 8:47
- * @Modified:
+ * 客户端Rpc服务代理类的方法拦截器,实现了cglib的MethodInterceptor
  */
-class ProxyServiceInterceptor(private val location: InetSocketAddress, private val serviceName:String): MethodInterceptor {
+class ProxyServiceInterceptor(private val serviceName:String,private val serverAddress: String): MethodInterceptor {
 
     override fun intercept(obj: Any, method: Method, args: Array<Any>, methodProxy: MethodProxy): Any? {
 
-        val channelPool = ClientChannelPool.getChannelPool(location)
+        val channel = ClientChannelPool.getChannel(serverAddress)
 
         val id = RpcRequestIdGenerator.getId()
         RpcResponseManager.add(id)
         val rpcRequest = RpcRequest(id, serviceName, method.name,method.parameterTypes,args)
-
-        val channel = channelPool.getChannel()
-        try{
-            channel.writeAndFlush(rpcRequest).sync()
-        }finally {
-            channelPool.releaseChannel(channel)
-        }
-
+        channel.writeAndFlush(rpcRequest).sync()
         val result = RpcResponseManager.get(id)?.take()
         RpcResponseManager.remove(id)
         return result

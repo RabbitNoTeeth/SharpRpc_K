@@ -1,5 +1,7 @@
 package cn.booklish.sharp.remoting.netty4.core
 
+import cn.booklish.sharp.remoting.netty4.config.ServerConfig
+import cn.booklish.sharp.remoting.netty4.handler.ServerChannelInitializer
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.Channel
 import io.netty.channel.ChannelOption
@@ -8,10 +10,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel
 import java.util.concurrent.Executors
 
 /**
- * @Author: liuxindong
- * @Description: 服务端引导类
- * @Create: don9 2017/12/18
- * @Modify:
+ * 服务端引导类
  */
 object Server {
 
@@ -21,6 +20,7 @@ object Server {
     private val executor = Executors.newSingleThreadExecutor()
     private val bootstrap = ServerBootstrap()
     private lateinit var serverConfig: ServerConfig
+
     /**
      * 默认配置并启动
      */
@@ -30,7 +30,7 @@ object Server {
                 .channel(NioServerSocketChannel::class.java)
                 .option(ChannelOption.SO_BACKLOG, 128)
                 .childOption(ChannelOption.SO_KEEPALIVE, true)
-                .childHandler(ServerChannelInitializer(serverConfig.clientChannelTimeout, serverConfig.channelOperator,serverConfig.rpcSerializer))
+                .childHandler(ServerChannelInitializer(serverConfig.channelOperator, serverConfig.rpcSerializer!!))
         return this
     }
 

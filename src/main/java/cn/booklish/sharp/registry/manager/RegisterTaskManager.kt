@@ -1,6 +1,11 @@
 package cn.booklish.sharp.registry.manager
 
+import cn.booklish.sharp.compute.RpcServiceBeanManager
+import cn.booklish.sharp.protocol.api.ProtocolName
+import cn.booklish.sharp.protocol.config.ProtocolConfig
 import cn.booklish.sharp.registry.api.RegistryCenter
+import cn.booklish.sharp.registry.config.RegistryConfig
+import org.apache.log4j.Logger
 import java.lang.IllegalStateException
 import java.util.concurrent.Executors
 import java.util.concurrent.LinkedBlockingQueue
@@ -11,37 +16,40 @@ import kotlin.math.min
  */
 object RegisterTaskManager{
 
-    private val queue = LinkedBlockingQueue<RegisterInfo>()
-
-    @Volatile
-    private var started = false
+    private val logger: Logger = Logger.getLogger(this.javaClass)
 
     private val exec = Executors.newFixedThreadPool(min(Runtime.getRuntime().availableProcessors()+1,32))
 
-    fun start(registryCenter: RegistryCenter){
-        started = true
-        exec.execute({
-            while (true) {
-                try {
-                    val info = queue.take()
-                    registryCenter.register(info.serviceName, info.address)
-                } catch (e: InterruptedException) {
-                    Thread.currentThread().interrupt()
-                    throw ExceptionInInitializerError("RegisterTaskManager 服务注册管理器初始化失败")
-                }
-            }
-        })
+    private lateinit var registryConfig: RegistryConfig
+
+    private lateinit var protocolConfig: ProtocolConfig
+
+    fun init(registryConfig: RegistryConfig, protocolConfig:ProtocolConfig){
+        this.registryConfig = registryConfig
+        this.protocolConfig = protocolConfig
     }
 
     fun submit(registerInfo: RegisterInfo){
-        if(!started) throw IllegalStateException("RegisterTaskManager 服务管理器无启动, 无法接收注册任务")
-        exec.execute({
+        exec.execute{
+            val serviceName = (registerInfo.bean).javaClass.typeName
             try {
-                queue.put(registerInfo)
-            } catch (e: InterruptedException) {
+                //将服务信息注册到注册中心
+                val registryCenter = registryConfig.registryCenter?: throw IllegalStateException("无效的注册中心,服务注册失败")
+                val key = protocolConfig.name.value + serviceName + "?version=" + registerInfo.version
+                registryCenter.register(key,registerInfo.address)
+                logger.info("[Sharp] : 服务 $serviceName 注册成功, key = $key , value = ${registerInfo.address}")
+                when(protocolConfig.name){
+                    ProtocolName.RMI -> {}
+                    ProtocolName.SHARP -> {
+                        //服务端保存服务实体
+                        RpcServiceBeanManager.add(registerInfo.bean)
+                    }
+                }
+            } catch (e: Exception) {
                 Thread.currentThread().interrupt()
+                throw RuntimeException("[Sharp] : 服务 $serviceName 注册失败",e)
             }
-        })
+        }
     }
 
     fun stop(){
@@ -49,5 +57,5 @@ object RegisterTaskManager{
     }
 
 
-    class RegisterInfo(val serviceName:String,val address:String)
+    class RegisterInfo(val bean:Any,val address:String,val version:String)
 }

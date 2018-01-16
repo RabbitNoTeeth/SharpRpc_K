@@ -1,4 +1,4 @@
-package cn.booklish.sharp.remoting.netty4.core
+package cn.booklish.sharp.remoting.netty4.codec
 
 import cn.booklish.sharp.serialize.GsonUtil
 import cn.booklish.sharp.serialize.api.RpcSerializer
@@ -7,10 +7,7 @@ import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.MessageToByteEncoder
 
 /**
- * @Author: liuxindong
- * @Description:  Rpc消息编码器
- * @Created: 2017/12/19 13:38
- * @Modified:
+ * Rpc消息编码器
  */
 class MessageEncoder(private val rpcSerializer: RpcSerializer): MessageToByteEncoder<Any>() {
 

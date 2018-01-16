@@ -3,10 +3,7 @@ package cn.booklish.sharp.proxy
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
- * @Author: liuxindong
- * @Description:  Rpc请求id生成器
- * @Created: 2017/12/20 13:21
- * @Modified:
+ * Rpc请求id生成器
  */
 object RpcRequestIdGenerator {
 

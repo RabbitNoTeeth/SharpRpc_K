@@ -1,12 +1,21 @@
 package cn.booklish.sharp.registry.config
 
+import cn.booklish.sharp.constant.SharpConstants
+import cn.booklish.sharp.registry.api.RegistryCenter
 
+/**
+ * 注册中心配置类
+ */
 class RegistryConfig {
 
-    var address  = "127.0.0.1"
+    var type = SharpConstants.DEFAULT_REGISTRY_TYPE
 
-    var port = 6379
+    var address  = SharpConstants.DEFAULT_REGISTRY_ADDRESS
 
-    var timeout = 30
+    var port = SharpConstants.DEFAULT_REGISTRY_PORT
+
+    var timeout = SharpConstants.DEFAULT_REGISTRY_TIMEOUT
+
+    var registryCenter: RegistryCenter? = null
 
 }

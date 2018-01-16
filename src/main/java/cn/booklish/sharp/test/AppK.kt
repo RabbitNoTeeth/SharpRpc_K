@@ -2,13 +2,10 @@ package cn.booklish.sharp.test
 
 import cn.booklish.sharp.proxy.ServiceProxyFactory
 import cn.booklish.sharp.config.SharpRpcConfig
-import cn.booklish.sharp.compute.ServiceBeanFactory
 import cn.booklish.sharp.registry.api.RegisterInfo
 import cn.booklish.sharp.registry.api.RegisterTaskManager
-import cn.booklish.sharp.registry.api.RegistryCenterType
 import cn.booklish.sharp.test.service.Test
 import cn.booklish.sharp.test.service.TestImpl
-import java.util.concurrent.CountDownLatch
 
 
 // 1.首先定义一个java函数式接口
@@ -42,21 +39,21 @@ fun main(args: Array<String>) {
     //客户端运行服务
     println(testService.run())
 
-    /*val start = CountDownLatch(1)
+    /*val init = CountDownLatch(1)
     val end = CountDownLatch(10)
 
     for (x in 1..10){
         val t = Thread{
-            start.await()
+            init.await()
             try{
                 println(service.run())
             }finally {
                 end.countDown()
             }
         }
-        t.start()
+        t.init()
     }
-    start.countDown()
+    init.countDown()
     end.await()*/
 
 

@@ -1,93 +1,51 @@
 package cn.booklish.sharp.constant
 
+import cn.booklish.sharp.protocol.api.ProtocolName
+import cn.booklish.sharp.registry.api.RegistryCenterType
+import cn.booklish.sharp.remoting.netty4.api.ClientChannelOperator
+import cn.booklish.sharp.remoting.netty4.api.ServerChannelOperator
+import cn.booklish.sharp.serialize.kryo.KryoSerializer
 import kotlin.math.min
 
 /**
- * @Author: liuxindong
- * @Description:  Sharp配置默认值常量
- * @Created: 2017/12/20 9:39
- * @Modified:
+ * Sharp配置默认值常量
  */
 object SharpConstants {
 
+    /*--------------------------默认序列化配置--------------------------*/
 
-    /*--------------------------默认zookeeper配置--------------------------*/
+    val DEFAULT_SERIALIZER = KryoSerializer()
 
-    /**
-     * 默认zookeeper连接地址
-     */
-    val DEFAULT_ZOOKEEPER_ADDRESS = "127.0.0.1:2181"
 
-    /**
-     * 默认zookeeper重连次数
-     */
-    val DEFAULT_ZOOKEEPER_RETRY_TIMES = 3
+    /*--------------------------默认registry注册中心配置--------------------------*/
 
-    /**
-     * 默认zookeeper重连间隔时长
-     */
-    val DEFAULT_ZOOKEEPER_SLEEP_BETWEEN_RETRY = 3000
+    val DEFAULT_REGISTRY_TYPE = RegistryCenterType.REDIS
 
-    /**
-     * 默认zookeeper会话超时时长
-     */
-    val DEFAULT_ZOOKEEPER_SESSION_TIMEOUT = 60000
+    var DEFAULT_REGISTRY_ADDRESS = "127.0.0.1"
 
-    /**
-     * 默认zookeeper连接超时时长
-     */
-    val DEFAULT_ZOOKEEPER_CONNECTION_TIMEOUT = 15000
+    var DEFAULT_REGISTRY_PORT = 6379
 
-    /*--------------------------默认redis配置--------------------------*/
+    var DEFAULT_REGISTRY_TIMEOUT = 30
 
-    /**
-     * 默认redis主机地址
-     */
-    val DEFAULT_REDIS_ADDRESS = "127.0.0.1:6379"
 
-    /**
-     * 默认redis连接超时时长
-     */
-    val DEFAULT_REDIS_CONNECTION_TIMEOUT = 2000
+    /*--------------------------默认protocol配置--------------------------*/
 
-    /*--------------------------默认server服务端配置--------------------------*/
+    val DEFAULT_PROTOCOL_NAME = ProtocolName.RMI
 
-    /**
-     * 默认服务端server监听端口
-     */
-    val DEFAULT_SERVER_LISTEN_PORT = 12200
+    val DEFAULT_PROTOCOL_HOST = ""
 
-    /**
-     * 默认启用服务端
-     */
-    val DEFAULT_SERVER_ENABLE = true
+    val DEFAULT_PROTOCOL_PORT = 12200
 
-    /**
-     * 默认不启用服务自动扫描器
-     */
-    val DEFAULT__AUTO_SCAN_ENABLE = false
 
-    /**
-     * 默认Rpc请求异步处理
-     */
-    val DEFAULT_RPC_REQUEST_COMPUTE_MANAGER_ASYNC = true
+    /*--------------------------默认client配置--------------------------*/
 
-    /**
-     * 默认Rpc异步处理线程池大小
-     */
-    val DEFAULT_RPC_REQUEST_COMPUTE_MANAGER_THREAD_POOL_SIZE = min(Runtime.getRuntime().availableProcessors()+1,32)
+    val DEFAULT_CLIENT_CHANNEL_OPERATOR = ClientChannelOperator()
 
-    /**
-     * 默认Rpc注册管理器线程池大小
-     */
-    val DEFAULT_REGISTER_TASK_MANAGER_THREAD_POOL_SIZE = min(Runtime.getRuntime().availableProcessors()+1,32)
+    /*--------------------------默认server配置--------------------------*/
 
-    /*--------------------------默认client客户端配置--------------------------*/
+    val DEFAULT_SERVER_CHANNEL_OPERATOR = ServerChannelOperator()
 
-    /**
-     * 默认客户端rpc请求连接过期时间
-     */
-    val DEFAULT_CLIENT_CHANNEL_TIMEOUT = 3600
+    val DEFAULT_SERVER_COMPUTE_THREAD_POOL_SIZE = min(Runtime.getRuntime().availableProcessors()+1,32)
 
 
 }

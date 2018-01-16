@@ -1,15 +1,12 @@
-package cn.booklish.sharp.remoting.netty4.core
+package cn.booklish.sharp.remoting.netty4.handler
 
 import cn.booklish.sharp.remoting.netty4.api.ChannelOperator
-import cn.booklish.sharp.remoting.netty4.util.NettyChannelUtil
+import cn.booklish.sharp.remoting.netty4.util.NettyUtil
 import io.netty.channel.*
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * @Author: liuxindong
- * @Description:  服务器channel处理器
- * @Created: 2017/12/13 8:56
- * @Modified:
+ * 服务器channel处理器
  */
 @ChannelHandler.Sharable
 class ServerHandler(private val channelOperator: ChannelOperator) : ChannelDuplexHandler(){
@@ -18,12 +15,12 @@ class ServerHandler(private val channelOperator: ChannelOperator) : ChannelDuple
 
     override fun channelActive(ctx: ChannelHandlerContext) {
         ctx.fireChannelActive()
-        map.putIfAbsent(NettyChannelUtil.getRemoteAddressAsString(ctx.channel()),ctx.channel())
+        map.putIfAbsent(NettyUtil.getRemoteAddressAsString(ctx.channel()),ctx.channel())
         channelOperator.connected(ctx.channel())
     }
 
     override fun channelInactive(ctx: ChannelHandlerContext) {
-        map.remove(NettyChannelUtil.getRemoteAddressAsString(ctx.channel()),ctx.channel())
+        map.remove(NettyUtil.getRemoteAddressAsString(ctx.channel()),ctx.channel())
         channelOperator.disconnected(ctx.channel())
     }
 

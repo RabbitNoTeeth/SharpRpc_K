@@ -1,4 +1,4 @@
-package cn.booklish.sharp.remoting.netty4.core
+package cn.booklish.sharp.remoting.netty4.codec
 
 import cn.booklish.sharp.serialize.api.RpcSerializer
 import io.netty.channel.CombinedChannelDuplexHandler

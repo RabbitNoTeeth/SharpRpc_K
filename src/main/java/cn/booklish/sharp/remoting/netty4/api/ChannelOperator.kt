@@ -3,10 +3,7 @@ package cn.booklish.sharp.remoting.netty4.api
 import io.netty.channel.Channel
 
 /**
- * @Author: liuxindong
- * @Description:  Channel操作者
- * @Created: 2017/12/18 9:41
- * @Modified:
+ * Channel操作者
  */
 interface ChannelOperator {
 

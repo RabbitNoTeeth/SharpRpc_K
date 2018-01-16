@@ -9,10 +9,7 @@ import io.netty.util.ReferenceCountUtil
 import org.apache.log4j.Logger
 
 /**
- * @Author: liuxindong
- * @Description:  服务端channel处理类
- * @Created: 2017/12/20 9:44
- * @Modified:
+ * 服务端channel处理类
  */
 class ServerChannelOperator :ChannelOperator {
 
@@ -27,8 +24,6 @@ class ServerChannelOperator :ChannelOperator {
     }
 
     override fun send(channel: Channel, message: Any) {
-        logger.info("[SharpRpc-server]: 来自客户端连接" + channel.id() + "的Rpc请求处理完成,返回结果给客户端")
-        channel.writeAndFlush(message)
     }
 
     override fun receive(channel: Channel, message: Any) {

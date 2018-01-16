@@ -1,17 +1,16 @@
 package cn.booklish.sharp.remoting.netty4.core
 
+import cn.booklish.sharp.remoting.netty4.config.ClientConfig
+import cn.booklish.sharp.remoting.netty4.handler.ClientChannelInitializer
+import cn.booklish.sharp.remoting.netty4.util.NettyUtil
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel.Channel
 import io.netty.channel.ChannelOption
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioSocketChannel
-import java.net.InetSocketAddress
 
 /**
- * @Author: liuxindong
- * @Description:  客户端引导
- * @Created: 2017/12/20 9:44
- * @Modified:
+ * 客户端引导
  */
 object Client {
 
@@ -23,11 +22,11 @@ object Client {
                 .channel(NioSocketChannel::class.java)
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.TCP_NODELAY, true)
-                .handler(ClientChannelInitializer(clientConfig.channelOperator,clientConfig.rpcSerializer))
+                .handler(ClientChannelInitializer(clientConfig.channelOperator, clientConfig.rpcSerializer!!))
     }
 
-    fun newChannel(address: InetSocketAddress):Channel{
-        return bootstrap.connect(address).sync().channel()
+    fun newChannel(address: String):Channel{
+        return bootstrap.connect(NettyUtil.resolveAddressString(address)).sync().channel()
     }
 
 }
