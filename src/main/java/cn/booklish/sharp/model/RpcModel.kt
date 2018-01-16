@@ -1,23 +1,46 @@
 package cn.booklish.sharp.model
 
 import java.io.Serializable
+import java.lang.Exception
+
 
 /**
  * Rpc请求消息实体
  */
-data class RpcRequest(val id:Int,
+class RpcRequest(val id:Int,
                       val serviceName:String,
                       val methodName:String,
                       val paramTypes:Array<Class<*>> = emptyArray(),
                       val paramValues:Array<Any> = emptyArray()
-): Serializable
+)
 
 /**
  * Rpc响应消息实体
  */
-data class RpcResponse(val id:Int,
-                  val result:Any? = null,
-                  val success:Boolean = true,
-                  val e:Exception? = null
-): Serializable
+class RpcResponse{
+
+    var id:Int = 0
+
+    var success:Boolean = false
+
+    var result:Any? = null
+
+    var error:Exception? = null
+
+    constructor(id:Int,success:Boolean){
+        this.id = id
+        this.success = success
+    }
+
+    fun result(result:Any?):RpcResponse{
+        this.result = result
+        return this
+    }
+
+    fun error(error:Exception?):RpcResponse{
+        this.error = error
+        return this
+    }
+
+}
 

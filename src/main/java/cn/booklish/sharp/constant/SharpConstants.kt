@@ -21,7 +21,7 @@ object SharpConstants {
 
     val DEFAULT_REGISTRY_TYPE = RegistryCenterType.REDIS
 
-    var DEFAULT_REGISTRY_ADDRESS = "127.0.0.1"
+    var DEFAULT_REGISTRY_HOST = "127.0.0.1"
 
     var DEFAULT_REGISTRY_PORT = 6379
 

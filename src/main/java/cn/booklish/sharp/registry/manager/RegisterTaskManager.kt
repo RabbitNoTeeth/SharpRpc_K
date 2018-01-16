@@ -31,18 +31,18 @@ object RegisterTaskManager{
 
     fun submit(registerInfo: RegisterInfo){
         exec.execute{
-            val serviceName = (registerInfo.bean).javaClass.typeName
+            val serviceName = registerInfo.clazz.typeName
             try {
                 //将服务信息注册到注册中心
                 val registryCenter = registryConfig.registryCenter?: throw IllegalStateException("无效的注册中心,服务注册失败")
-                val key = protocolConfig.name.value + serviceName + "?version=" + registerInfo.version
+                val key = protocolConfig.name.value + "://" + serviceName + "?version=" + registerInfo.version
                 registryCenter.register(key,registerInfo.address)
                 logger.info("[Sharp] : 服务 $serviceName 注册成功, key = $key , value = ${registerInfo.address}")
                 when(protocolConfig.name){
                     ProtocolName.RMI -> {}
                     ProtocolName.SHARP -> {
                         //服务端保存服务实体
-                        RpcServiceBeanManager.add(registerInfo.bean)
+                        RpcServiceBeanManager.add(registerInfo.clazz,registerInfo.bean)
                     }
                 }
             } catch (e: Exception) {
@@ -57,5 +57,5 @@ object RegisterTaskManager{
     }
 
 
-    class RegisterInfo(val bean:Any,val address:String,val version:String)
+    class RegisterInfo(val clazz:Class<*>,val bean:Any,val address:String,val version:String)
 }

@@ -14,15 +14,18 @@ object RpcResponseManager {
     private val map:ConcurrentHashMap<Int,LinkedBlockingQueue<Any>> = ConcurrentHashMap()
 
     fun add(id:Int){
-        map[id] = LinkedBlockingQueue()
+       map.putIfAbsent(id,LinkedBlockingQueue(1))
     }
 
     fun update(id:Int,result:Any){
         map[id]?.put(result)
     }
 
-    fun get(id:Int): LinkedBlockingQueue<Any>? {
-        return map[id]
+    fun get(id:Int): Any? {
+        val queue = map[id]?:return null
+        val result = queue.take()
+        remove(id)
+        return result
     }
 
     fun remove(id:Int){

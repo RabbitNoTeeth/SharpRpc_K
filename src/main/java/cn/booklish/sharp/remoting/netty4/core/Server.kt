@@ -1,5 +1,6 @@
 package cn.booklish.sharp.remoting.netty4.core
 
+import cn.booklish.sharp.protocol.config.ProtocolConfig
 import cn.booklish.sharp.remoting.netty4.config.ServerConfig
 import cn.booklish.sharp.remoting.netty4.handler.ServerChannelInitializer
 import io.netty.bootstrap.ServerBootstrap
@@ -20,12 +21,14 @@ object Server {
     private val executor = Executors.newSingleThreadExecutor()
     private val bootstrap = ServerBootstrap()
     private lateinit var serverConfig: ServerConfig
+    private lateinit var protocolConfig: ProtocolConfig
 
     /**
      * 默认配置并启动
      */
-    fun init(serverConfig: ServerConfig):Server{
+    fun init(serverConfig: ServerConfig,protocolConfig: ProtocolConfig):Server{
         this.serverConfig = serverConfig
+        this.protocolConfig = protocolConfig
         bootstrap.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel::class.java)
                 .option(ChannelOption.SO_BACKLOG, 128)
@@ -41,7 +44,7 @@ object Server {
 
         executor.execute({
             try {
-                val f = this.bootstrap.bind(serverConfig.listenPort).sync()
+                val f = this.bootstrap.bind(protocolConfig.port).sync()
                 channel = f.channel()
                 f.channel().closeFuture().sync()
             } catch (e: InterruptedException) {

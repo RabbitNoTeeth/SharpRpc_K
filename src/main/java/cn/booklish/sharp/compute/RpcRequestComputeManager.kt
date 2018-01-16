@@ -15,8 +15,6 @@ object RpcRequestComputeManager {
 
     private lateinit var exec: ExecutorService
 
-    private lateinit var serverConfig: ServerConfig
-
     /**
      * 启动管理器
      */
@@ -54,10 +52,10 @@ object RpcRequestComputeManager {
             val method = serviceClass.getMethod(rpcRequest.methodName, *rpcRequest.paramTypes)
             val serviceBean = RpcServiceBeanManager.get(serviceClass)?: throw IllegalStateException("服务端未找到服务[${serviceClass.typeName}的实体,无法计算rpc请求]")
             val invoke = method.invoke(serviceBean, *rpcRequest.paramValues)
-            RpcResponse(rpcRequest.id, invoke)
+            RpcResponse(rpcRequest.id,true).result(invoke)
         } catch (e: Exception) {
             e.printStackTrace()
-            RpcResponse(rpcRequest.id, null, false, e)
+            RpcResponse(rpcRequest.id,false).error(e)
         }
     }
 

@@ -45,9 +45,10 @@ class SharpRpcConfig {
      * 注册服务
      */
     @JvmOverloads
-    fun register(serviceBean:Any,version: String = "1.0.0"){
+    fun register(clazz: Class<*>,serviceBean:Any,version: String = "1.0.0"){
         checkServerReady()
-        val registerInfo = RegisterTaskManager.RegisterInfo(serviceBean,protocol.host+":"+protocol.port,version)
+        val address = protocol.host+":"+protocol.port
+        val registerInfo = RegisterTaskManager.RegisterInfo(clazz,serviceBean,address,version)
         RegisterTaskManager.submit(registerInfo)
     }
 
@@ -55,9 +56,9 @@ class SharpRpcConfig {
      * 获取服务
      */
     @JvmOverloads
-    fun <T> getService(clazz: Class<T>,version: String = "1.0.0"): T?{
+    fun <T> getService(clazz: Class<T>,version: String = "1.0.0"): T{
         checkClientReady()
-        return ServiceProxyFactory.getService(clazz,version) as? T
+        return ServiceProxyFactory.getService(clazz,version) as T
     }
 
 
@@ -71,7 +72,7 @@ class SharpRpcConfig {
             server.registryCenter = registry.registryCenter
             RegisterTaskManager.init(registry,protocol)
             RpcRequestComputeManager.start(server)
-            Server.init(server)
+            Server.init(server,protocol).start()
             serverReady = true
         }
     }
@@ -81,13 +82,15 @@ class SharpRpcConfig {
      */
     private fun checkRegistryReady() {
         if(!registryReady){
-            when(registry.type){
-                RegistryCenterType.REDIS -> {
-                   val jedis = Jedis(registry.address,registry.port,registry.timeout)
-                   registry.registryCenter = RedisRegistryCenter(jedis)
-                }
-                RegistryCenterType.ZOOKEEPER -> {
+            if(registry.registryCenter==null){
+                when(registry.type){
+                    RegistryCenterType.REDIS -> {
+                        val jedis = Jedis(registry.host,registry.port,registry.timeout)
+                        registry.registryCenter = RedisRegistryCenter(jedis)
+                    }
+                    RegistryCenterType.ZOOKEEPER -> {
 
+                    }
                 }
             }
             registryReady = true

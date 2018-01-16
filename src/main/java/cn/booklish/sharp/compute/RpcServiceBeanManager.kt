@@ -9,8 +9,8 @@ object RpcServiceBeanManager {
 
     private val map = ConcurrentHashMap<String,Any>()
 
-    fun add(bean :Any){
-        map[bean.javaClass.typeName] = bean
+    fun add(clazz:Class<*>,bean :Any){
+        map[clazz.typeName] = bean
     }
 
     fun <T> get(serviceClass: Class<T>): T?{

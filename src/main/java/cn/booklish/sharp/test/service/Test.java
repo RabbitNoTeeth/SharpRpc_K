@@ -6,6 +6,6 @@ package cn.booklish.sharp.test.service;
  **/
 public interface Test {
 
-    String run();
+    User run(int id);
 
 }

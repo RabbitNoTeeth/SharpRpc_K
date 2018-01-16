@@ -29,7 +29,7 @@ class ServerChannelOperator :ChannelOperator {
     override fun receive(channel: Channel, message: Any) {
         logger.info("[SharpRpc-server]: 接收到来自客户端连接" + channel.id() + "的Rpc请求,开始处理")
         try{
-            val rpcRequest = GsonUtil.jsonToObject(message.toString(),RpcRequest::class.java)
+            val rpcRequest:RpcRequest = message as RpcRequest
             val computeResult = RpcRequestComputeManager.submit(rpcRequest)
             logger.info("[SharpRpc-server]: 来自客户端连接" + channel.id() + "的Rpc请求处理完成,返回结果给客户端")
             channel.writeAndFlush(computeResult)

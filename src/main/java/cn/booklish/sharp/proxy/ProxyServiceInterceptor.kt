@@ -15,14 +15,11 @@ class ProxyServiceInterceptor(private val serviceName:String,private val serverA
     override fun intercept(obj: Any, method: Method, args: Array<Any>, methodProxy: MethodProxy): Any? {
 
         val channel = ClientChannelPool.getChannel(serverAddress)
-
         val id = RpcRequestIdGenerator.getId()
         RpcResponseManager.add(id)
         val rpcRequest = RpcRequest(id, serviceName, method.name,method.parameterTypes,args)
         channel.writeAndFlush(rpcRequest).sync()
-        val result = RpcResponseManager.get(id)?.take()
-        RpcResponseManager.remove(id)
-        return result
+        return RpcResponseManager.get(id)
     }
 
 }

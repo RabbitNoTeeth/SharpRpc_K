@@ -28,13 +28,13 @@ object ServiceProxyFactory {
     /**
      * 获得service服务代理
      */
-    fun getService(serviceClass: Class<*>,version: String): Any? {
+    fun getService(serviceClass: Class<*>,version: String): Any {
 
         val serverAddress = getServiceProvider(serviceClass.typeName,version)
 
         return when(protocolConfig.name){
             ProtocolName.RMI -> {
-                null
+                Any()
             }
             ProtocolName.SHARP -> {
                 val proxy = ProxyServiceInterceptor(serviceClass.typeName,serverAddress)
@@ -55,7 +55,7 @@ object ServiceProxyFactory {
      */
     private fun getServiceProvider(serviceName: String,version: String): String{
         val registryCenter = clientConfig.registryCenter?: throw IllegalStateException("无效的注册中心")
-        val key = protocolConfig.name.value + ":" + serviceName + "?version=" + version
+        val key = protocolConfig.name.value + "://" + serviceName + "?version=" + version
         registryCenter.getProviders(key).let {
             if(it.isEmpty()){
                 throw IllegalArgumentException("未找到服务[$serviceName]提供者,无法创建服务代理")
