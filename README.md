@@ -1,8 +1,13 @@
 # SharpRpc_K
-基于Netty4的分布式rpc框架,支持redis和zookeeper,SharpRpc的Kotlin重构版本,后面该框架的更新将主要在该版本上更新
+基于Netty4的分布式rpc框架,支持redis和zookeeper注册中心,SharpRpc的Kotlin重构版本,后面该框架的更新将主要在该版本上更新
 
 
 ## 配置使用
+
+注意<br>
+在RMI协议下,服务注册的RMI端口为ProtocolConfig中设置的端口port,此时服务提供者中netty的监听端口号为port+10000
+其他协议下服务注册端口和服务提供者中netty监听端口一致,都为ProtocolConfig中设置的端口port
+
 **1.  java 中**
 
 服务提供者
