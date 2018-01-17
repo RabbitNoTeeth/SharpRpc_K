@@ -15,13 +15,16 @@ fun main(args: Array<String>) {
 
     val sharpConfig = SharpRpcConfig()
     sharpConfig.registry.type(RegistryCenterType.REDIS).host("47.94.206.26").port(6380)
-    sharpConfig.protocol.name(ProtocolName.SHARP).host("192.168.2.246").port(12200)
+    sharpConfig.protocol.name(ProtocolName.RMI).host("192.168.2.246").port(12200)
 
     sharpConfig.register(Test::class.java,TestImpl())
 
-    Thread.sleep(15000)
+    Thread.sleep(3000)
 
-    val nThreads = 20
+    val service:Test = sharpConfig.getService(Test::class.java)
+    println(service.run(1))
+
+    /*val nThreads = 20
     val start = CountDownLatch(1)
     val end = CountDownLatch(nThreads)
 
@@ -31,9 +34,10 @@ fun main(args: Array<String>) {
                 try {
                     start.await()
                     val service:Test = sharpConfig.getService(Test::class.java)
-                    for(y in 1..5000){
+                    println("thread-"+x+" : "+service.run(x))
+                    *//*for(y in 1..5000){
                         println("thread-"+x+" : "+service.run(x))
-                    }
+                    }*//*
                 }finally {
                     end.countDown()
                 }
@@ -47,7 +51,7 @@ fun main(args: Array<String>) {
     end.await()
     val endTime = System.nanoTime()
 
-    println("cost : ${endTime-startTime}")
+    println("cost : ${endTime-startTime}")*/
 
 
 

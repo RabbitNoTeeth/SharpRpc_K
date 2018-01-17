@@ -2,10 +2,12 @@ package cn.booklish.sharp.proxy
 
 import cn.booklish.sharp.protocol.api.ProtocolName
 import cn.booklish.sharp.protocol.config.ProtocolConfig
+import cn.booklish.sharp.registry.manager.RegisterTaskManager
 import cn.booklish.sharp.remoting.netty4.config.ClientConfig
 import net.sf.cglib.proxy.Enhancer
 import org.apache.log4j.Logger
 import java.lang.IllegalStateException
+import java.rmi.Naming
 import java.util.*
 
 /**
@@ -32,9 +34,11 @@ object ServiceProxyFactory {
 
         val serverAddress = getServiceProvider(serviceClass.typeName,version)
 
+        val address = "rmi://${protocolConfig.host}:${protocolConfig.port}/${serviceClass.simpleName}"
+
         return when(protocolConfig.name){
             ProtocolName.RMI -> {
-                Any()
+                Naming.lookup(address)
             }
             ProtocolName.SHARP -> {
                 val proxy = ProxyServiceInterceptor(serviceClass.typeName,serverAddress)

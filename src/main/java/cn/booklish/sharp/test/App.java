@@ -7,13 +7,15 @@ import cn.booklish.sharp.registry.api.RegistryCenterType;
 import cn.booklish.sharp.test.service.Test;
 import cn.booklish.sharp.test.service.TestImpl;
 
+import java.rmi.RemoteException;
+
 /**
  * @author Don9
  * @create 2017-12-11-13:41
  **/
 public class App {
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, RemoteException {
 
         SharpRpcConfig sharpRpcConfig = new SharpRpcConfig();
 

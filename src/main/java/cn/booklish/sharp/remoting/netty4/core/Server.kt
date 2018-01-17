@@ -1,5 +1,6 @@
 package cn.booklish.sharp.remoting.netty4.core
 
+import cn.booklish.sharp.protocol.api.ProtocolName
 import cn.booklish.sharp.protocol.config.ProtocolConfig
 import cn.booklish.sharp.remoting.netty4.config.ServerConfig
 import cn.booklish.sharp.remoting.netty4.handler.ServerChannelInitializer
@@ -44,7 +45,12 @@ object Server {
 
         executor.execute({
             try {
-                val f = this.bootstrap.bind(protocolConfig.port).sync()
+                var port = protocolConfig.port
+                //如果是RMI协议,那么server端默认绑定在protocol设置的端口+10000上
+                if(protocolConfig.name==ProtocolName.RMI){
+                    port += 10000
+                }
+                val f = this.bootstrap.bind(port).sync()
                 channel = f.channel()
                 f.channel().closeFuture().sync()
             } catch (e: InterruptedException) {
