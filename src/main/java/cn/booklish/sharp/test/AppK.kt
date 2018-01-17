@@ -5,6 +5,7 @@ import cn.booklish.sharp.protocol.api.ProtocolName
 import cn.booklish.sharp.registry.api.RegistryCenterType
 import cn.booklish.sharp.test.service.Test
 import cn.booklish.sharp.test.service.TestImpl
+import java.util.concurrent.CountDownLatch
 
 
 // 1.首先定义一个java函数式接口
@@ -18,10 +19,37 @@ fun main(args: Array<String>) {
 
     sharpConfig.register(Test::class.java,TestImpl())
 
-    Thread.sleep(2000)
+    Thread.sleep(15000)
 
-    val service:Test = sharpConfig.getService(Test::class.java)
+    val nThreads = 20
+    val start = CountDownLatch(1)
+    val end = CountDownLatch(nThreads)
 
-    println(service.run(1))
+    for(x in 1..nThreads){
+        val thread = Thread{
+            run {
+                try {
+                    start.await()
+                    val service:Test = sharpConfig.getService(Test::class.java)
+                    for(y in 1..5000){
+                        println("thread-"+x+" : "+service.run(x))
+                    }
+                }finally {
+                    end.countDown()
+                }
+            }
+        }
+        thread.start()
+    }
+
+    val startTime = System.nanoTime()
+    start.countDown()
+    end.await()
+    val endTime = System.nanoTime()
+
+    println("cost : ${endTime-startTime}")
+
+
+
 
 }
