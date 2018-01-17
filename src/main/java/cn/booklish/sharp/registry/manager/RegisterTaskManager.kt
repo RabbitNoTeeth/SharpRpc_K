@@ -47,7 +47,7 @@ object RegisterTaskManager{
                             throw IllegalArgumentException("服务类 $serviceName 未实现java.rmi.Remote接口,无法注册")
                         }
                         LocateRegistry.createRegistry(protocolConfig.port)
-                        val address = "rmi://${protocolConfig.host}:${protocolConfig.port}/${registerInfo.clazz.simpleName}"
+                        val address = "rmi://${protocolConfig.host}:${protocolConfig.port}/${registerInfo.clazz.simpleName}/version-${registerInfo.version}"
                         Naming.bind(address, registerInfo.bean)
                     }
                     ProtocolName.SHARP -> {

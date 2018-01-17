@@ -15,7 +15,7 @@ object RpcResponseManager {
     /**
      * 保存一定数量的queue供map使用,类似于缓存
      * 当rpc请求非常频繁时,会不断的put新的消息id到map中,而每个id对应的queue只使用一次便作废,
-     * 当向map中添加新的消息id时,先从队列缓存中回去队列,如果获取不到,那么创建新的,
+     * 当向map中添加新的消息id时,先从队列缓存中获取队列,如果获取不到,那么创建新的,
      * 同时,每个id对应的队列在使用完毕后放回到缓存中
      */
     private val QUEUE = ConcurrentLinkedQueue<LinkedBlockingQueue<Any>>()
@@ -29,7 +29,6 @@ object RpcResponseManager {
     }
 
     fun add(id:Int){
-        println("add添加前 :" + QUEUE.size)
         val queue = QUEUE.poll()?:LinkedBlockingQueue(1)
         map.putIfAbsent(id,queue)
     }
@@ -43,7 +42,6 @@ object RpcResponseManager {
         val result = queue.take()
         remove(id)
         QUEUE.add(queue)
-        println("get获取后 :" + QUEUE.size)
         return result
     }
 

@@ -34,7 +34,7 @@ object ServiceProxyFactory {
 
         val serverAddress = getServiceProvider(serviceClass.typeName,version)
 
-        val address = "rmi://${protocolConfig.host}:${protocolConfig.port}/${serviceClass.simpleName}"
+        val address = "rmi://${protocolConfig.host}:${protocolConfig.port}/${serviceClass.simpleName}/version-$version"
 
         return when(protocolConfig.name){
             ProtocolName.RMI -> {
