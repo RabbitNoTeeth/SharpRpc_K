@@ -5,8 +5,8 @@
 ## 配置使用
 
 注意<br>
-在RMI协议下,服务注册的RMI端口为ProtocolConfig中设置的端口port,此时服务提供者中netty的监听端口号为port+10000<br>
-其他协议下服务注册端口和服务提供者中netty监听端口一致,都为ProtocolConfig中设置的端口port
+1.RMI协议的实现是通过java原生RMI实现的,所以使用时要遵循java RMI规范; 同时,服务注册的RMI端口为ProtocolConfig中设置的端口port,此时服务提供者中netty的监听端口号为port+10000<br>
+2.其他协议下服务注册端口和服务提供者中netty监听端口一致,都为ProtocolConfig中设置的端口port
 
 **1.  java 中**
 
