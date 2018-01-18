@@ -101,6 +101,7 @@ class SharpRpcConfig {
      * 检查客户端状态
      */
     private fun checkClientReady() {
+        checkRegistryReady()
         if(!clientReady){
             client.rpcSerializer = serializerConfig.rpcSerializer
             client.registryCenter = registry.registryCenter

@@ -15,7 +15,7 @@ fun main(args: Array<String>) {
 
     val sharpConfig = SharpRpcConfig()
     sharpConfig.registry.type(RegistryCenterType.REDIS).host("47.94.206.26").port(6380)
-    sharpConfig.protocol.name(ProtocolName.RMI).host("192.168.2.246").port(12200)
+    sharpConfig.protocol.name(ProtocolName.SHARP).host("192.168.2.246").port(12200)
 
     sharpConfig.register(Test::class.java,TestImpl())
 

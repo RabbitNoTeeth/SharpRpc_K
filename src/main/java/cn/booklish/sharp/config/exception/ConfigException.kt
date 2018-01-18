@@ -1,4 +1,4 @@
-package cn.booklish.sharp.exception
+package cn.booklish.sharp.config.exception
 
 /**
  * sharp配置文件异常基类
