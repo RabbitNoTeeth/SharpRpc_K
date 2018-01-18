@@ -25,12 +25,6 @@
     //注册服务
     sharpRpcConfig.register(Test.class,new TestImpl());
 
-    //获取服务类
-    Test testService = sharpRpcConfig.getService(Test.class);
-
-    //使用服务类
-    System.out.println(testService.run(1));
-
 </code></pre>
 
 服务消费者
