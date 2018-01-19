@@ -19,7 +19,13 @@ object ClientChannelPool {
 
         val key = serverAddress + "/" + serviceName
 
-        return channelPoolMap[key]!!.get()
+        var channel = channelPoolMap[key]!!.get()
+
+        if(!channel.isOpen || !channel.isActive){
+            channel = connect(serverAddress, serviceName)?:throw IllegalArgumentException("对于服务$serviceName,没有到提供者 $serverAddress 的可用连接")
+        }
+
+        return channel
 
     }
 
