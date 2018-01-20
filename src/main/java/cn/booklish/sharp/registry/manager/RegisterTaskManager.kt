@@ -15,6 +15,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.LinkedBlockingQueue
 import kotlin.math.min
 
+
 /**
  * 注册任务管理器，统一管理服务提供者的服务注册行为
  */
@@ -35,27 +36,28 @@ object RegisterTaskManager{
 
     fun submit(registerInfo: RegisterInfo){
         exec.execute{
-            val serviceName = registerInfo.clazz.typeName
+            val serviceName = registerInfo.clazz.typeName.replace(".","/",false)
             try {
-                //将服务信息注册到注册中心
-                val registryCenter = registryConfig.registryCenter?: throw IllegalStateException("无效的注册中心,服务注册失败")
                 val key = protocolConfig.name.value + "://" + serviceName + "?version=" + registerInfo.version
-                registryCenter.register(key,registerInfo.address)
+
                 when(protocolConfig.name){
                     ProtocolName.RMI -> {
                         if(registerInfo.bean !is Remote){
                             throw IllegalArgumentException("服务类 $serviceName 未实现java.rmi.Remote接口,无法注册")
                         }
                         LocateRegistry.createRegistry(protocolConfig.port)
-                        val address = "rmi://${protocolConfig.host}:${protocolConfig.port}/${registerInfo.clazz.simpleName}/version-${registerInfo.version}"
+                        val address = "rmi://${protocolConfig.host}:${protocolConfig.port}/$serviceName/version-${registerInfo.version}"
                         Naming.bind(address, registerInfo.bean)
                     }
                     ProtocolName.SHARP -> {
                         //服务端保存服务实体
                         RpcServiceBeanManager.add(registerInfo.clazz,registerInfo.bean)
+
                     }
                 }
-                logger.info("[Sharp] : 服务 $serviceName 注册成功, key = $key , value = ${registerInfo.address}")
+
+                registryConfig.registryCenter!!.register(key,registerInfo.address)
+                logger.info("[Sharp] : 服务 $key 注册成功, value = ${registerInfo.address}")
             } catch (e: Exception) {
                 Thread.currentThread().interrupt()
                 throw RuntimeException("[Sharp] : 服务 $serviceName 注册失败",e)

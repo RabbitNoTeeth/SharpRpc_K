@@ -10,6 +10,8 @@ import cn.booklish.sharp.registry.support.redis.RedisRegistryCenter
 import cn.booklish.sharp.remoting.netty4.config.ClientConfig
 import cn.booklish.sharp.remoting.netty4.config.ServerConfig
 import cn.booklish.sharp.remoting.netty4.core.Client
+import cn.booklish.sharp.proxy.pool.ClientChannelPool
+import cn.booklish.sharp.proxy.pool.RmiPool
 import cn.booklish.sharp.remoting.netty4.core.Server
 import cn.booklish.sharp.serialize.config.SerializerConfig
 import org.apache.log4j.Logger
@@ -106,6 +108,8 @@ class SharpRpcConfig {
             client.rpcSerializer = serializerConfig.rpcSerializer
             client.registryCenter = registry.registryCenter
             Client.init(client)
+            ClientChannelPool.init(client,protocol)
+            RmiPool.init(client,protocol)
             ServiceProxyFactory.init(client,protocol)
             clientReady = true
         }

@@ -2,9 +2,10 @@ package cn.booklish.sharp.proxy
 
 import cn.booklish.sharp.protocol.api.ProtocolName
 import cn.booklish.sharp.protocol.config.ProtocolConfig
-import cn.booklish.sharp.registry.manager.RegisterTaskManager
 import cn.booklish.sharp.remoting.netty4.config.ClientConfig
-import cn.booklish.sharp.remoting.netty4.core.ClientChannelPool
+import cn.booklish.sharp.proxy.pool.ClientChannelPool
+import cn.booklish.sharp.proxy.pool.RmiPool
+import cn.booklish.sharp.registry.manager.RegisterTaskManager
 import net.sf.cglib.proxy.Enhancer
 import org.apache.log4j.Logger
 import java.lang.IllegalStateException
@@ -18,7 +19,6 @@ object ServiceProxyFactory {
 
     private val logger:Logger = Logger.getLogger(this.javaClass)
 
-    private val random = Random()
 
     private lateinit var clientConfig: ClientConfig
     private lateinit var protocolConfig: ProtocolConfig
@@ -33,16 +33,16 @@ object ServiceProxyFactory {
      */
     fun getService(serviceClass: Class<*>,version: String): Any {
 
-        val serverAddress = getServiceProvider(serviceClass.typeName,version)
+        val serviceName = serviceClass.typeName.replace(".","/",false)
 
-        val address = "rmi://${protocolConfig.host}:${protocolConfig.port}/${serviceClass.simpleName}/version-$version"
+        val key = protocolConfig.name.value + "://" + serviceName + "?version=" + version
 
         return when(protocolConfig.name){
             ProtocolName.RMI -> {
-                Naming.lookup(address)
+                RmiPool.get(key,"$serviceName/version-$version")
             }
             ProtocolName.SHARP -> {
-                val proxy = ProxyServiceInterceptor(serviceClass.typeName,serverAddress)
+                val proxy = ProxyServiceInterceptor(key)
                 val enhancer = Enhancer()
                 enhancer.setSuperclass(serviceClass)
                 // 回调方法
@@ -52,46 +52,6 @@ object ServiceProxyFactory {
             }
         }
 
-    }
-
-
-    /**
-     * 获取服务提供者地址
-     */
-    private fun getServiceProvider(serviceName: String,version: String): String{
-        val registryCenter = clientConfig.registryCenter?: throw IllegalStateException("无效的注册中心")
-        val key = protocolConfig.name.value + "://" + serviceName + "?version=" + version
-        registryCenter.getProviders(key).let {
-            if(it.isEmpty()){
-                throw IllegalArgumentException("未找到服务[$serviceName]提供者,无法创建服务代理")
-            }
-
-            val serverList = arrayListOf<String>()
-            it.forEach { element ->
-                serverList.add(element)
-            }
-
-            //随即获取一个服务提供者
-            var x = random.nextInt(it.size)
-            var serverAddress = serverList[x]
-
-            while (ClientChannelPool.connect(serverAddress,serviceName)==null){
-
-                //连接失败,那么先删除该提供者
-                serverList.remove(serverAddress)
-
-                //所有连接都不可用,抛出异常
-                if(serverList.isEmpty()){
-                    throw IllegalStateException("服务[$serviceName]无可用提供者,服务获取失败")
-                }
-
-                //切换服务提供者,重新连接
-                x = random.nextInt(serverList.size)
-                serverAddress = serverList[x]
-            }
-
-            return serverAddress
-        }
     }
 
 }
