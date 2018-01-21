@@ -1,11 +1,11 @@
 package cn.booklish.sharp.test
 
-import cn.booklish.sharp.config.SharpRpcConfig
+import cn.booklish.sharp.config.ServiceExport
 import cn.booklish.sharp.protocol.api.ProtocolName
+import cn.booklish.sharp.protocol.config.ProtocolConfig
 import cn.booklish.sharp.registry.api.RegistryCenterType
-import cn.booklish.sharp.test.service.Test
+import cn.booklish.sharp.registry.config.RegistryConfig
 import cn.booklish.sharp.test.service.TestImpl
-import java.util.concurrent.CountDownLatch
 
 
 // 1.首先定义一个java函数式接口
@@ -13,16 +13,15 @@ import java.util.concurrent.CountDownLatch
 
 fun main(args: Array<String>) {
 
-    val sharpConfig = SharpRpcConfig()
-    sharpConfig.registry.type(RegistryCenterType.REDIS).host("47.94.206.26").port(6380)
-    sharpConfig.protocol.name(ProtocolName.SHARP).host("192.168.2.246").port(12200)
+    val registryConfig = RegistryConfig().type(RegistryCenterType.REDIS).host("47.94.206.26").port(6380)
+    val protocolConfig = ProtocolConfig().name(ProtocolName.SHARP).host("192.168.2.246").port(12200)
 
-    sharpConfig.register(Test::class.java,TestImpl())
+    val serviceExport = ServiceExport<cn.booklish.sharp.test.service.Test>()
 
-    Thread.sleep(3000)
+    serviceExport.setRegistry(registryConfig).setProtocol(protocolConfig).setInterface(cn.booklish.sharp.test.service.Test::class.java)
+            .setRef(TestImpl())
 
-    val service:Test = sharpConfig.getService(Test::class.java)
-    println(service.run(1))
+    serviceExport.export()
 
     /*val nThreads = 20
     val start = CountDownLatch(1)

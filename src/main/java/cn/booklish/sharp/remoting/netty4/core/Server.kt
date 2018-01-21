@@ -1,8 +1,8 @@
 package cn.booklish.sharp.remoting.netty4.core
 
+import cn.booklish.sharp.config.ServiceExport
+import cn.booklish.sharp.constant.SharpConstants
 import cn.booklish.sharp.protocol.api.ProtocolName
-import cn.booklish.sharp.protocol.config.ProtocolConfig
-import cn.booklish.sharp.remoting.netty4.config.ServerConfig
 import cn.booklish.sharp.remoting.netty4.handler.ServerChannelInitializer
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.channel.Channel
@@ -14,28 +14,21 @@ import java.util.concurrent.Executors
 /**
  * 服务端引导类
  */
-object Server {
+class Server(private val serviceExport: ServiceExport<*>) {
 
     private val bossGroup = NioEventLoopGroup()
     private val workerGroup = NioEventLoopGroup()
-    private lateinit var channel: Channel
-    private val executor = Executors.newSingleThreadExecutor()
     private val bootstrap = ServerBootstrap()
-    private lateinit var serverConfig: ServerConfig
-    private lateinit var protocolConfig: ProtocolConfig
+    private val executor = Executors.newSingleThreadExecutor()
 
-    /**
-     * 默认配置并启动
-     */
-    fun init(serverConfig: ServerConfig,protocolConfig: ProtocolConfig):Server{
-        this.serverConfig = serverConfig
-        this.protocolConfig = protocolConfig
+    private lateinit var channel: Channel
+
+    init {
         bootstrap.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel::class.java)
                 .option(ChannelOption.SO_BACKLOG, 128)
                 .childOption(ChannelOption.SO_KEEPALIVE, true)
-                .childHandler(ServerChannelInitializer(serverConfig.channelOperator, serverConfig.rpcSerializer!!))
-        return this
+                .childHandler(ServerChannelInitializer(SharpConstants.DEFAULT_SERVER_CHANNEL_OPERATOR, SharpConstants.DEFAULT_SERIALIZER))
     }
 
     /**
@@ -45,14 +38,17 @@ object Server {
 
         executor.execute({
             try {
-                var port = protocolConfig.port
-                //如果是RMI协议,那么server端默认绑定在protocol设置的端口+10000上
-                if(protocolConfig.name==ProtocolName.RMI){
-                    port += 10000
+                val protocols = serviceExport.protocols
+                for (protocol in protocols){
+                    var port = protocol.port
+                    //如果是RMI协议,那么server端默认绑定在protocol设置的端口+10000上
+                    if(protocol.name==ProtocolName.RMI){
+                        port += 10000
+                    }
+                    val f = this.bootstrap.bind(port).sync()
+                    channel = f.channel()
+                    f.channel().closeFuture().sync()
                 }
-                val f = this.bootstrap.bind(port).sync()
-                channel = f.channel()
-                f.channel().closeFuture().sync()
             } catch (e: InterruptedException) {
                 Thread.currentThread().interrupt()
             } finally {
@@ -61,16 +57,6 @@ object Server {
             }
         })
 
-    }
-
-    /**
-     * 停止服务器
-     */
-    fun stop() {
-        channel.closeFuture().syncUninterruptibly()
-        executor.shutdown()
-        workerGroup.shutdownGracefully()
-        bossGroup.shutdownGracefully()
     }
 
 }

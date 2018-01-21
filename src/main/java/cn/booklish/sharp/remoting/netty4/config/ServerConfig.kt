@@ -1,6 +1,7 @@
 package cn.booklish.sharp.remoting.netty4.config
 
 import cn.booklish.sharp.constant.SharpConstants
+import cn.booklish.sharp.protocol.config.ProtocolConfig
 import cn.booklish.sharp.registry.api.RegistryCenter
 import cn.booklish.sharp.remoting.netty4.api.ChannelOperator
 import cn.booklish.sharp.serialize.api.RpcSerializer
@@ -17,6 +18,8 @@ class ServerConfig {
     var channelOperator:ChannelOperator = SharpConstants.DEFAULT_SERVER_CHANNEL_OPERATOR
 
     var registryCenter:RegistryCenter? = null
+
+    var protocolConfig: ProtocolConfig? = null
 
     fun computeThreadPoolSize(computeThreadPoolSize: Int):ServerConfig{
         this.computeThreadPoolSize = computeThreadPoolSize
@@ -35,6 +38,11 @@ class ServerConfig {
 
     fun registryCenter(registryCenter: RegistryCenter):ServerConfig{
         this.registryCenter = registryCenter
+        return this
+    }
+
+    fun protocolConfig(protocolConfig: ProtocolConfig):ServerConfig{
+        this.protocolConfig = protocolConfig
         return this
     }
 

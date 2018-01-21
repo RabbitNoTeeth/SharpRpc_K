@@ -1,5 +1,6 @@
 package cn.booklish.sharp.model
 
+import cn.booklish.sharp.protocol.api.ProtocolName
 import java.io.Serializable
 import java.lang.Exception
 
@@ -43,4 +44,9 @@ class RpcResponse{
     }
 
 }
+
+/**
+ * 服务注册时保存的value
+ */
+data class RegisterValue(val protocol:ProtocolName,val address:String)
 

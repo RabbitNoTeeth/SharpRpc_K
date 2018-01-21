@@ -1,5 +1,6 @@
 package cn.booklish.sharp.compute
 
+import cn.booklish.sharp.constant.SharpConstants
 import cn.booklish.sharp.model.RpcRequest
 import cn.booklish.sharp.model.RpcResponse
 import cn.booklish.sharp.remoting.netty4.config.ServerConfig
@@ -13,14 +14,7 @@ import java.util.concurrent.Executors
  */
 object RpcRequestComputeManager {
 
-    private lateinit var exec: ExecutorService
-
-    /**
-     * 启动管理器
-     */
-    fun start(serverConfig: ServerConfig){
-        this.exec = Executors.newFixedThreadPool(serverConfig.computeThreadPoolSize)
-    }
+    private val exec = Executors.newFixedThreadPool(SharpConstants.DEFAULT_SERVER_COMPUTE_THREAD_POOL_SIZE)
 
     /**
      * 提交Rpc注册任务

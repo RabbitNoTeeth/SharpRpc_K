@@ -1,10 +1,13 @@
 package cn.booklish.sharp.registry.manager
 
 import cn.booklish.sharp.compute.RpcServiceBeanManager
+import cn.booklish.sharp.config.ServiceExport
+import cn.booklish.sharp.model.RegisterValue
 import cn.booklish.sharp.protocol.api.ProtocolName
 import cn.booklish.sharp.protocol.config.ProtocolConfig
 import cn.booklish.sharp.registry.api.RegistryCenter
 import cn.booklish.sharp.registry.config.RegistryConfig
+import cn.booklish.sharp.serialize.GsonUtil
 import org.apache.log4j.Logger
 import java.lang.IllegalArgumentException
 import java.lang.IllegalStateException
@@ -25,39 +28,54 @@ object RegisterTaskManager{
 
     private val exec = Executors.newFixedThreadPool(min(Runtime.getRuntime().availableProcessors()+1,32))
 
-    private lateinit var registryConfig: RegistryConfig
+    fun submit(serviceExport: ServiceExport<*>){
 
-    private lateinit var protocolConfig: ProtocolConfig
-
-    fun init(registryConfig: RegistryConfig, protocolConfig:ProtocolConfig){
-        this.registryConfig = registryConfig
-        this.protocolConfig = protocolConfig
-    }
-
-    fun submit(registerInfo: RegisterInfo){
         exec.execute{
-            val serviceName = registerInfo.clazz.typeName.replace(".","/",false)
+
+            val serviceName = serviceExport.serviceInterface.typeName.replace(".","/",false)
+
             try {
-                val key = protocolConfig.name.value + "://" + serviceName + "?version=" + registerInfo.version
 
-                when(protocolConfig.name){
-                    ProtocolName.RMI -> {
-                        if(registerInfo.bean !is Remote){
-                            throw IllegalArgumentException("服务类 $serviceName 未实现java.rmi.Remote接口,无法注册")
+                val protocols = serviceExport.protocols
+
+                val registryCenters = serviceExport.registryCenters
+
+                for (protocol in protocols){
+                    //生成注册信息的键值
+                    val key = "SharpRpc://" + serviceName + "?version=" + serviceExport.version
+                    //生成注册信息的值
+                    var value:RegisterValue? = null
+
+                    when(protocol.name){
+                        ProtocolName.RMI -> {
+                            //校验注册服务是否实现了Remote接口
+                            if(serviceExport.serviceRef !is Remote){
+                                throw IllegalArgumentException("服务类 $serviceName 未实现java.rmi.Remote接口,无法注册")
+                            }
+                            //创建RMI注册中心
+                            LocateRegistry.createRegistry(protocol.port)
+                            //生成服务的RMI绑定地址
+                            val address = "rmi://${protocol.host}:${protocol.port}/$serviceName/version-${serviceExport.version}"
+                            //绑定服务
+                            Naming.bind(address, serviceExport.serviceRef as Remote)
+
+                            value = RegisterValue(protocol.name,address)
                         }
-                        LocateRegistry.createRegistry(protocolConfig.port)
-                        val address = "rmi://${protocolConfig.host}:${protocolConfig.port}/$serviceName/version-${registerInfo.version}"
-                        Naming.bind(address, registerInfo.bean)
+                        ProtocolName.SHARP -> {
+                            //服务端保存服务实体
+                            RpcServiceBeanManager.add(serviceExport.serviceInterface,serviceExport.serviceRef)
+                            val address = "${protocol.host}:${protocol.port}"
+                            value = RegisterValue(protocol.name,address)
+                        }
                     }
-                    ProtocolName.SHARP -> {
-                        //服务端保存服务实体
-                        RpcServiceBeanManager.add(registerInfo.clazz,registerInfo.bean)
 
+                    for(registryCenter in registryCenters){
+                        registryCenter.register(key,GsonUtil.objectToJson(value))
+                        logger.info("[Sharp] : 服务 $key 注册成功, value = $value")
                     }
+
                 }
 
-                registryConfig.registryCenter!!.register(key,registerInfo.address)
-                logger.info("[Sharp] : 服务 $key 注册成功, value = ${registerInfo.address}")
             } catch (e: Exception) {
                 Thread.currentThread().interrupt()
                 throw RuntimeException("[Sharp] : 服务 $serviceName 注册失败",e)
@@ -69,6 +87,4 @@ object RegisterTaskManager{
         exec.shutdown()
     }
 
-
-    class RegisterInfo(val clazz:Class<*>,val bean:Any,val address:String,val version:String)
 }
