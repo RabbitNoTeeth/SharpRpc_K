@@ -14,9 +14,9 @@ import java.util.*
 /**
  * 客户端Rpc服务代理类的方法拦截器,实现了cglib的MethodInterceptor
  */
-class ProxyServiceInterceptor(private val serviceReference: ServiceReference<*>): MethodInterceptor {
+class ProxyServiceInterceptor(private val serviceReference: ServiceReference<*>, firstAddress:String): MethodInterceptor {
 
-    private var channel = Client.newChannel(serviceReference)
+    private var channel = Client.initChannel(firstAddress)
 
     override fun intercept(obj: Any, method: Method, args: Array<Any>, methodProxy: MethodProxy): Any? {
 

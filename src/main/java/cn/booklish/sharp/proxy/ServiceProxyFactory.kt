@@ -40,7 +40,7 @@ object ServiceProxyFactory {
                         Naming.lookup(registerValue.address) as T
                     }
                     ProtocolName.SHARP -> {
-                        val proxy = ProxyServiceInterceptor(serviceReference)
+                        val proxy = ProxyServiceInterceptor(serviceReference,registerValue.address)
                         val enhancer = Enhancer()
                         enhancer.setSuperclass(serviceReference.serviceInterface)
                         // 回调方法
@@ -50,6 +50,7 @@ object ServiceProxyFactory {
                     }
                 }
             }catch (e:Exception){
+                e.printStackTrace()
                 logger.warn("连接到服务 $serviceName 的提供者 ${registerValue.address} 失败,尝试连接其他服务提供者")
                 providers.remove(registerValue)
                 if(providers.isEmpty()){

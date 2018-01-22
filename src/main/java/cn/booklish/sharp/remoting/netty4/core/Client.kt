@@ -69,4 +69,16 @@ object Client {
 
     }
 
+    fun initChannel(address: String):Channel{
+
+        val channelFuture = this.bootstrap.clone().connect(NettyUtil.resolveAddressString(address)).sync()
+                .addListener { future ->
+                    if (future.isDone && !future.isSuccess){
+                        throw IllegalStateException("连接到服务提供者 $address 失败,尝试连接其他服务提供者")
+                    }
+                }
+        return channelFuture.channel()
+
+    }
+
 }
