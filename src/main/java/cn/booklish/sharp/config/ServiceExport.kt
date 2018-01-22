@@ -84,10 +84,10 @@ class ServiceExport<T> {
      */
     fun export(){
         //注册服务到注册中心
-        RegisterTaskManager.submit(this)
-        //启动netty监听
-        Server(this).start()
+        if(RegisterTaskManager.submit(this).get()){
+            //启动netty监听
+            Server(this).start()
+        }
     }
-
 
 }

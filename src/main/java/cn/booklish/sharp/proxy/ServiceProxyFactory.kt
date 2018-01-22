@@ -2,6 +2,7 @@ package cn.booklish.sharp.proxy
 
 import cn.booklish.sharp.config.ServiceReference
 import cn.booklish.sharp.protocol.api.ProtocolName
+import cn.booklish.sharp.remoting.netty4.core.Client
 import net.sf.cglib.proxy.Enhancer
 import org.apache.log4j.Logger
 import java.lang.IllegalStateException
@@ -23,6 +24,8 @@ object ServiceProxyFactory {
      */
     fun <T> getService(serviceReference: ServiceReference<T>): T {
 
+        val serviceName = serviceReference.serviceInterface.typeName
+
         val providers = ProvidersLoader.getProviders(serviceReference)
 
         //随机获取一个服务提供者
@@ -32,11 +35,9 @@ object ServiceProxyFactory {
         while (true){
 
             try{
-                when(registerValue.protocol){
+                return when(registerValue.protocol){
                     ProtocolName.RMI -> {
-                        if(serviceReference.serviceInterface !is Remote)
-                            throw IllegalStateException("服务[${serviceReference.serviceInterface.typeName}]未实现java.lang.Remote接口,无法通过rmi获取")
-                        return Naming.lookup(registerValue.address) as T
+                        Naming.lookup(registerValue.address) as T
                     }
                     ProtocolName.SHARP -> {
                         val proxy = ProxyServiceInterceptor(serviceReference)
@@ -45,13 +46,14 @@ object ServiceProxyFactory {
                         // 回调方法
                         enhancer.setCallback(proxy)
                         // 创建代理对象
-                        return enhancer.create() as T
+                        enhancer.create() as T
                     }
                 }
             }catch (e:Exception){
+                logger.warn("连接到服务 $serviceName 的提供者 ${registerValue.address} 失败,尝试连接其他服务提供者")
                 providers.remove(registerValue)
                 if(providers.isEmpty()){
-                    throw IllegalStateException("服务[${serviceReference.serviceInterface.typeName}]无可用连接")
+                    throw IllegalStateException("服务 $serviceName 无可用连接,服务获取失败")
                 }
                 x = random.nextInt(providers.size)
                 registerValue = providers[x]

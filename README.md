@@ -13,37 +13,50 @@
 服务提供者
 <pre><code>
 
-    //创建配置类
-    SharpRpcConfig sharpRpcConfig = new SharpRpcConfig();
-    
     //设置注册中心
-    sharpRpcConfig.getRegistry().type(RegistryCenterType.REDIS).host("47.94.206.26").port(6380);
-
+    RegistryConfig registryConfig = new RegistryConfig().type(RegistryCenterType.REDIS).host("47.94.206.26").port(6380);
+    
     //设置协议
-    sharpRpcConfig.getProtocol().name(ProtocolName.SHARP).host("192.168.2.246").port(12200);
+    ProtocolConfig protocolConfig = new ProtocolConfig().name(ProtocolName.SHARP).host("192.168.2.246").port(12200);
 
-    //注册服务
-    sharpRpcConfig.register(Test.class,new TestImpl());
+    //创建提供者配置
+    ServiceExport<Test> serviceExport = new ServiceExport<>();
+
+    //设置服务的注册中心,协议,接口及实现类(支持多协议和多注册中心)
+    serviceExport.setRegistry(registryConfig).setProtocol(protocolConfig).setInterface(Test.class).setRef(new TestImpl());
+
+    //注册并暴露服务
+    serviceExport.export();
+
+    Thread.sleep(3000);
+
+    ServiceReference<Test> serviceReference = new ServiceReference<>();
+
+    serviceReference.setRegistry(registryConfig).setInterface(Test.class);
+
+    Test test = serviceReference.get();
+
+    System.out.println(test.run(100));
 
 </code></pre>
 
 服务消费者
 <pre><code>
 
-    //创建配置类
-    SharpRpcConfig sharpRpcConfig = new SharpRpcConfig();
-    
     //设置注册中心
-    sharpRpcConfig.getRegistry().type(RegistryCenterType.REDIS).host("47.94.206.26").port(6380);
+    RegistryConfig registryConfig = new RegistryConfig().type(RegistryCenterType.REDIS).host("47.94.206.26").port(6380);
 
-    //设置协议
-    sharpRpcConfig.getProtocol().name(ProtocolName.SHARP).host("192.168.2.246").port(12200);
+    //创建服务引用配置
+    ServiceReference<Test> serviceReference = new ServiceReference<>();
 
-    //获取服务类
-    Test testService = sharpRpcConfig.getService(Test.class);
+    //设置服务注册中心和接口
+    serviceReference.setRegistry(registryConfig).setInterface(Test.class);
 
-    //使用服务类
-    System.out.println(testService.run(1));
+    //获取服务
+    Test test = serviceReference.get();
+
+    //使用服务
+    System.out.println(test.run(100));
 
 </code></pre>
 
@@ -52,37 +65,41 @@
 服务提供者
 <pre><code>
 
-    //创建配置类
-    val sharpConfig = SharpRpcConfig()
-    
     //设置注册中心
-    sharpConfig.registry.type(RegistryCenterType.REDIS).host("47.94.206.26").port(6380)
+    val registryConfig = RegistryConfig().type(RegistryCenterType.REDIS).host("47.94.206.26").port(6380)
     
     //设置协议
-    sharpConfig.protocol.name(ProtocolName.SHARP).host("192.168.2.246").port(12200)
+    val protocolConfig = ProtocolConfig().name(ProtocolName.SHARP).host("192.168.2.246").port(12200)
 
-    //注册服务
-    sharpConfig.register(Test::class.java,TestImpl())
+    //创建服务提供者配置
+    val serviceExport = ServiceExport<Test>()
+
+    //设置注册中心和协议(支持多注册中心和多协议),设置服务接口和服务实现
+    serviceExport.setRegistry(registryConfig).setProtocol(protocolConfig).setInterface(Test::class.java)
+            .setRef(TestImpl())
+
+    //注册并暴露服务
+    serviceExport.export()
 
 </code></pre>
 
 服务消费者
 <pre><code>
-
-    //创建配置类
-    val sharpConfig = SharpRpcConfig()
     
     //设置注册中心
-    sharpConfig.registry.type(RegistryCenterType.REDIS).host("47.94.206.26").port(6380)
+    val registryConfig = RegistryConfig().type(RegistryCenterType.REDIS).host("47.94.206.26").port(6380)
     
-    //设置协议
-    sharpConfig.protocol.name(ProtocolName.SHARP).host("192.168.2.246").port(12200)
+    //创建服务引用配置
+    val serviceReference = ServiceReference<Test>()
+    
+    //设置注册中心和服务接口
+    serviceReference.setRegistry(registryConfig).setInterface(Test::class.java)
 
-    //获取服务类
-    val service:Test = sharpConfig.getService(Test::class.java)
-
-    //使用服务类
-    println(service.run(1))
+    //获取服务
+    val test:Test = serviceReference.get()
+    
+    //使用服务
+    println(test.run(100))
 
 </code></pre>
 

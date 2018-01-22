@@ -14,7 +14,9 @@ import java.lang.IllegalStateException
 import java.rmi.Naming
 import java.rmi.Remote
 import java.rmi.registry.LocateRegistry
+import java.util.concurrent.Callable
 import java.util.concurrent.Executors
+import java.util.concurrent.Future
 import java.util.concurrent.LinkedBlockingQueue
 import kotlin.math.min
 
@@ -28,9 +30,9 @@ object RegisterTaskManager{
 
     private val exec = Executors.newFixedThreadPool(min(Runtime.getRuntime().availableProcessors()+1,32))
 
-    fun submit(serviceExport: ServiceExport<*>){
+    fun submit(serviceExport: ServiceExport<*>): Future<Boolean> {
 
-        exec.execute{
+        return exec.submit(Callable<Boolean>{
 
             val serviceName = serviceExport.serviceInterface.typeName.replace(".","/",false)
 
@@ -48,10 +50,6 @@ object RegisterTaskManager{
 
                     when(protocol.name){
                         ProtocolName.RMI -> {
-                            //校验注册服务是否实现了Remote接口
-                            if(serviceExport.serviceRef !is Remote){
-                                throw IllegalArgumentException("服务类 $serviceName 未实现java.rmi.Remote接口,无法注册")
-                            }
                             //创建RMI注册中心
                             LocateRegistry.createRegistry(protocol.port)
                             //生成服务的RMI绑定地址
@@ -76,11 +74,14 @@ object RegisterTaskManager{
 
                 }
 
+                return@Callable true
+
             } catch (e: Exception) {
                 Thread.currentThread().interrupt()
                 throw RuntimeException("[Sharp] : 服务 $serviceName 注册失败",e)
             }
-        }
+
+        })
     }
 
     fun stop(){
