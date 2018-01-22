@@ -28,16 +28,6 @@
     //注册并暴露服务
     serviceExport.export();
 
-    Thread.sleep(3000);
-
-    ServiceReference<Test> serviceReference = new ServiceReference<>();
-
-    serviceReference.setRegistry(registryConfig).setInterface(Test.class);
-
-    Test test = serviceReference.get();
-
-    System.out.println(test.run(100));
-
 </code></pre>
 
 服务消费者
