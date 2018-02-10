@@ -17,16 +17,18 @@ object ServiceProvidersLoader {
 
         val registryCenters = serviceReference.registryCenters
 
-        var providers: Set<String>? = null
+        val providers = mutableSetOf<String>()
 
         for (registryCenter in registryCenters){
-            providers = registryCenter.getProviders(key)
-            if(providers.isNotEmpty()){
-                break
+            try {
+                providers.addAll(registryCenter.getProviders(key))
+            }catch (e:Exception){
+                //ignore this registryCenter
+                continue
             }
         }
 
-        if(providers==null || providers.isEmpty()){
+        if(providers.isEmpty()){
             throw IllegalArgumentException("there is no available provider of service \"${serviceReference.serviceInterface.typeName}\"")
         }
 
