@@ -5,9 +5,9 @@ import `fun`.bookish.sharp.protocol.api.ProtocolName
 import `fun`.bookish.sharp.proxy.ServiceProvidersLoader
 import `fun`.bookish.sharp.remoting.netty4.codec.MessageCodec
 import `fun`.bookish.sharp.remoting.netty4.handler.ClientChannelHandler
-import `fun`.bookish.sharp.remoting.netty4.util.NettyUtil
 import `fun`.bookish.sharp.serialize.api.RpcSerializer
 import `fun`.bookish.sharp.serialize.kryo.KryoSerializer
+import `fun`.bookish.sharp.util.resolveAddress
 import io.netty.bootstrap.Bootstrap
 import io.netty.channel.Channel
 import io.netty.channel.ChannelInitializer
@@ -55,7 +55,7 @@ object NettyClient {
         for(x in providers.size-1 downTo 0 step 1) {
             val registerValue = providers[x]
             try {
-                val channelFuture = this.bootstrap.clone().connect(NettyUtil.resolveAddressString(registerValue.address)).sync()
+                val channelFuture = this.bootstrap.clone().connect(resolveAddress(registerValue.address)).sync()
                         //添加监听器,判断连接是否成功,当连接超时时,进入if代码块,抛出异常
                         .addListener { future ->
                             if (future.isDone && !future.isSuccess) {
@@ -75,7 +75,7 @@ object NettyClient {
     fun initChannel(serviceReference: ServiceReference<*>, address: String):Channel{
 
         return try {
-            val channelFuture = this.bootstrap.clone().connect(NettyUtil.resolveAddressString(address)).sync()
+            val channelFuture = this.bootstrap.clone().connect(resolveAddress(address)).sync()
                     .addListener { future ->
                         if (future.isDone && !future.isSuccess){
                             throw IllegalArgumentException()

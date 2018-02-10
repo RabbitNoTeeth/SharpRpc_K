@@ -2,6 +2,8 @@ package `fun`.bookish.sharp.remoting.netty4.core
 
 import `fun`.bookish.sharp.compute.ServiceImplManager
 import `fun`.bookish.sharp.config.ServiceExport
+import `fun`.bookish.sharp.manage.ProviderManageBean
+import `fun`.bookish.sharp.manage.ProviderManager
 import `fun`.bookish.sharp.model.RegisterValue
 import `fun`.bookish.sharp.protocol.api.ProtocolName
 import `fun`.bookish.sharp.remoting.netty4.codec.MessageCodec
@@ -80,9 +82,11 @@ object NettyServer {
                     val address = "${protocol.host}:${protocol.port}"
                     try {
                         val f = this.bootstrap.clone().bind(protocol.port).sync()
+                        ProviderManager.cache(ProviderManageBean(originalServiceName,address))
                         f.channel().closeFuture().addListener {
-                            workerGroup.shutdownGracefully()
-                            bossGroup.shutdownGracefully()
+                            if(it.isDone && it.isSuccess){
+                                ProviderManager.remove(address)
+                            }
                         }
                         //服务端保存服务实现实体
                         ServiceImplManager.add(serviceExport.serviceInterface,serviceExport.serviceRef)
