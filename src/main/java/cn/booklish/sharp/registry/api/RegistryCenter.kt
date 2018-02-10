@@ -24,4 +24,9 @@ interface RegistryCenter {
      */
     fun getProviders(serviceName: String): Set<String>
 
+    /**
+     * 获取注册中心地址
+     */
+    fun address(): String
+
 }

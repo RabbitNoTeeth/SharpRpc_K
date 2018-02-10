@@ -6,8 +6,8 @@ package cn.booklish.sharp.registry.api
  * @Created: 2017/12/20 9:43
  * @Modified:
  */
-enum class RegistryCenterType {
+enum class RegistryCenterType(val value:String) {
 
-    REDIS,ZOOKEEPER
+    REDIS("redis"),ZOOKEEPER("zookeeper")
 
 }

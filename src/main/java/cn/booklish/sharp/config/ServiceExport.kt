@@ -4,9 +4,8 @@ import cn.booklish.sharp.protocol.config.ProtocolConfig
 import cn.booklish.sharp.registry.api.RegistryCenter
 import cn.booklish.sharp.registry.api.RegistryCenterType
 import cn.booklish.sharp.registry.config.RegistryConfig
-import cn.booklish.sharp.registry.manager.RegisterTaskManager
 import cn.booklish.sharp.registry.support.redis.RedisRegistryCenter
-import cn.booklish.sharp.remoting.netty4.core.Server
+import cn.booklish.sharp.remoting.netty4.core.NettyServer
 import redis.clients.jedis.Jedis
 
 /**
@@ -41,13 +40,11 @@ class ServiceExport<T> {
     private fun createRegistryCenter(registryConfig: RegistryConfig):RegistryCenter{
         return when(registryConfig.type) {
             RegistryCenterType.REDIS -> {
-                val jedis = Jedis(registryConfig.host, registryConfig.port, registryConfig.timeout)
-                RedisRegistryCenter(jedis)
+                RedisRegistryCenter(registryConfig)
             }
             RegistryCenterType.ZOOKEEPER -> {
-                //暂时设置
-                val jedis = Jedis(registryConfig.host, registryConfig.port, registryConfig.timeout)
-                RedisRegistryCenter(jedis)
+                // TODO 添加zookeeper注册中心实现
+                RedisRegistryCenter(registryConfig)
             }
         }
     }
@@ -83,11 +80,7 @@ class ServiceExport<T> {
      * 注册并暴露服务
      */
     fun export(){
-        //注册服务到注册中心
-        if(RegisterTaskManager.submit(this).get()){
-            //启动netty监听
-            Server(this).start()
-        }
+        NettyServer.start(this)
     }
 
 }

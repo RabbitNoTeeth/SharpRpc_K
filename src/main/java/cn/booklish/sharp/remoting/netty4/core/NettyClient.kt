@@ -22,7 +22,7 @@ import java.util.*
 /**
  * 客户端引导
  */
-object Client {
+object NettyClient {
 
     private val logger: Logger = Logger.getLogger(this.javaClass)
 
