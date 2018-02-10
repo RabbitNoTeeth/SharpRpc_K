@@ -24,11 +24,11 @@ public class App {
 
         RegistryConfig registryConfig = new RegistryConfig().type(RegistryCenterType.REDIS).host("47.94.206.26").port(6380);
 
-        ProtocolConfig protocolConfig1 = new ProtocolConfig().name(ProtocolName.RMI).host("192.168.2.246").port(12200);
+        //ProtocolConfig protocolConfig1 = new ProtocolConfig().name(ProtocolName.RMI).host("192.168.2.246").port(12200);
 
         ProtocolConfig protocolConfig2 = new ProtocolConfig().name(ProtocolName.SHARP).host("192.168.2.246").port(12211);
 
-        List protocolList = Lists.newArrayList(protocolConfig1,protocolConfig2);
+        List protocolList = Lists.newArrayList(protocolConfig2);
 
         ServiceExport<Test> serviceExport = new ServiceExport<>();
 
@@ -36,7 +36,7 @@ public class App {
 
         serviceExport.export();
 
-        Thread.sleep(3000);
+        Thread.sleep(5000);
 
         ServiceReference<Test> serviceReference = new ServiceReference<>();
 

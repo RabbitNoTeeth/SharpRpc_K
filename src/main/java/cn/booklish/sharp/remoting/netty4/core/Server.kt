@@ -22,7 +22,6 @@ class Server(private val serviceExport: ServiceExport<*>) {
     private val bossGroup = NioEventLoopGroup()
     private val workerGroup = NioEventLoopGroup()
     private val bootstrap = ServerBootstrap()
-    private val executor = Executors.newFixedThreadPool(serviceExport.protocols.size)
 
     init {
         bootstrap.group(bossGroup, workerGroup)
@@ -40,26 +39,26 @@ class Server(private val serviceExport: ServiceExport<*>) {
         val protocols = serviceExport.protocols
 
         for (protocol in protocols){
-            executor.execute({
-                try {
-                    var port = protocol.port
-                    //如果是RMI协议,那么server端默认绑定在protocol设置的端口+10000上
-                    if(protocol.name==ProtocolName.RMI){
-                        port += 10000
+            try {
+                var port = protocol.port
+                //如果是RMI协议,那么server端默认绑定在protocol设置的端口+10000上
+                if(protocol.name==ProtocolName.RMI){
+                    port += 10000
+                }
+                val f = this.bootstrap.bind(port).sync().addListener { future ->
+                    if(future.isDone && future.isSuccess){
+                        logger.info("成功启动服务 ${serviceExport.serviceInterface.typeName} 监听,端口:$port")
                     }
-                    val f = this.bootstrap.bind(port).sync().addListener { future ->
-                        if(future.isDone && future.isSuccess){
-                            logger.info("成功启动服务 ${serviceExport.serviceInterface.typeName} 监听,端口:$port")
-                        }
-                    }
-                    f.channel().closeFuture().sync()
-                } catch (e: InterruptedException) {
-                    Thread.currentThread().interrupt()
-                } finally {
+                }
+                f.channel().closeFuture().addListener {
                     workerGroup.shutdownGracefully()
                     bossGroup.shutdownGracefully()
                 }
-            })
+            } catch (e: InterruptedException) {
+                Thread.currentThread().interrupt()
+                workerGroup.shutdownGracefully()
+                bossGroup.shutdownGracefully()
+            }
         }
 
     }

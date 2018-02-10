@@ -27,10 +27,11 @@ object ProvidersLoader {
         }
 
         if(providers==null || providers.isEmpty()){
-            throw IllegalArgumentException("未找到服务 ${serviceReference.serviceInterface.typeName} 可用的服务提供者")
+            throw IllegalArgumentException("there is no available provider of service \"${serviceReference.serviceInterface.typeName}\"")
         }
 
-        return providers.map { GsonUtil.jsonToObject(it,RegisterValue::class.java) }.toMutableList()
+        return providers.map { GsonUtil.jsonToObject(it,RegisterValue::class.java) }
+                .sortedBy { it.weight }.toMutableList()
 
     }
 

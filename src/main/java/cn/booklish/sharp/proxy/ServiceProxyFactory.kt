@@ -2,13 +2,10 @@ package cn.booklish.sharp.proxy
 
 import cn.booklish.sharp.config.ServiceReference
 import cn.booklish.sharp.protocol.api.ProtocolName
-import cn.booklish.sharp.remoting.netty4.core.Client
 import net.sf.cglib.proxy.Enhancer
 import org.apache.log4j.Logger
 import java.lang.IllegalStateException
 import java.rmi.Naming
-import java.rmi.Remote
-import java.util.*
 
 /**
  * Rpc客户端,用于获取Rpc服务代理类
@@ -17,51 +14,42 @@ object ServiceProxyFactory {
 
     private val logger:Logger = Logger.getLogger(this.javaClass)
 
-    private val random = Random()
-
     /**
      * 获得service服务代理
      */
     fun <T> getService(serviceReference: ServiceReference<T>): T {
 
         val serviceName = serviceReference.serviceInterface.typeName
-
         val providers = ProvidersLoader.getProviders(serviceReference)
+        var serviceProxy: T? = null
 
-        //随机获取一个服务提供者
-        var x = random.nextInt(providers.size)
-        var registerValue = providers[x]
-
-        while (true){
-
+        //按照权重进行连接
+        for(x in providers.size-1 downTo 0 step 1){
+            val registerValue = providers[x]
             try{
-                return when(registerValue.protocol){
+                when(registerValue.protocol){
                     ProtocolName.RMI -> {
-                        Naming.lookup(registerValue.address) as T
+                        serviceProxy = Naming.lookup(registerValue.address) as T
+                        logger.info("successfully connect to the provider \"[${registerValue.protocol.value}] ${registerValue.address}\" of service \"$serviceName\"")
                     }
                     ProtocolName.SHARP -> {
                         val proxy = ProxyServiceInterceptor(serviceReference,registerValue.address)
                         val enhancer = Enhancer()
                         enhancer.setSuperclass(serviceReference.serviceInterface)
-                        // 回调方法
+                        // 设置回调
                         enhancer.setCallback(proxy)
                         // 创建代理对象
-                        enhancer.create() as T
+                        serviceProxy = enhancer.create() as T
+                        logger.info("successfully connect to the provider \"[${registerValue.protocol.value}] ${registerValue.address}\" of service \"$serviceName\"")
                     }
                 }
-            }catch (e:Exception){
-                e.printStackTrace()
-                logger.warn("连接到服务 $serviceName 的提供者 ${registerValue.address} 失败,尝试连接其他服务提供者")
-                providers.remove(registerValue)
-                if(providers.isEmpty()){
-                    throw IllegalStateException("服务 $serviceName 无可用连接,服务获取失败")
-                }
-                x = random.nextInt(providers.size)
-                registerValue = providers[x]
+            }catch (e: Exception){
+                logger.warn("failed to connect to the provider \"[${registerValue.protocol.value}] ${registerValue.address}\" of service \"$serviceName\"")
+                continue
             }
-
         }
 
+        return serviceProxy?:throw IllegalStateException("there is no available provider of service \"$serviceName\"")
     }
 
 }

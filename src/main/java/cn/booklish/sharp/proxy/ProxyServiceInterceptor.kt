@@ -16,7 +16,7 @@ import java.util.*
  */
 class ProxyServiceInterceptor(private val serviceReference: ServiceReference<*>, firstAddress:String): MethodInterceptor {
 
-    private var channel = Client.initChannel(firstAddress)
+    private var channel = Client.initChannel(serviceReference,firstAddress)
 
     override fun intercept(obj: Any, method: Method, args: Array<Any>, methodProxy: MethodProxy): Any? {
 

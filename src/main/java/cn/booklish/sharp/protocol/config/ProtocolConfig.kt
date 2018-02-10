@@ -14,6 +14,8 @@ class ProtocolConfig {
 
     var port = SharpConstants.DEFAULT_PROTOCOL_PORT
 
+    var weight = SharpConstants.DEFAULT_PROTOCOL_WEIGHT
+
     fun name(name:ProtocolName):ProtocolConfig{
         this.name = name
         return this
@@ -26,6 +28,11 @@ class ProtocolConfig {
 
     fun port(port:Int):ProtocolConfig{
         this.port = port
+        return this
+    }
+
+    fun weight(weight:Int):ProtocolConfig{
+        this.weight = weight
         return this
     }
 

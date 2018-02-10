@@ -57,19 +57,19 @@ object RegisterTaskManager{
                             //绑定服务
                             Naming.bind(address, serviceExport.serviceRef as Remote)
 
-                            value = RegisterValue(protocol.name,address)
+                            value = RegisterValue(protocol.name,address,protocol.weight)
                         }
                         ProtocolName.SHARP -> {
                             //服务端保存服务实体
                             RpcServiceBeanManager.add(serviceExport.serviceInterface,serviceExport.serviceRef)
                             val address = "${protocol.host}:${protocol.port}"
-                            value = RegisterValue(protocol.name,address)
+                            value = RegisterValue(protocol.name,address,protocol.weight)
                         }
                     }
 
                     for(registryCenter in registryCenters){
                         registryCenter.register(key,GsonUtil.objectToJson(value))
-                        logger.info("[Sharp] : 服务 $key 注册成功, value = $value")
+                        logger.info("successfully registered service  \"${serviceExport.serviceInterface}\", [key=$key, value=$value]")
                     }
 
                 }
@@ -78,7 +78,7 @@ object RegisterTaskManager{
 
             } catch (e: Exception) {
                 Thread.currentThread().interrupt()
-                throw RuntimeException("[Sharp] : 服务 $serviceName 注册失败",e)
+                throw RuntimeException("failed to register service \"${serviceExport.serviceInterface}\"",e)
             }
 
         })

@@ -44,11 +44,12 @@ object RpcRequestComputeManager {
         return try {
             val serviceClass = Class.forName(rpcRequest.serviceName)
             val method = serviceClass.getMethod(rpcRequest.methodName, *rpcRequest.paramTypes)
-            val serviceBean = RpcServiceBeanManager.get(serviceClass)?: throw IllegalStateException("服务端未找到服务[${serviceClass.typeName}的实体,无法计算rpc请求]")
+            val serviceBean = RpcServiceBeanManager.get(serviceClass)?:
+                    throw IllegalStateException("there is no a impl of service \"${serviceClass.typeName}\" in the provider")
             val invoke = method.invoke(serviceBean, *rpcRequest.paramValues)
             RpcResponse(rpcRequest.id,true).result(invoke)
         } catch (e: Exception) {
-            e.printStackTrace()
+            //e.printStackTrace()
             RpcResponse(rpcRequest.id,false).error(e)
         }
     }

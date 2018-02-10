@@ -36,6 +36,8 @@ object SharpConstants {
 
     var DEFAULT_PROTOCOL_PORT = 12200
 
+    var DEFAULT_PROTOCOL_WEIGHT = 1
+
 
     /*--------------------------默认client配置--------------------------*/
 

@@ -48,5 +48,5 @@ class RpcResponse{
 /**
  * 服务注册时保存的value
  */
-data class RegisterValue(val protocol:ProtocolName,val address:String)
+data class RegisterValue(val protocol:ProtocolName,val address:String,val weight:Int)
 
