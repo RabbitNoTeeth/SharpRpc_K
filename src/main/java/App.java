@@ -1,4 +1,3 @@
-package cn.booklish.sharp.test;
 
 
 import fun.bookish.sharp.config.ServiceExport;
@@ -7,9 +6,9 @@ import fun.bookish.sharp.protocol.api.ProtocolName;
 import fun.bookish.sharp.protocol.config.ProtocolConfig;
 import fun.bookish.sharp.registry.api.RegistryCenterType;
 import fun.bookish.sharp.registry.config.RegistryConfig;
-import cn.booklish.sharp.test.service.Test;
-import cn.booklish.sharp.test.service.TestImpl;
 import com.google.common.collect.Lists;
+import test.service.Test;
+import test.service.TestImpl;
 
 import java.rmi.RemoteException;
 import java.util.List;
