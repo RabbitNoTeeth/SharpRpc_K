@@ -21,7 +21,7 @@ public class App {
 
     public static void main(String[] args) throws InterruptedException, RemoteException {
 
-        RegistryConfig registryConfig = new RegistryConfig().type(RegistryCenterType.REDIS).host("47.94.206.26").port(6380);
+        RegistryConfig registryConfig = new RegistryConfig().type(RegistryCenterType.ZOOKEEPER).host("47.94.206.26").port(2181);
 
         //ProtocolConfig protocolConfig1 = new ProtocolConfig().name(ProtocolName.RMI).host("192.168.2.246").port(12200);
 

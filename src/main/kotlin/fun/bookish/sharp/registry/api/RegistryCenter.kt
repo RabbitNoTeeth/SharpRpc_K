@@ -1,5 +1,7 @@
 package `fun`.bookish.sharp.registry.api
 
+import `fun`.bookish.sharp.model.RegisterValue
+
 
 /**
  * @Author: liuxindong
@@ -12,17 +14,17 @@ interface RegistryCenter {
     /**
      * 注册服务
      */
-    fun register(serviceName: String, address: String)
+    fun register(key: String, value: RegisterValue)
 
     /**
      * 注销服务
      */
-    fun unregister(serviceName: String, address: String)
+    fun unregister(key: String, value: RegisterValue)
 
     /**
      * 获取服务提供者
      */
-    fun getProviders(serviceName: String): Set<String>
+    fun getProviders(key: String): Set<RegisterValue>
 
     /**
      * 获取注册中心地址

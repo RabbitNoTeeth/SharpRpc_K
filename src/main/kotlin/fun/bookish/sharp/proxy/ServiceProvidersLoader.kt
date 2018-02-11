@@ -11,13 +11,13 @@ object ServiceProvidersLoader {
 
     fun getProviders(serviceReference: ServiceReference<*>):MutableList<RegisterValue>{
 
-        val serviceName = serviceReference.serviceInterface.typeName.replace(".","/",false)
+        val serviceName = serviceReference.serviceInterface.typeName
 
-        val key = "SharpRpc://" + serviceName + "?version=" + serviceReference.version
+        val key = "SharpRpc:" + serviceName + "?version=" + serviceReference.version
 
         val registryCenters = serviceReference.registryCenters
 
-        val providers = mutableSetOf<String>()
+        val providers = mutableSetOf<RegisterValue>()
 
         for (registryCenter in registryCenters){
             try {
@@ -29,11 +29,10 @@ object ServiceProvidersLoader {
         }
 
         if(providers.isEmpty()){
-            throw IllegalArgumentException("there is no available provider of service \"${serviceReference.serviceInterface.typeName}\"")
+            throw IllegalArgumentException("there is no available provider of service \"$serviceName\"")
         }
 
-        return providers.map { GsonUtil.jsonToObject(it,RegisterValue::class.java) }
-                .sortedBy { it.weight }.toMutableList()
+        return providers.sortedBy { it.weight }.toMutableList()
 
     }
 

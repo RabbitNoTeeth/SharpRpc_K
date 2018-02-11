@@ -1,7 +1,9 @@
 package `fun`.bookish.sharp.registry.support.redis
 
+import `fun`.bookish.sharp.model.RegisterValue
 import `fun`.bookish.sharp.registry.api.RegistryCenter
 import `fun`.bookish.sharp.registry.config.RegistryConfig
+import `fun`.bookish.sharp.serialize.GsonUtil
 import redis.clients.jedis.Jedis
 
 /**
@@ -11,16 +13,16 @@ class RedisRegistryCenter (private val registryConfig: RegistryConfig):RegistryC
 
     val jedis = Jedis(registryConfig.host, registryConfig.port, registryConfig.timeout)
 
-    override fun register(serviceName: String, address: String) {
-        jedis.sadd(serviceName, address)
+    override fun register(key: String, value: RegisterValue) {
+        jedis.sadd(key, GsonUtil.objectToJson(value))
     }
 
-    override fun unregister(serviceName: String, address: String) {
-        jedis.srem(serviceName,address)
+    override fun unregister(key: String, value: RegisterValue) {
+        jedis.srem(key,GsonUtil.objectToJson(value))
     }
 
-    override fun getProviders(serviceName: String): Set<String> {
-        return jedis.smembers(serviceName)
+    override fun getProviders(key: String): Set<RegisterValue> {
+        return jedis.smembers(key).map { GsonUtil.jsonToObject(it,RegisterValue::class.java) }.toSet()
     }
 
     override fun address(): String {

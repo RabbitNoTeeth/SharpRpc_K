@@ -6,6 +6,7 @@ import `fun`.bookish.sharp.registry.api.RegistryCenter
 import `fun`.bookish.sharp.registry.api.RegistryCenterType
 import `fun`.bookish.sharp.registry.config.RegistryConfig
 import `fun`.bookish.sharp.registry.support.redis.RedisRegistryCenter
+import `fun`.bookish.sharp.registry.support.zookeeper.ZkRegistryCenter
 
 /**
  * 服务引用
@@ -38,8 +39,7 @@ class ServiceReference<T> {
                 RedisRegistryCenter(registryConfig)
             }
             RegistryCenterType.ZOOKEEPER -> {
-                // TODO 添加zookeeper注册中心实现
-                RedisRegistryCenter(registryConfig)
+                ZkRegistryCenter(registryConfig)
             }
         }
     }

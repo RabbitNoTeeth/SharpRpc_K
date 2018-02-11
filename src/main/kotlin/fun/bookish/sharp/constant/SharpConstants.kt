@@ -19,6 +19,12 @@ object SharpConstants {
 
     var DEFAULT_REGISTRY_TIMEOUT = 30
 
+    /*--------------------------默认zookeeper注册中心配置--------------------------*/
+
+    var DEFAULT_ZK_RETRY_TIMES = 3
+
+    var DEFAULT_ZK_RETRY_SLEEP = 3
+
 
     /*--------------------------默认protocol配置--------------------------*/
 

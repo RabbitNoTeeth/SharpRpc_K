@@ -53,13 +53,12 @@ object NettyServer {
     fun start(serviceExport: ServiceExport<*>) {
 
         val protocols = serviceExport.protocols
-        val originalServiceName = serviceExport.serviceInterface.typeName
-        val serviceName = originalServiceName.replace(".","/",false)
+        val serviceName = serviceExport.serviceInterface.typeName
         val registryCenters = serviceExport.registryCenters
 
         for (protocol in protocols) {
             //生成注册信息的键值
-            val key = "SharpRpc://" + serviceName + "?version=" + serviceExport.version
+            val key = "SharpRpc:" + serviceName + "?version=" + serviceExport.version
             //生成注册信息的值
             var value: RegisterValue? = null
 
@@ -70,10 +69,10 @@ object NettyServer {
                     try {
                         //绑定服务
                         Naming.bind(address, serviceExport.serviceRef as Remote)
-                        logger.info("successfully bind rmi service \"$originalServiceName\" , address=$address")
+                        logger.info("successfully bind rmi service \"$serviceName\" , address=$address")
                         value = RegisterValue(protocol.name, address, protocol.weight)
                     } catch (e: Exception) {
-                        val message = "failed bind rmi service \"$originalServiceName\" to the address \"$address\""
+                        val message = "failed bind rmi service \"$serviceName\" to the address \"$address\""
                         logger.error(message)
                         throw IllegalStateException(message, e)
                     }
@@ -82,7 +81,7 @@ object NettyServer {
                     val address = "${protocol.host}:${protocol.port}"
                     try {
                         val f = this.bootstrap.clone().bind(protocol.port).sync()
-                        ProviderManager.cache(ProviderManageBean(originalServiceName,address))
+                        ProviderManager.cache(ProviderManageBean(serviceName,address))
                         f.channel().closeFuture().addListener {
                             if(it.isDone && it.isSuccess){
                                 ProviderManager.remove(address)
@@ -90,10 +89,10 @@ object NettyServer {
                         }
                         //服务端保存服务实现实体
                         ServiceImplManager.add(serviceExport.serviceInterface,serviceExport.serviceRef)
-                        logger.info("successfully start a provider of service $originalServiceName, address=$address")
+                        logger.info("successfully start a provider of service $serviceName, address=$address")
                         value = RegisterValue(protocol.name,address,protocol.weight)
                     } catch (e: Exception) {
-                        val message = "failed start a provider of service \"$originalServiceName\", address=$address"
+                        val message = "failed start a provider of service \"$serviceName\", address=$address"
                         logger.error(message)
                         throw IllegalStateException(message, e)
                     }
@@ -103,11 +102,11 @@ object NettyServer {
             //将注册服务到注册中心
             for (registryCenter in registryCenters) {
                 try {
-                    registryCenter.register(key, GsonUtil.objectToJson(value))
-                    logger.info("successfully registered service  \"$originalServiceName\" to [${registryCenter.address()}]," +
+                    registryCenter.register(key, value)
+                    logger.info("successfully registered service  \"$serviceName\" to [${registryCenter.address()}]," +
                             " key=$key, value=$value")
                 }catch (e: Exception){
-                    val message = "failed registered service  \"$originalServiceName\" to [${registryCenter.address()}]," +
+                    val message = "failed registered service  \"$serviceName\" to [${registryCenter.address()}]," +
                             " key=$key, value=$value"
                     logger.error(message)
                     throw IllegalStateException(message, e)
