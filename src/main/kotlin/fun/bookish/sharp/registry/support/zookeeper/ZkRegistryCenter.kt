@@ -93,7 +93,6 @@ class ZkRegistryCenter(private val registryConfig: RegistryConfig): RegistryCent
      * 创建节点
      */
     private fun createNode(path: String, data: String) {
-        //checkAndCreateParent(path.substringBeforeLast("/"))
         connection.create().withMode(CreateMode.PERSISTENT).withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE)
                         .forPath(path, data.toByteArray(Charsets.UTF_8))
     }

@@ -11,17 +11,20 @@ import `fun`.bookish.sharp.remoting.netty4.core.NettyServer
 /**
  * 服务引用
  */
-class ServiceExport<T> {
+class ServiceExport<T:Any>(val serviceInterface:Class<T>,val serviceRef:T) {
+
+    var serviceKey:String = serviceInterface.typeName
 
     val registryCenters:MutableList<RegistryCenter> = mutableListOf()
 
     val protocols:MutableList<ProtocolConfig> = mutableListOf()
 
-    lateinit var serviceInterface:Class<T>
-
-    lateinit var serviceRef:Any
-
     var version = "1.0.0"
+
+    fun serviceKey(serviceKey: String):ServiceExport<T>{
+        this.serviceKey = serviceKey
+        return this
+    }
 
     fun setRegistry(registry: RegistryConfig):ServiceExport<T>{
         val registryCenter = registry.registryCenter?:createRegistryCenter(registry)
@@ -57,16 +60,6 @@ class ServiceExport<T> {
         for (protocol in protocols){
             this.protocols.add(protocol)
         }
-        return this
-    }
-
-    fun setInterface(clazz:Class<T>):ServiceExport<T>{
-        this.serviceInterface = clazz
-        return this
-    }
-
-    fun setRef(ref:Any):ServiceExport<T>{
-        this.serviceRef = ref
         return this
     }
 

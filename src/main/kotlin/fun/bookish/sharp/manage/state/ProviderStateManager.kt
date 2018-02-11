@@ -1,11 +1,11 @@
-package `fun`.bookish.sharp.manage
+package `fun`.bookish.sharp.manage.state
 
 import java.util.concurrent.ConcurrentHashMap
 
-object ProviderManager {
+object ProviderStateManager {
 
 
-    private val cache = ConcurrentHashMap<String,ProviderManageBean>()
+    private val cache = ConcurrentHashMap<String, ProviderManageBean>()
 
     fun cache(provider: ProviderManageBean){
         cache.putIfAbsent(provider.serviceAddress,provider)

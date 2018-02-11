@@ -21,7 +21,7 @@ class ProxyServiceInterceptor(private val serviceReference: ServiceReference<*>,
         }
         val id = RequestIdGenerator.getId()
         RpcResponseManager.add(id)
-        val rpcRequest = RpcRequest(id, serviceReference.serviceInterface.typeName, method.name,method.parameterTypes,args)
+        val rpcRequest = RpcRequest(id, serviceReference.serviceKey, method.name,method.parameterTypes,args)
         channel.writeAndFlush(rpcRequest).sync()
         val result = RpcResponseManager.get(id)
         if(result is Throwable){

@@ -1,4 +1,4 @@
-package `fun`.bookish.sharp.manage
+package `fun`.bookish.sharp.manage.state
 
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicInteger

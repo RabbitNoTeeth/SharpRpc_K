@@ -27,19 +27,19 @@ public class App {
 
         ProtocolConfig protocolConfig2 = new ProtocolConfig().name(ProtocolName.SHARP).host("192.168.2.246").port(12211);
 
-        List protocolList = Lists.newArrayList(protocolConfig2);
+        List<ProtocolConfig> protocolList = Lists.newArrayList(protocolConfig2);
 
-        ServiceExport<Test> serviceExport = new ServiceExport<>();
+        ServiceExport<Test> serviceExport = new ServiceExport<>(Test.class,new TestImpl());
 
-        serviceExport.setRegistry(registryConfig).setProtocols(protocolList).setInterface(Test.class).setRef(new TestImpl());
+        serviceExport.setRegistry(registryConfig).setProtocols(protocolList).serviceKey("aaa");
 
         serviceExport.export();
 
         Thread.sleep(5000);
 
-        ServiceReference<Test> serviceReference = new ServiceReference<>();
+        ServiceReference<Test> serviceReference = new ServiceReference<>(Test.class);
 
-        serviceReference.setRegistry(registryConfig).setInterface(Test.class);
+        serviceReference.setRegistry(registryConfig).serviceKey("aaa");
 
         Test test1 = serviceReference.get();
 

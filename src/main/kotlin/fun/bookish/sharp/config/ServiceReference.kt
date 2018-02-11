@@ -11,13 +11,18 @@ import `fun`.bookish.sharp.registry.support.zookeeper.ZkRegistryCenter
 /**
  * 服务引用
  */
-class ServiceReference<T> {
+class ServiceReference<T:Any>(val serviceInterface:Class<T>) {
+
+    var serviceKey:String = serviceInterface.typeName
 
     val registryCenters:MutableList<RegistryCenter> = mutableListOf()
 
-    lateinit var serviceInterface:Class<T>
-
     var version = "1.0.0"
+
+    fun serviceKey(serviceKey: String):ServiceReference<T>{
+        this.serviceKey = serviceKey
+        return this
+    }
 
     fun setRegistry(registry: RegistryConfig): ServiceReference<T>{
         val registryCenter = registry.registryCenter?:createRegistryCenter(registry)
@@ -42,11 +47,6 @@ class ServiceReference<T> {
                 ZkRegistryCenter(registryConfig)
             }
         }
-    }
-
-    fun setInterface(clazz:Class<T>): ServiceReference<T>{
-        this.serviceInterface = clazz
-        return this
     }
 
     fun setVersion(version:String): ServiceReference<T>{

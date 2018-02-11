@@ -1,14 +1,13 @@
 package `fun`.bookish.sharp.remoting.netty4.core
 
-import `fun`.bookish.sharp.compute.ServiceImplManager
 import `fun`.bookish.sharp.config.ServiceExport
-import `fun`.bookish.sharp.manage.ProviderManageBean
-import `fun`.bookish.sharp.manage.ProviderManager
+import `fun`.bookish.sharp.manage.bean.ServiceManager
+import `fun`.bookish.sharp.manage.state.ProviderManageBean
+import `fun`.bookish.sharp.manage.state.ProviderStateManager
 import `fun`.bookish.sharp.model.RegisterValue
 import `fun`.bookish.sharp.protocol.api.ProtocolName
 import `fun`.bookish.sharp.remoting.netty4.codec.MessageCodec
 import `fun`.bookish.sharp.remoting.netty4.handler.ServerChannelHandler
-import `fun`.bookish.sharp.serialize.GsonUtil
 import `fun`.bookish.sharp.serialize.api.RpcSerializer
 import `fun`.bookish.sharp.serialize.kryo.KryoSerializer
 import io.netty.bootstrap.ServerBootstrap
@@ -53,18 +52,19 @@ object NettyServer {
     fun start(serviceExport: ServiceExport<*>) {
 
         val protocols = serviceExport.protocols
-        val serviceName = serviceExport.serviceInterface.typeName
+        val serviceKey = serviceExport.serviceKey
         val registryCenters = serviceExport.registryCenters
 
         for (protocol in protocols) {
             //生成注册信息的键值
-            val key = "SharpRpc:" + serviceName + "?version=" + serviceExport.version
+            val key = "SharpRpc:" + serviceKey + "?version=" + serviceExport.version
             //生成注册信息的值
             var value: RegisterValue? = null
 
             when (protocol.name) {
                 ProtocolName.RMI -> {
                     //生成服务的RMI绑定地址
+                    val serviceName = serviceKey.replace(".","/")
                     val address = "rmi://${protocol.host}:${protocol.port}/$serviceName/version-${serviceExport.version}"
                     try {
                         //绑定服务
@@ -81,18 +81,18 @@ object NettyServer {
                     val address = "${protocol.host}:${protocol.port}"
                     try {
                         val f = this.bootstrap.clone().bind(protocol.port).sync()
-                        ProviderManager.cache(ProviderManageBean(serviceName,address))
+                        ProviderStateManager.cache(ProviderManageBean(serviceKey, address))
                         f.channel().closeFuture().addListener {
                             if(it.isDone && it.isSuccess){
-                                ProviderManager.remove(address)
+                                ProviderStateManager.remove(address)
                             }
                         }
                         //服务端保存服务实现实体
-                        ServiceImplManager.add(serviceExport.serviceInterface,serviceExport.serviceRef)
-                        logger.info("successfully start a provider of service $serviceName, address=$address")
+                        ServiceManager.add(serviceKey,serviceExport.serviceInterface,serviceExport.serviceRef)
+                        logger.info("successfully start a provider of service $serviceKey, address=$address")
                         value = RegisterValue(protocol.name,address,protocol.weight)
                     } catch (e: Exception) {
-                        val message = "failed start a provider of service \"$serviceName\", address=$address"
+                        val message = "failed start a provider of service \"$serviceKey\", address=$address"
                         logger.error(message)
                         throw IllegalStateException(message, e)
                     }
@@ -103,10 +103,10 @@ object NettyServer {
             for (registryCenter in registryCenters) {
                 try {
                     registryCenter.register(key, value)
-                    logger.info("successfully registered service  \"$serviceName\" to [${registryCenter.address()}]," +
+                    logger.info("successfully registered service  \"$serviceKey\" to [${registryCenter.address()}]," +
                             " key=$key, value=$value")
                 }catch (e: Exception){
-                    val message = "failed registered service  \"$serviceName\" to [${registryCenter.address()}]," +
+                    val message = "failed registered service  \"$serviceKey\" to [${registryCenter.address()}]," +
                             " key=$key, value=$value"
                     logger.error(message)
                     throw IllegalStateException(message, e)
