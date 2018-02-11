@@ -10,9 +10,9 @@ import java.lang.reflect.Method
 /**
  * 客户端Rpc服务代理类的方法拦截器,实现了cglib的MethodInterceptor
  */
-class ProxyServiceInterceptor(private val serviceReference: ServiceReference<*>, firstAddress:String): MethodInterceptor {
+class ProxyServiceInterceptor(private val serviceReference: ServiceReference<*>, firstAddress:String, directConnect: Boolean): MethodInterceptor {
 
-    private var channel = NettyClient.initChannel(serviceReference,firstAddress)
+    private var channel = NettyClient.initChannel(serviceReference,firstAddress,directConnect)
 
     override fun intercept(obj: Any, method: Method, args: Array<Any>, methodProxy: MethodProxy): Any? {
 

@@ -73,7 +73,7 @@ object NettyServer {
                         logger.info("successfully bind rmi service \"$originalServiceName\" , address=$address")
                         value = RegisterValue(protocol.name, address, protocol.weight)
                     } catch (e: Exception) {
-                        val message = "failed bind rmi service \"$originalServiceName\""
+                        val message = "failed bind rmi service \"$originalServiceName\" to the address \"$address\""
                         logger.error(message)
                         throw IllegalStateException(message, e)
                     }

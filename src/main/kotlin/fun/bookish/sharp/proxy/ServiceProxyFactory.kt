@@ -2,6 +2,7 @@ package `fun`.bookish.sharp.proxy
 
 import `fun`.bookish.sharp.config.ServiceReference
 import `fun`.bookish.sharp.protocol.api.ProtocolName
+import `fun`.bookish.sharp.protocol.config.ProtocolConfig
 import net.sf.cglib.proxy.Enhancer
 import org.apache.log4j.Logger
 import java.lang.IllegalStateException
@@ -33,7 +34,7 @@ object ServiceProxyFactory {
                         logger.info("successfully connect to the provider \"[${registerValue.protocol.value}] ${registerValue.address}\" of service \"$serviceName\"")
                     }
                     ProtocolName.SHARP -> {
-                        val proxy = ProxyServiceInterceptor(serviceReference,registerValue.address)
+                        val proxy = ProxyServiceInterceptor(serviceReference,registerValue.address,false)
                         val enhancer = Enhancer()
                         enhancer.setSuperclass(serviceReference.serviceInterface)
                         // 设置回调
@@ -50,6 +51,40 @@ object ServiceProxyFactory {
         }
 
         return serviceProxy?:throw IllegalStateException("there is no available provider of service \"$serviceName\"")
+    }
+
+    /**
+     * 获得service服务代理
+     */
+    fun <T> getService(serviceReference: ServiceReference<T>,protocol: ProtocolConfig): T {
+
+        val serviceName = serviceReference.serviceInterface.typeName
+        var serviceProxy: T? = null
+
+        try{
+            when(protocol.name){
+                ProtocolName.RMI -> {
+                    val address = "rmi://${protocol.host}:${protocol.port}/$serviceName/version-${serviceReference.version}"
+                    serviceProxy = Naming.lookup(address) as T
+                    logger.info("successfully connect to the provider \"[${protocol.name.value}] $address\" of service \"$serviceName\"")
+                }
+                ProtocolName.SHARP -> {
+                    val address = "${protocol.host}:${protocol.port}"
+                    val proxy = ProxyServiceInterceptor(serviceReference,address,true)
+                    val enhancer = Enhancer()
+                    enhancer.setSuperclass(serviceReference.serviceInterface)
+                    // 设置回调
+                    enhancer.setCallback(proxy)
+                    // 创建代理对象
+                    serviceProxy = enhancer.create() as T
+                    logger.info("successfully connect to the provider \"[${protocol.name.value}] $address\" of service \"$serviceName\"")
+                }
+            }
+        }catch (e: Exception){
+            throw IllegalStateException("failed to connect to the provider \"[${protocol.name.value}] ${protocol.host}:${protocol.port}\" of service \"$serviceName\"")
+        }
+
+        return serviceProxy
     }
 
 }

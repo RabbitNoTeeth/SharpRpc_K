@@ -72,7 +72,9 @@ object NettyClient {
 
     }
 
-    fun initChannel(serviceReference: ServiceReference<*>, address: String):Channel{
+    fun initChannel(serviceReference: ServiceReference<*>, address: String, directConnect: Boolean):Channel{
+
+        val serviceName = serviceReference.serviceInterface.typeName
 
         return try {
             val channelFuture = this.bootstrap.clone().connect(resolveAddress(address)).sync()
@@ -83,7 +85,13 @@ object NettyClient {
                     }
             channelFuture.channel()
         }catch (e: Exception){
-            this.newChannel(serviceReference)
+            if(directConnect){
+                val message = "failed to connect to the provider \"[SHARP] $address\" of service \"$serviceName\""
+                logger.error(message)
+                throw IllegalStateException(message)
+            }else{
+                this.newChannel(serviceReference)
+            }
         }
 
     }

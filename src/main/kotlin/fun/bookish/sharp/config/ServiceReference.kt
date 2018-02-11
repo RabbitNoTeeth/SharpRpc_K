@@ -1,5 +1,6 @@
 package `fun`.bookish.sharp.config
 
+import `fun`.bookish.sharp.protocol.config.ProtocolConfig
 import `fun`.bookish.sharp.proxy.ServiceProxyFactory
 import `fun`.bookish.sharp.registry.api.RegistryCenter
 import `fun`.bookish.sharp.registry.api.RegistryCenterType
@@ -54,10 +55,17 @@ class ServiceReference<T> {
     }
 
     /**
-     * 注册并暴露服务
+     * 获取服务
      */
     fun get():T{
         return ServiceProxyFactory.getService(this)
+    }
+
+    /**
+     * 服务直连
+     */
+    fun get(protocol: ProtocolConfig):T{
+        return ServiceProxyFactory.getService(this,protocol)
     }
 
 
