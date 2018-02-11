@@ -47,7 +47,7 @@ object NettyClient {
 
     fun newChannel(serviceReference: ServiceReference<*>):Channel{
 
-        val serviceName = serviceReference.serviceInterface.typeName
+        val serviceKey = serviceReference.serviceKey
         val providers = ServiceProvidersLoader.getProviders(serviceReference).filter { it.protocol== ProtocolName.SHARP }.toMutableList()
         val channel:Channel? = null
 
@@ -64,17 +64,17 @@ object NettyClient {
                         }
                 channelFuture.channel()
             } catch (e: Exception) {
-                logger.warn("failed to connect to the provider \"[${registerValue.protocol.value}] ${registerValue.address}\" of service \"$serviceName\"")
+                logger.warn("failed to connect to the provider \"[${registerValue.protocol.value}] ${registerValue.address}\" of service \"$serviceKey\"")
             }
         }
 
-        return channel?:throw IllegalStateException("there is no available provider of service \"$serviceName\"")
+        return channel?:throw IllegalStateException("there is no available provider of service \"$serviceKey\"")
 
     }
 
     fun initChannel(serviceReference: ServiceReference<*>, address: String, directConnect: Boolean):Channel{
 
-        val serviceName = serviceReference.serviceInterface.typeName
+        val serviceKey = serviceReference.serviceKey
 
         return try {
             val channelFuture = this.bootstrap.clone().connect(resolveAddress(address)).sync()
@@ -86,7 +86,7 @@ object NettyClient {
             channelFuture.channel()
         }catch (e: Exception){
             if(directConnect){
-                val message = "failed to connect to the provider \"[SHARP] $address\" of service \"$serviceName\""
+                val message = "failed to connect to the provider \"[SHARP] $address\" of service \"$serviceKey\""
                 logger.error(message)
                 throw IllegalStateException(message)
             }else{

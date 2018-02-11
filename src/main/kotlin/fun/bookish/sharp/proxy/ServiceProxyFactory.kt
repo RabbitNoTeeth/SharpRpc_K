@@ -18,7 +18,7 @@ object ServiceProxyFactory {
     /**
      * 获得service服务代理
      */
-    fun <T> getService(serviceReference: ServiceReference<T>): T {
+    fun <T:Any> getService(serviceReference: ServiceReference<T>): T {
 
         val serviceName = serviceReference.serviceInterface.typeName
         val providers = ServiceProvidersLoader.getProviders(serviceReference)
@@ -44,6 +44,7 @@ object ServiceProxyFactory {
                         logger.info("successfully connect to the provider \"[${registerValue.protocol.value}] ${registerValue.address}\" of service \"$serviceName\"")
                     }
                 }
+                break
             }catch (e: Exception){
                 logger.warn("failed to connect to the provider \"[${registerValue.protocol.value}] ${registerValue.address}\" of service \"$serviceName\"")
                 continue
@@ -56,17 +57,17 @@ object ServiceProxyFactory {
     /**
      * 获得service服务代理
      */
-    fun <T> getService(serviceReference: ServiceReference<T>,protocol: ProtocolConfig): T {
+    fun <T:Any> getService(serviceReference: ServiceReference<T>,protocol: ProtocolConfig): T {
 
-        val serviceName = serviceReference.serviceInterface.typeName
+        val serviceKey = serviceReference.serviceKey
         var serviceProxy: T? = null
 
         try{
             when(protocol.name){
                 ProtocolName.RMI -> {
-                    val address = "rmi://${protocol.host}:${protocol.port}/$serviceName/version-${serviceReference.version}"
+                    val address = "rmi://${protocol.host}:${protocol.port}/${serviceKey.replace(".","/")}/version-${serviceReference.version}"
                     serviceProxy = Naming.lookup(address) as T
-                    logger.info("successfully connect to the provider \"[${protocol.name.value}] $address\" of service \"$serviceName\"")
+                    logger.info("successfully connect to the provider \"[${protocol.name.value}] $address\" of service \"$serviceKey\"")
                 }
                 ProtocolName.SHARP -> {
                     val address = "${protocol.host}:${protocol.port}"
@@ -77,11 +78,11 @@ object ServiceProxyFactory {
                     enhancer.setCallback(proxy)
                     // 创建代理对象
                     serviceProxy = enhancer.create() as T
-                    logger.info("successfully connect to the provider \"[${protocol.name.value}] $address\" of service \"$serviceName\"")
+                    logger.info("successfully connect to the provider \"[${protocol.name.value}] $address\" of service \"$serviceKey\"")
                 }
             }
         }catch (e: Exception){
-            throw IllegalStateException("failed to connect to the provider \"[${protocol.name.value}] ${protocol.host}:${protocol.port}\" of service \"$serviceName\"")
+            throw IllegalStateException("failed to connect to the provider \"[${protocol.name.value}] ${protocol.host}:${protocol.port}\" of service \"$serviceKey\"")
         }
 
         return serviceProxy

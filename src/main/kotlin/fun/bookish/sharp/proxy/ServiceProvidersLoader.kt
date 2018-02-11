@@ -11,9 +11,9 @@ object ServiceProvidersLoader {
 
     fun getProviders(serviceReference: ServiceReference<*>):MutableList<RegisterValue>{
 
-        val serviceName = serviceReference.serviceInterface.typeName
+        val serviceKey = serviceReference.serviceKey
 
-        val key = "SharpRpc:" + serviceName + "?version=" + serviceReference.version
+        val key = serviceReference.getRegisterKey()
 
         val registryCenters = serviceReference.registryCenters
 
@@ -29,7 +29,7 @@ object ServiceProvidersLoader {
         }
 
         if(providers.isEmpty()){
-            throw IllegalArgumentException("there is no available provider of service \"$serviceName\"")
+            throw IllegalArgumentException("there is no available provider of service \"$serviceKey\"")
         }
 
         return providers.sortedBy { it.weight }.toMutableList()

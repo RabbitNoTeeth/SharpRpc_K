@@ -2,6 +2,7 @@ package `fun`.bookish.sharp.registry.support.zookeeper
 
 import `fun`.bookish.sharp.constant.SharpConstants
 import `fun`.bookish.sharp.model.RegisterValue
+import `fun`.bookish.sharp.protocol.api.ProtocolName
 import `fun`.bookish.sharp.registry.api.RegistryCenter
 import `fun`.bookish.sharp.registry.config.RegistryConfig
 import `fun`.bookish.sharp.serialize.GsonUtil
@@ -19,11 +20,15 @@ class ZkRegistryCenter(private val registryConfig: RegistryConfig): RegistryCent
             RetryNTimes(SharpConstants.DEFAULT_ZK_RETRY_TIMES, SharpConstants.DEFAULT_ZK_RETRY_SLEEP)).apply { start() }
 
     override fun register(key: String, value: RegisterValue) {
-        val path = "/$key/${value.address}"
+        val path = if(value.protocol == ProtocolName.RMI){
+            "/$key/${value.address.substringAfter("rmi://").substringBefore("/")}"
+        }else{
+            "/$key/${value.address}"
+        }
         if(checkNodeExists(path)){
             updateNode(path,GsonUtil.objectToJson(value))
         }else{
-            checkAndCreateParentNode(path)
+            checkAndCreateParentNode(path.substringBeforeLast("/"))
             createNode(path,GsonUtil.objectToJson(value))
         }
     }
@@ -93,8 +98,7 @@ class ZkRegistryCenter(private val registryConfig: RegistryConfig): RegistryCent
      * 创建节点
      */
     private fun createNode(path: String, data: String) {
-        connection.create().withMode(CreateMode.PERSISTENT).withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE)
-                        .forPath(path, data.toByteArray(Charsets.UTF_8))
+        connection.create().withMode(CreateMode.PERSISTENT).withACL(ZooDefs.Ids.OPEN_ACL_UNSAFE).forPath(path, data.toByteArray(Charsets.UTF_8))
     }
 
     /**

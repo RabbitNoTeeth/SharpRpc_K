@@ -68,6 +68,10 @@ class ServiceExport<T:Any>(val serviceInterface:Class<T>,val serviceRef:T) {
         return this
     }
 
+    fun getRegisterKey(): String{
+        return "SharpRpc:$serviceKey?version=$version"
+    }
+
     /**
      * 注册并暴露服务
      */

@@ -54,6 +54,10 @@ class ServiceReference<T:Any>(val serviceInterface:Class<T>) {
         return this
     }
 
+    fun getRegisterKey(): String{
+        return "SharpRpc:$serviceKey?version=$version"
+    }
+
     /**
      * 获取服务
      */

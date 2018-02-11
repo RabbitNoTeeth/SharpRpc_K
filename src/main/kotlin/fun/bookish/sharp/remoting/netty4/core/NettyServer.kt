@@ -19,6 +19,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel
 import org.apache.log4j.Logger
 import java.rmi.Naming
 import java.rmi.Remote
+import java.rmi.registry.LocateRegistry
 
 /**
  * 服务端引导类
@@ -57,7 +58,7 @@ object NettyServer {
 
         for (protocol in protocols) {
             //生成注册信息的键值
-            val key = "SharpRpc:" + serviceKey + "?version=" + serviceExport.version
+            val key = serviceExport.getRegisterKey()
             //生成注册信息的值
             var value: RegisterValue? = null
 
@@ -68,11 +69,12 @@ object NettyServer {
                     val address = "rmi://${protocol.host}:${protocol.port}/$serviceName/version-${serviceExport.version}"
                     try {
                         //绑定服务
+                        LocateRegistry.createRegistry(protocol.port)
                         Naming.bind(address, serviceExport.serviceRef as Remote)
-                        logger.info("successfully bind rmi service \"$serviceName\" , address=$address")
+                        logger.info("successfully bind rmi service \"$serviceKey\" , address=$address")
                         value = RegisterValue(protocol.name, address, protocol.weight)
                     } catch (e: Exception) {
-                        val message = "failed bind rmi service \"$serviceName\" to the address \"$address\""
+                        val message = "failed bind rmi service \"$serviceKey\" to the address \"$address\""
                         logger.error(message)
                         throw IllegalStateException(message, e)
                     }
